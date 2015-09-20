@@ -2,6 +2,7 @@ module.exports = function(grunt) {
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
+
 		uglify: {
 			options: {
 				banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
@@ -64,7 +65,7 @@ module.exports = function(grunt) {
 					'node_modules/angulartics/src/angulartics.js',
 					'node_modules/angulartics-google-analytics/lib/angulartics-google-analytics.js'
 				],
-				dest: 'build/public/main.js'
+				dest: 'build/public/js/main.js'
 			}
 		},
 	});

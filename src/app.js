@@ -13,9 +13,11 @@ var bodyParser = require('body-parser');
 
 var log = require('./log');
 
-var server;
-
 var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+
+
 app.use(log.requestLogger());
 app.enable('trust proxy');
 app.disable('x-powered-by');
@@ -26,6 +28,20 @@ app.use(express.static('build/public'));
 
 app.get('/', function(req, res) {
 	res.send('Hello World!');
+});
+
+app.get('/js/config.js', function(req, res) {
+	var cfg = {
+		socketIoUrl: 'http://localhost:3000'
+	};
+	res.send('angular.module("dhm").constant("config", ' + JSON.stringify(cfg) + ');');
+});
+
+io.on('connection', function (socket) {
+  socket.emit('news', { hello: 'world' });
+  socket.on('my other event', function (data) {
+    console.log(data);
+  });
 });
 
 
@@ -66,7 +82,7 @@ process.on('uncaughtException', function(err) {
 function start() {
 	var port = process.env.PORT || 3000;
 
-	server = app.listen(port, function(err) {
+	server.listen(port, function(err) {
 		if (err) { return log.error({err: err}, 'listen error'); }
 		log.info({port: port}, 'listening on %s', port);
 	});
