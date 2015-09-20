@@ -1,2 +1,14 @@
 
-<h1>Daheim!</h1>
+<md-content>
+
+	<div layout layout-align="start center">
+		<span>{{state}}</span>
+		<md-button ng-click="iamGerman()" ng-disabled="sent">I speak German</md-button>
+		<md-button ng-click="iamFriend()" ng-disabled="sent">I want to learn German</md-button>
+	</div>
+	<div layout>
+		<div id="remotesVideos"></div>
+		<video height="50" id="localVideo"></video>
+	</div>
+
+</md-content>

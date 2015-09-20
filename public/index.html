@@ -26,24 +26,16 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/angular-moment/0.9.0/angular-moment.min.js"></script>
 
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		window.io1 = window.io;
+		delete window.io;
+	</script>
+
 	<script src="js/main.js"></script>
 	<script src="js/core.js"></script>
 	<script src="js/config.js"></script>
 
-	<script src="/socket.io/socket.io.js"></script>
-	<script>
-		angular.module('dhm').run(function(config) {
-		  var socket = io.connect(config.socketIoUrl, {
-		  	transports: ['websocket']
-		  });
-		  socket.on('news', function (data) {
-		    console.log(data);
-		    socket.emit('my other event', { my: 'data' });
-		  });
-		});
-
-
-	</script>
 
 </head>
 <body layout="row" ng-cloak>

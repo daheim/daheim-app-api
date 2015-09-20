@@ -48,6 +48,7 @@
     "request-promise": "^0.4.2",
     "sendgrid": "^1.9.2",
     "should": "^7.0.2",
+    "simplewebrtc": "^1.19.1",
     "sinon": "^1.15.4",
     "socket.io": "^1.3.6",
     "sqlite3": "^3.0.8",

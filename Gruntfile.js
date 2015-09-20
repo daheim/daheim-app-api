@@ -39,7 +39,7 @@ module.exports = function(grunt) {
 
 		jshint: {
 			node: {
-				src: ['*.js', 'test/**.js', 'app_data/**.js', 'items/**.js', 'platform_services/**.js', 'realms/**.js'],
+				src: ['src/**.js', 'test/**.js'],
 				options: {
 					jshintrc: true
 				}
@@ -48,7 +48,7 @@ module.exports = function(grunt) {
 
 		jscs: {
 			node: {
-				src: ['*.js', 'test/**.js', 'app_data/**.js', 'items/**.js', 'platform_services/**.js', 'realms/**.js'],
+				src: ['src/**.js', 'test/**.js', 'public/js/**.js'],
 				options: {
 					config: true,
 					verbose: true
@@ -63,7 +63,8 @@ module.exports = function(grunt) {
 			dist: {
 				src: [
 					'node_modules/angulartics/src/angulartics.js',
-					'node_modules/angulartics-google-analytics/lib/angulartics-google-analytics.js'
+					'node_modules/angulartics-google-analytics/lib/angulartics-google-analytics.js',
+					'node_modules/simplewebrtc/simplewebrtc.bundle.js'
 				],
 				dest: 'build/public/js/main.js'
 			}
