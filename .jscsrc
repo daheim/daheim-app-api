@@ -1,0 +1,14 @@
+{
+	"preset": "grunt",
+	"validateIndentation": {
+		"value": "\t",
+		"allExcept": ["comments"]
+	},
+	"maximumLineLength": 350,
+	"disallowMultipleLineBreaks": false,
+	"disallowSpacesInsideObjectBrackets": false,
+	"requireSpaceBeforeObjectValues": false,
+	"validateQuoteMarks": false,
+	"requireDotNotation": false,
+	"jsDoc": false
+}
