@@ -26,7 +26,7 @@ module.exports = function(grunt) {
 
 		exec: {
 			cover: {
-				cmd: './node_modules/.bin/istanbul cover grunt --root src --include-all-sources --dir ./build/coverage --print both -- test',
+				cmd: './node_modules/.bin/istanbul cover grunt --root build/dist/src --include-all-sources --dir ./build/coverage --print both -- test',
 				stdout: false
 			}
 		},
