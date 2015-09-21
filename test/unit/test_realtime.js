@@ -53,6 +53,24 @@ describe('Realtime', function() {
 		return Promise.all([p1.promise, p2.promise]);
 	});
 
+	it('dequeues disconnected people', function() {
+		var done = Promise.pending();
+
+		let client1 = createClient();
+		client1.emit('identify', {as: 'german'});
+		client1.once('listed', () => client1.close());
+		client1.once('disconnect', () => {
+			let client2 = createClient();
+			client2.emit('identify', {as: 'friend'});
+			client2.once('listed', (message) => {
+				message.should.have.property('queueLength');
+				done.resolve();
+			});
+		});
+
+		return done.promise;
+	});
+
 	function createClient() {
 		return io.connect(url, {
 			'force new connection': true

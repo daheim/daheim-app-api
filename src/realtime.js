@@ -55,6 +55,7 @@ class Realtime {
 		function connectOrEnqueue(myQueue, partnerQueue) {
 			if (!partnerQueue.length) {
 				log.info({clientId: client.id}, 'enqueueing');
+				client.emit('listed', {queueLength: myQueue.length});
 				myQueue.push(client);
 				return;
 			}
