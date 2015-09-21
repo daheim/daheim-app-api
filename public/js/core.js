@@ -48,9 +48,7 @@
 
 		$scope.state = 'Enable camera access';
 
-		var socket = window.io1(undefined, {
-			//transports: ['websocket']
-		});
+		var socket = window.io1();
 		socket.on('connect', function() {
 			console.log('connect');
 		});
