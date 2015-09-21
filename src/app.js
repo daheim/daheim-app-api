@@ -17,7 +17,7 @@ var log = require('./log');
 var app = express();
 var server = require('http').Server(app);
 
-require('./realtime').create({server: server});
+require('./realtime').create({log, server});
 //var io = require('socket.io').listen(server);
 
 
@@ -44,54 +44,7 @@ app.get('/js/config.js', function(req, res) {
 
 var germans = [];
 var friends = [];
-// io.on('connection', function(client) {
-// 	log.info({clientId: client.id}, 'webrtc connection');
 
-// 	client.on('identify', function(message) {
-// 		log.info({clientId: client.id, message: message}, 'identify');
-
-// 		if (message.as === 'german') {
-// 			connectOrEnqueue(germans, friends);
-// 		} else {
-// 			connectOrEnqueue(friends, germans);
-// 		}
-// 	});
-
-// 	client.on('disconnect', function() {
-// 		log.info({clientId: client.id}, 'webrtc disconnect');
-
-// 		var i = germans.indexOf(client);
-// 		if (i >= 0) {
-// 			germans.splice(i, 1);
-// 		}
-// 		i = friends.indexOf(client);
-// 		if (i >= 0) {
-// 			friends.splice(i, 1);
-// 		}
-// 	});
-
-// 	client.emit('message', {hello: 'world'});
-
-// 	function connectOrEnqueue(myQueue, partnerQueue) {
-// 		if (!partnerQueue.length) {
-// 			log.info({clientId: client.id}, 'enqueueing');
-// 			myQueue.push(client);
-// 			return;
-// 		}
-
-// 		var partner = partnerQueue.splice(0, 1)[0];
-// 		log.info({clientId: client.id, partnerId: partner.id}, 'partner found');
-// 		var channelId = 'egergo' + new Date().getTime() + Math.random();
-// 		client.emit('partnerFound', {
-// 			channelId: channelId
-// 		});
-// 		partner.emit('partnerFound', {
-// 			channelId: channelId
-// 		});
-
-// 	}
-
-// });
 
 
 

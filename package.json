@@ -53,6 +53,7 @@
     "simplewebrtc": "^1.19.1",
     "sinon": "^1.15.4",
     "socket.io": "^1.3.6",
+    "socket.io-client": "^1.3.7",
     "sqlite3": "^3.0.8",
     "supertest": "^1.0.1",
     "url-join": "0.0.1",
