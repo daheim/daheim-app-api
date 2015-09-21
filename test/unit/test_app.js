@@ -1,3 +1,4 @@
+require('../../src/bootstrap');
 var chai = require('chai');
 var sinon = require('sinon');
 var supertest = require('supertest');
@@ -12,8 +13,6 @@ var zlib = require('zlib');
 
 var log = require('../../src/log');
 var app = require('../../src/app').app;
-
-log.streams = [];
 
 describe('Web', function() {
 
