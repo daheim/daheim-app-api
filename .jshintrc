@@ -11,6 +11,10 @@
 	"notypeof": true,
 	"singleGroups": true,
 	"undef": true,
+	"esnext": true,
+	"predef": [
+		"-Promise"
+	],
 	"globals": {
 		"require": true,
 		"process": true,

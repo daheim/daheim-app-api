@@ -20,7 +20,7 @@ module.exports = function(grunt) {
 						mochaFile: './build/test-results.xml'
 					},
 				},
-				src: ['test/unit/*.js'],
+				src: ['build/dist/test/unit/**/*.js'],
 			},
 		},
 
@@ -39,7 +39,7 @@ module.exports = function(grunt) {
 
 		jshint: {
 			node: {
-				src: ['src/**.js', 'test/**.js'],
+				src: ['src/**/*.js', 'test/**/*.js'],
 				options: {
 					jshintrc: true
 				}
@@ -48,7 +48,7 @@ module.exports = function(grunt) {
 
 		jscs: {
 			node: {
-				src: ['src/**.js', 'test/**.js', 'public/js/**.js'],
+				src: ['src/**/*.js', 'test/**/*.js', 'public/js/**/*.js'],
 				options: {
 					config: true,
 					verbose: true
@@ -69,6 +69,37 @@ module.exports = function(grunt) {
 				dest: 'build/public/js/main.js'
 			}
 		},
+
+		babel: {
+			options: {
+				sourceMap: true
+			},
+			dist: {
+				files: [{
+					expand: true,
+					cwd: 'src/',
+					src: ['**/*.js'],
+					dest: 'build/dist/src',
+					ext: '.js'
+				}, {
+					expand: true,
+					cwd: 'test/',
+					src: ['**/*.js'],
+					dest: 'build/dist/test',
+					ext: '.js'
+				}]
+			}
+		},
+
+		watch: {
+			source: {
+				files: ['src/**/*.js', 'test/**/*.js'],
+				tasks: ['babel'],
+				options: {
+					atBegin: true
+				}
+			}
+		}
 	});
 
 	grunt.loadNpmTasks('grunt-mocha-test');
@@ -76,10 +107,12 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
+	grunt.loadNpmTasks('grunt-babel');
+	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks("grunt-jscs");
 
-	grunt.registerTask('default', ['concat']);
-	grunt.registerTask('check', ['jscs', 'jshint', 'test']);
+	grunt.registerTask('default', ['babel', 'concat']);
+	grunt.registerTask('check', ['jscs', 'jshint', 'babel', 'test']);
 	grunt.registerTask('test', ['mochaTest']);
 	grunt.registerTask('cover', ['exec:cover']);
 };
