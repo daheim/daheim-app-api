@@ -70,6 +70,14 @@ module.exports = function(grunt) {
 			}
 		},
 
+		copy: {
+			static: {
+				expand: true,
+				src: 'public/**',
+				dest: 'build/'
+			}
+		},
+
 		babel: {
 			options: {
 				sourceMap: true
@@ -98,6 +106,13 @@ module.exports = function(grunt) {
 				options: {
 					atBegin: true
 				}
+			},
+			static: {
+				files: ['public/**'],
+				tasks: ['copy:static'],
+				options: {
+					atBegin: true
+				}
 			}
 		}
 	});
@@ -109,9 +124,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-babel');
 	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks("grunt-jscs");
+	grunt.loadNpmTasks('grunt-jscs');
+	grunt.loadNpmTasks('grunt-contrib-copy');
 
-	grunt.registerTask('default', ['babel', 'concat']);
+	grunt.registerTask('default', ['babel', 'copy:static', 'concat']);
 	grunt.registerTask('check', ['jscs', 'jshint', 'babel', 'test']);
 	grunt.registerTask('test', ['mochaTest']);
 	grunt.registerTask('cover', ['exec:cover']);

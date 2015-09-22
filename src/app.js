@@ -23,7 +23,6 @@ app.enable('trust proxy');
 app.disable('x-powered-by');
 app.use(bodyParser.json());
 
-app.use(express.static(__dirname + '/../../../public'));
 app.use(express.static(__dirname + '/../../../build/public'));
 
 app.get('/', function(req, res) {
