@@ -1,0 +1,14 @@
+{
+  "name": "daheim",
+  "version": "0.0.0",
+  "dependencies": {
+    "grunt": {
+      "version": "^0.4.5",
+      "dependencies": {
+        "glob": {
+          "version": "5.0.14"
+        }
+      }
+    }
+  }
+}
