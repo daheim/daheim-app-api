@@ -56,17 +56,38 @@ module.exports = function(grunt) {
 			}
 		},
 
-		concat: {
-			options: {
-				sourceMap: true
-			},
-			dist: {
-				src: [
-					'node_modules/angulartics/src/angulartics.js',
-					'node_modules/angulartics-google-analytics/lib/angulartics-google-analytics.js',
-					'node_modules/simplewebrtc/simplewebrtc.bundle.js'
-				],
-				dest: 'build/public/js/main.js'
+		uglify: {
+			lib: {
+				options: {
+					sourceMap: true,
+					sourceMapIncludeSources: true,
+				},
+				files: {
+					'build/public/js/lib.min.js': [
+						require.resolve('jquery/dist/jquery.js'),
+						require.resolve('angular/angular.js'),
+						require.resolve('angular-aria/angular-aria.js'),
+						require.resolve('angular-animate/angular-animate.js'),
+						require.resolve('angular-material/angular-material.js'),
+						require.resolve('angular-route/angular-route.js'),
+						require.resolve('angular-resource/angular-resource.js'),
+						require.resolve('angulartics/src/angulartics.js'),
+						require.resolve('angulartics-google-analytics/lib/angulartics-google-analytics.js'),
+						require.resolve('socket.io-client/socket.io.js'),
+						require.resolve('simplewebrtc/simplewebrtc.bundle.js'),
+					]
+				}
+			}
+		},
+
+		cssmin: {
+			lib: {
+				options: {
+					sourceMap: true
+				},
+				files: {
+					'build/public/style/lib.min.css': [require.resolve('angular-material/angular-material.css')]
+				}
 			}
 		},
 
@@ -126,8 +147,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-jscs');
 	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-cssmin');
 
-	grunt.registerTask('default', ['babel', 'copy:static', 'concat']);
+	grunt.registerTask('default', ['babel', 'copy:static', 'uglify', 'cssmin']);
 	grunt.registerTask('check', ['jscs', 'jshint', 'babel', 'test']);
 	grunt.registerTask('test', ['mochaTest']);
 	grunt.registerTask('cover', ['exec:cover']);

@@ -3,7 +3,7 @@
 
 	var angular = window.angular;
 
-	angular.module('dhm', ['ngRoute', 'ngMaterial', 'ngResource', 'angularMoment', 'angulartics', 'angulartics.google.analytics'])
+	angular.module('dhm', ['ngRoute', 'ngMaterial', 'ngResource', 'angulartics', 'angulartics.google.analytics'])
 
 	.config(function($routeProvider) {
 		$routeProvider
@@ -48,7 +48,7 @@
 
 		$scope.state = 'Enable camera access';
 
-		var socket = window.io1();
+		var socket = window.io();
 		socket.on('connect', function() {
 			console.log('connect');
 		});
