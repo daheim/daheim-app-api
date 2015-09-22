@@ -3,11 +3,8 @@ require('newrelic');
 
 var express = require('express');
 
-var Passport = require('passport').Passport;
 var request = require('request-promise');
 var Promise = require('bluebird');
-var azureCommon = require('azure-common');
-var azureStorage = require('azure-storage');
 var util = require('util');
 var zlib = require('zlib');
 var bodyParser = require('body-parser');
