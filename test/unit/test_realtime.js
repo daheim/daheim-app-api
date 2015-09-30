@@ -30,45 +30,22 @@ describe('Realtime', function() {
 		server.close();
 	});
 
-	it('matches peope with each other', function() {
+	it('should be able to connect', function() {
 		var client1 = createClient();
 		var client2 = createClient();
 
 		var p1 = Promise.pending();
 		var p2 = Promise.pending();
 
-		client1.once('partnerFound', (message) => {
-			message.should.have.property('channelId');
+		client1.once('connect', () => {
 			p1.resolve();
 		});
 
-		client2.once('partnerFound', (message) => {
-			message.should.have.property('channelId');
+		client2.once('connect', (message) => {
 			p2.resolve();
 		});
 
-		client1.emit('identify', {as: 'german'});
-		client2.emit('identify', {as: 'friend'});
-
 		return Promise.all([p1.promise, p2.promise]);
-	});
-
-	it('dequeues disconnected people', function() {
-		var done = Promise.pending();
-
-		let client1 = createClient();
-		client1.emit('identify', {as: 'german'});
-		client1.once('listed', () => client1.close());
-		client1.once('disconnect', () => {
-			let client2 = createClient();
-			client2.emit('identify', {as: 'friend'});
-			client2.once('listed', (message) => {
-				message.should.have.property('queueLength');
-				done.resolve();
-			});
-		});
-
-		return done.promise;
 	});
 
 	function createClient() {

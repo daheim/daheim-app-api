@@ -11,9 +11,9 @@
 				templateUrl: 'partials/home.html',
 				controller: 'HomeCtrl'
 			})
-			.when('/characters', {
-				templateUrl: 'characters.html',
-				controller: 'CharactersCtrl'
+			.when('/second', {
+				templateUrl: 'partials/second.html',
+				controller: 'SecondCtrl'
 			})
 			.when('/auctions', {
 				templateUrl: 'auctions.html',
@@ -48,7 +48,9 @@
 
 		$scope.state = 'Enable camera access';
 
-		var socket = window.io();
+		var socket = window.io(undefined, {
+			multiplex: false
+		});
 		socket.on('connect', function() {
 			console.log('connect');
 		});
@@ -81,7 +83,7 @@
 			// the id/element dom element that will hold remote videos
 			remoteVideosEl: 'remotesVideos',
 			// immediately ask for camera access
-			autoRequestMedia: true
+			//autoRequestMedia: true
 		});
 
 		socket.on('message', function(msg) {
@@ -96,7 +98,7 @@
 
 		$scope.$on("$destroy", function() {
 			console.log('destroyed');
-			socket.disconnect();
+			socket.destroy();
 			if (webrtc) {
 				webrtc.disconnect();
 			}
@@ -114,6 +116,9 @@
 			$scope.sent = true;
 			$scope.state = 'Wait for a partner';
 		};
+
+		console.log('socket', socket, 'webrtc', webrtc);
+		socket.connect();
 
 		// we have to wait until it's ready
 		webrtc.on('readyToCall', function() {

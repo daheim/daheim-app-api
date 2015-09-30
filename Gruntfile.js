@@ -3,15 +3,6 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 
-		uglify: {
-			options: {
-				banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
-			},
-			build: {
-				src: 'src/<%= pkg.name %>.js',
-				dest: 'build/<%= pkg.name %>.min.js'
-			}
-		},
 		mochaTest: {
 			test: {
 				options: {
@@ -56,26 +47,35 @@ module.exports = function(grunt) {
 			}
 		},
 
+		concat: {
+			options: {
+				sourceMap: true
+			},
+			lib: {
+				src: [
+					require.resolve('jquery/dist/jquery.js'),
+					require.resolve('angular/angular.js'),
+					require.resolve('angular-aria/angular-aria.js'),
+					require.resolve('angular-animate/angular-animate.js'),
+					require.resolve('angular-material/angular-material.js'),
+					require.resolve('angular-route/angular-route.js'),
+					require.resolve('angular-resource/angular-resource.js'),
+					require.resolve('angulartics/src/angulartics.js'),
+					require.resolve('angulartics-google-analytics/lib/angulartics-google-analytics.js'),
+				],
+				dest: 'build/public/js/lib.js'
+			}
+		},
+
 		uglify: {
 			lib: {
 				options: {
 					sourceMap: true,
 					sourceMapIncludeSources: true,
+					sourceMapIn: 'build/public/js/lib.js.map'
 				},
 				files: {
-					'build/public/js/lib.min.js': [
-						require.resolve('jquery/dist/jquery.js'),
-						require.resolve('angular/angular.js'),
-						require.resolve('angular-aria/angular-aria.js'),
-						require.resolve('angular-animate/angular-animate.js'),
-						require.resolve('angular-material/angular-material.js'),
-						require.resolve('angular-route/angular-route.js'),
-						require.resolve('angular-resource/angular-resource.js'),
-						require.resolve('angulartics/src/angulartics.js'),
-						require.resolve('angulartics-google-analytics/lib/angulartics-google-analytics.js'),
-						require.resolve('socket.io-client/socket.io.js'),
-						require.resolve('simplewebrtc/simplewebrtc.bundle.js'),
-					]
+					'build/public/js/lib.min.js': ['build/public/js/lib.js']
 				}
 			}
 		},
@@ -117,6 +117,15 @@ module.exports = function(grunt) {
 					dest: 'build/dist/test',
 					ext: '.js'
 				}]
+			},
+			client: {
+				files: [{
+					expand: true,
+					cwd: 'client/',
+					src: ['**/*.js'],
+					dest: 'build/dist/client',
+					ext: '.js'
+				}]
 			}
 		},
 
@@ -134,6 +143,36 @@ module.exports = function(grunt) {
 				options: {
 					atBegin: true
 				}
+			},
+			client: {
+				files: ['client/**/*.js'],
+				tasks: ['babel:client', 'browserify:dist', 'exorcise:dist'],
+				options: {
+					atBegin: true
+				}
+			}
+		},
+
+		browserify: {
+			dist: {
+				src: [
+					'build/dist/src/exports.js',
+					'build/dist/client/second.js'
+				],
+				dest: 'build/public/js/browserified.js'
+			},
+			options: {
+				browserifyOptions: {
+					debug: true
+				}
+			}
+		},
+
+		exorcise: {
+			dist: {
+				files: {
+					'<%= browserify.dist.dest %>.map': ['<%= browserify.dist.dest %>']
+				}
 			}
 		}
 	});
@@ -149,8 +188,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-copy');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
+	grunt.loadNpmTasks('grunt-browserify');
+	grunt.loadNpmTasks('grunt-exorcise');
 
-	grunt.registerTask('default', ['babel', 'copy:static', 'uglify', 'cssmin']);
+	grunt.registerTask('default', ['babel', 'browserify', 'exorcise', 'copy:static', 'concat', 'uglify', 'cssmin']);
 	grunt.registerTask('check', ['jscs', 'jshint', 'babel', 'test']);
 	grunt.registerTask('test', ['mochaTest']);
 	grunt.registerTask('cover', ['exec:cover']);

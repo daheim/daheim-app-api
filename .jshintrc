@@ -21,6 +21,7 @@
 		"module": true,
 		"Buffer": true,
 		"__dirname": true,
+		"window": true,
 
 		"console": true,
 		"setTimeout": true,

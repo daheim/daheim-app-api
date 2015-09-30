@@ -1,0 +1,15 @@
+<md-content layout="column">
+
+
+	<p>Connection status: {{socket_state}} {{volume}} | ICE Connection: {{iceConnectionState}} | ICE Gathering: {{iceGatheringState}} | Signaling: {{signalingState}}</p>
+	<div>
+		<md-button ng-click="german()">German</md-button>
+		<md-button ng-click="klose()">Klose</md-button>
+	</div>
+
+	<div layout="row">
+	<video height="200" id="localVideo" dhm-src-object="localVideoObject" autoplay muted style="transform: scale(-1, 1); -webkit-transform: scale(-1, 1)" />
+	<video height="200" id="localVideo" dhm-src-object="remoteVideoObject" autoplay />
+	</video>
+
+</md-content>

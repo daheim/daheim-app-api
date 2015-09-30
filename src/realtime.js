@@ -1,7 +1,12 @@
-import * as sio from 'socket.io';
+import sio from 'socket.io';
+import Promise from 'bluebird';
+import CommandProtocol from './command_protocol';
+import Webroulette from './webroulette';
 
 const $io = Symbol();
 const $log = Symbol();
+const $cp = Symbol();
+const $webroulette = Symbol();
 
 class Realtime {
 
@@ -11,9 +16,6 @@ class Realtime {
 		if (!opt.log) { throw new Error('opt.log must be defined'); }
 
 		this[$log] = opt.log;
-
-		this.germans = [];
-		this.friends = [];
 
 		let io = this[$io] = sio.listen(opt.server);
 		io.on('connection', (client) => this._onConnection(client));
@@ -27,51 +29,19 @@ class Realtime {
 		let log = this[$log];
 		this[$log].info({clientId: client.id}, 'sio connection');
 
-		client.on('identify', (message) => {
-			this[$log].info({clientId: client.id, message: message}, 'sio identify');
+		let cp = client[$cp] = new CommandProtocol({client});
+		let webroulette = client[$webroulette] = new Webroulette({cp});
 
-			if (message.as === 'german') {
-				connectOrEnqueue(this.germans, this.friends);
-			} else {
-				connectOrEnqueue(this.friends, this.germans);
-			}
+		client.on('error', (err) => {
+			this[$log].error({err: err}, 'client error');
 		});
 
 		client.on('disconnect', () => {
 			this[$log].info({clientId: client.id}, 'sio disconnect');
-
-			let i = this.germans.indexOf(client);
-			if (i >= 0) {
-				this.germans.splice(i, 1);
-			}
-			i = this.friends.indexOf(client);
-			if (i >= 0) {
-				this.friends.splice(i, 1);
-			}
 		});
-
-		client.emit('message', {hello: 'world'});
-
-		function connectOrEnqueue(myQueue, partnerQueue) {
-			if (!partnerQueue.length) {
-				log.info({clientId: client.id}, 'enqueueing');
-				client.emit('listed', {queueLength: myQueue.length});
-				myQueue.push(client);
-				return;
-			}
-
-			let partner = partnerQueue.splice(0, 1)[0];
-			log.info({clientId: client.id, partnerId: partner.id}, 'partner found');
-			let channelId = 'egergo' + new Date().getTime() + Math.random();
-			client.emit('partnerFound', {
-				channelId: channelId
-			});
-			partner.emit('partnerFound', {
-				channelId: channelId
-			});
-
-		}
 	}
 }
+
+
 
 export default Realtime;
