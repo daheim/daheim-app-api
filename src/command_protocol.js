@@ -21,6 +21,14 @@ class CommandProtocol {
 		this[$client].on('command', (msg) => this[$onCommand](msg));
 	}
 
+	get client() {
+		return this[$client];
+	}
+
+	get socket() {
+		return this[$client];
+	}
+
 	send(name, opt) {
 		let id = this[$nextId]++;
 		let resolver = this[$commands][id] = Promise.pending();
@@ -46,7 +54,9 @@ class CommandProtocol {
 			}
 			delete this[$commands][msg.ack];
 			if (msg.error) {
-				cmd.reject(msg.error);
+				let error = new Error(msg.error.message);
+				error.name = msg.error.name;
+				cmd.reject(error);
 			} else {
 				cmd.resolve(msg.result);
 			}
@@ -56,7 +66,8 @@ class CommandProtocol {
 				this[$client].emit('command', {
 					ack: msg.id,
 					error: {
-						name: 'CommandNotFound'
+						name: 'CommandNotFound',
+						message: `Command '${msg.cmd}' not found`
 					}
 				});
 			} else {
