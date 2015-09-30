@@ -7,9 +7,29 @@
 		<md-button ng-click="klose()">Klose</md-button>
 	</div>
 
-	<div layout="row">
-	<video height="200" id="localVideo" dhm-src-object="localVideoObject" autoplay muted style="transform: scale(-1, 1); -webkit-transform: scale(-1, 1)" />
-	<video height="200" id="localVideo" dhm-src-object="remoteVideoObject" autoplay />
-	</video>
+	<style>
+	.fourthree {
+		position: relative;
+		width: 100%;
+	}
+
+	.fourthree:before {
+		content: "";
+		display: block;
+		padding-top: 75%; 	/* initial ratio of 1:1*/
+	}
+
+	</style>
+
+	<div layout="row" layout-align="center center">
+			<div flex="60" flex-sm="95" flex-md="95" style="position: relative;">
+				<video ng-if="iceConnectionState=='connected' || iceConnectionState=='completed'" dhm-src-object="remoteVideoObject" autoplay style="border: solid black 1px; width: 100%;"></video>
+				<div class="fourthree" ng-if="iceConnectionState!=='connected' &amp;&amp; iceConnectionState!=='completed'">
+					<div style="border: solid black 1px; width: 100%; background-color: pink; position: absolute; top: 0; left: 0; bottom: 0; right: 0; text-align: center;">Waiting for video</div>
+				</div>
+				<video dhm-src-object="localVideoObject" autoplay muted style="transform: scale(-1, 1); -webkit-transform: scale(-1, 1); border: solid black 1px; margin-right: -2px; margin-bottom: 3px; position: absolute; max-width: 20%; max-height: 20%; bottom: 10px; right: 10px;"></video>
+			</div>
+	</div>
+
 
 </md-content>
