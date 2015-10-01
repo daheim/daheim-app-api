@@ -16,12 +16,12 @@ class IceSender {
 			this._ices.push(candidate);
 		}
 		this.trySend();
-	};
+	}
 
 	okToSend() {
 		this._okToSend = true;
 		this.trySend();
-	};
+	}
 
 	trySend(timeoutExpired) {
 		if (!this._ices.length) { return; }
@@ -77,6 +77,8 @@ class WebrouletteClient {
 
 		this[$createPeerConnection]();
 	}
+
+	get peerConnection() { return this[$pc]; }
 
 	[$onGotOffer](opt) {
 		let pc = this[$pc];

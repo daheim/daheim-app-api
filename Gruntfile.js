@@ -30,7 +30,7 @@ module.exports = function(grunt) {
 
 		jshint: {
 			node: {
-				src: ['src/**/*.js', 'test/**/*.js'],
+				src: ['src/**/*.js', 'test/**/*.js', 'public/js/**/*.js'],
 				options: {
 					jshintrc: true
 				}
@@ -68,15 +68,29 @@ module.exports = function(grunt) {
 		},
 
 		uglify: {
+			options: {
+				sourceMap: true,
+				sourceMapIncludeSources: true
+			},
 			lib: {
 				options: {
-					sourceMap: true,
-					sourceMapIncludeSources: true,
-					sourceMapIn: 'build/public/js/lib.js.map'
+					sourceMapIn: '<%=concat.lib.dest%>.map'
 				},
-				files: {
-					'build/public/js/lib.min.js': ['build/public/js/lib.js']
-				}
+				files: [{
+					expand: true,
+					src: '<%=concat.lib.dest%>',
+					ext: '.min.js'
+				}]
+			},
+			ui: {
+				options: {
+					sourceMapIn: '<%=exorcise.ui.dest%>'
+				},
+				files: [{
+					expand: true,
+					src: '<%=browserify.ui.dest%>',
+					ext: '.min.js'
+				}]
 			}
 		},
 
@@ -92,7 +106,7 @@ module.exports = function(grunt) {
 		},
 
 		copy: {
-			static: {
+			public: {
 				expand: true,
 				src: 'public/**',
 				dest: 'build/'
@@ -101,9 +115,9 @@ module.exports = function(grunt) {
 
 		babel: {
 			options: {
-				sourceMap: true
+				sourceMap: 'inline'
 			},
-			dist: {
+			src: {
 				files: [{
 					expand: true,
 					cwd: 'src/',
@@ -117,36 +131,20 @@ module.exports = function(grunt) {
 					dest: 'build/dist/test',
 					ext: '.js'
 				}]
-			},
-			client: {
-				files: [{
-					expand: true,
-					cwd: 'client/',
-					src: ['**/*.js'],
-					dest: 'build/dist/client',
-					ext: '.js'
-				}]
 			}
 		},
 
 		watch: {
-			source: {
+			src: {
 				files: ['src/**/*.js', 'test/**/*.js'],
-				tasks: ['babel'],
+				tasks: ['src'],
 				options: {
 					atBegin: true
 				}
 			},
-			static: {
+			public: {
 				files: ['public/**'],
-				tasks: ['copy:static'],
-				options: {
-					atBegin: true
-				}
-			},
-			client: {
-				files: ['client/**/*.js'],
-				tasks: ['babel:client', 'browserify:dist', 'exorcise:dist'],
+				tasks: ['public'],
 				options: {
 					atBegin: true
 				}
@@ -154,25 +152,56 @@ module.exports = function(grunt) {
 		},
 
 		browserify: {
-			dist: {
-				src: [
-					'build/dist/src/exports.js',
-					'build/dist/client/second.js'
-				],
-				dest: 'build/public/js/browserified.js'
-			},
 			options: {
 				browserifyOptions: {
 					debug: true
 				}
+			},
+			ui: {
+				src: ['build/dist/src/ui/index.js'],
+				dest: 'build/public/js/ui.js'
 			}
 		},
 
 		exorcise: {
-			dist: {
-				files: {
-					'<%= browserify.dist.dest %>.map': ['<%= browserify.dist.dest %>']
-				}
+			src: {
+				files: [{
+					expand: true,
+					cwd: 'build/dist/src/',
+					src: ['**/*.js'],
+					dest: 'build/dist/src/',
+					ext: '.js.map'
+				}]
+			},
+			ui: {
+				src: '<%=browserify.ui.dest%>',
+				dest: '<%=browserify.ui.dest%>.map'
+			}
+		},
+
+		ngAnnotate: {
+			options: {
+        singleQuotes: true,
+        sourceMap: true
+      },
+      ui: {
+      	files: {
+      		'<%=browserify.ui.dest%>': ['<%=browserify.ui.dest%>']
+      	}
+      }
+		},
+
+		replace: {
+			indexDevel: {
+				src: ['build/public/index.html'],
+				overwrite: true,
+				replacements: [{
+					from: '<script src="js/lib.min.js"></script>',
+					to: '<script src="js/lib.js"></script>'
+				}, {
+					from: '<script src="js/ui.min.js"></script>',
+					to: '<script src="js/ui.js"></script>'
+				}]
 			}
 		}
 	});
@@ -190,8 +219,28 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-browserify');
 	grunt.loadNpmTasks('grunt-exorcise');
+	grunt.loadNpmTasks('grunt-ng-annotate');
+	grunt.loadNpmTasks('grunt-text-replace');
 
-	grunt.registerTask('default', ['babel', 'browserify', 'exorcise', 'copy:static', 'concat', 'uglify', 'cssmin']);
+	var isDevel = process.env.DEVEL === '1';
+	var srcTasks = ['babel:src', 'browserify:ui', 'ngAnnotate:ui', 'exorcise:ui', 'exorcise:src'];
+	var libTasks = ['concat:lib'];
+	var publicTasks = ['copy:public'];
+	if (!isDevel) {
+		srcTasks.push('uglify:ui');
+		libTasks.push('uglify:lib');
+	} else {
+		publicTasks.push('replace:indexDevel');
+	}
+
+	grunt.registerTask('default', ['clean', 'lib', 'public', 'css', 'src']);
+
+	grunt.registerTask('src', srcTasks);
+	grunt.registerTask('public', publicTasks);
+	grunt.registerTask('lib', libTasks);
+	grunt.registerTask('css', ['cssmin:lib']);
+
+
 	grunt.registerTask('check', ['jscs', 'jshint', 'babel', 'test']);
 	grunt.registerTask('test', ['mochaTest']);
 	grunt.registerTask('cover', ['exec:cover']);

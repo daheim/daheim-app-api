@@ -1,13 +1,16 @@
 import io from 'socket.io-client';
 
-function SocketService($rootScope) {
-	this.$rootScope = $rootScope;
-}
+/*@ngInject*/
+class SocketService {
+	constructor($rootScope) {
+		this.$rootScope = $rootScope;
+	}
 
-SocketService.prototype.connect = function($scope) {
-	if (!$scope) { $scope = $rootScope.$new; }
-	return new Socket($scope);
-};
+	connect($scope) {
+		if (!$scope) { $scope = this.$rootScope.$new; }
+		return new Socket($scope);
+	}
+}
 
 function Socket($scope) {
 	var prefix = 'socket_';

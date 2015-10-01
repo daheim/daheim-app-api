@@ -29,6 +29,10 @@
 		"setInterval": true,
 		"clearInterval": true,
 		"setImmediate": true,
+		"alert": true,
+
+		"RTCSessionDescription": true,
+		"RTCIceCandidate": true,
 
 		"describe": true,
 		"it": true,

@@ -1,4 +1,4 @@
-import CommandProtocol from '../src/command_protocol';
+import CommandProtocol from '../command_protocol';
 import WebRTC from 'webrtc-adapter-test';
 import Promise from 'bluebird';
 import WebrouletteClient from './webroulette_client';
@@ -39,7 +39,7 @@ angular.module('dhm')
 	var cp = new CommandProtocol({client: socket._socket});
 
 	$scope.german = function() {
-		navigator.getUserMedia({audio: true, video: true}, function(stream) {
+		WebRTC.getUserMedia({audio: true, video: true}, function(stream) {
 			$log.info('got user media', stream);
 			// var options = {};
 			// var speechEvents = hark(stream, options);
@@ -80,8 +80,16 @@ angular.module('dhm')
 
 	$scope.klose = function() {
 		$scope.localVideoObject = undefined;
-		pc.close();
-		str.stop();
+		// pc.close();
+		// str.stop();
+	};
+
+	$scope.stats = () => {
+		wc.peerConnection.getStats(null).then(res => {
+			console.log(res);
+		}).catch(err => {
+			console.error(err);
+		});
 	};
 
 	// $window.navigator.getUserMedia({
