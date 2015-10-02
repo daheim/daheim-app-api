@@ -25,18 +25,34 @@ angular.module('dhm')
 					WebRTC.attachMediaStream(element[0], value);
 				}
 			});
+
+.directive('dhmResize', ($parse) => {
+	return {
+		restrict: 'A',
+		link: ($scope, $element, $attributes) => {
+			let fn = $parse($attributes.dhmResize);
+			let handler = () => fn($scope);
+			$element.on('resize', handler);
+			$scope.$on('$destroy', () => {
+				$element.off('resize', handler);
+			});
 		}
 	};
 })
 
 .service('socketService', SocketService)
 
-.controller('SecondCtrl', function($scope, $window, $log, $interval, config, socketService) {
+.controller('SecondCtrl', function($scope, $window, $log, $interval, config, socketService, $anchorScroll) {
 	var socket = socketService.connect($scope);
 
 	console.log(WebRTC.webrtcDetectedBrowser, WebRTC.webrtcDetectedVersion, WebRTC.webrtcMinimumVersion);
 
 	var cp = new CommandProtocol({client: socket._socket});
+
+	$scope.remoteResized = () => {
+		$anchorScroll.yOffset = 64;
+		$anchorScroll('lenyeg');
+	};
 
 	$scope.german = function() {
 		WebRTC.getUserMedia({audio: true, video: true}, function(stream) {
@@ -75,7 +91,6 @@ angular.module('dhm')
 		}).catch(function(err) {
 			console.error('err', err);
 		});
-		return;
 	}
 
 	$scope.klose = function() {
