@@ -3,12 +3,15 @@ import WebRTC from 'webrtc-adapter-test';
 import Promise from 'bluebird';
 import WebrouletteClient from './webroulette_client';
 import SocketService from './socket_service';
+import ResizeDirective from './window_resize';
 
 console.log('WebRTC', WebRTC);
 
 var angular = window.angular;
 
 angular.module('dhm')
+
+.directive('windowResize', ResizeDirective)
 
 .filter('trusted', function($sce) {
 	return function(url) {
@@ -25,6 +28,24 @@ angular.module('dhm')
 					WebRTC.attachMediaStream(element[0], value);
 				}
 			});
+
+			// let a = element[0];
+			// let events = {};
+			// for (let p in a) {
+			// 	if (p.indexOf('on') === 0) {
+			// 		events[p] = true;
+			// 	}
+			// }
+			// //delete events.onprogress;
+			// //delete events.ontimeupdate;
+			// delete events.onmousemove;
+			// Object.keys(events).forEach(name => {
+			// 	name = name.substring(2);
+			// 	element.on(name, (e) => console.log(name, a.videoWidth, a.currentTime, a.duration));
+			// });
+		}
+	};
+})
 
 .directive('dhmResize', ($parse) => {
 	return {

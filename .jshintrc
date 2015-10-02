@@ -31,6 +31,8 @@
 		"setImmediate": true,
 		"alert": true,
 
+		"angular": true,
+
 		"RTCSessionDescription": true,
 		"RTCIceCandidate": true,
 
