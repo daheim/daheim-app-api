@@ -30,6 +30,10 @@ class CommandProtocol {
 	}
 
 	send(name, opt) {
+		if (this.socket.disconnected) {
+			return Promise.reject(new Error('client disconnected'));
+		}
+
 		let id = this[$nextId]++;
 		let resolver = this[$commands][id] = Promise.pending();
 		this[$client].emit('command', {

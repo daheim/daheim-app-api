@@ -62,6 +62,7 @@ const $iceSender = Symbol();
 const $onGotOffer = Symbol();
 const $onGotAnswer = Symbol();
 const $onGotIceCandidates = Symbol();
+const $onCancelCommunication = Symbol();
 
 class WebrouletteClient {
 	constructor(cp, stream, scope) {
@@ -74,6 +75,7 @@ class WebrouletteClient {
 		cp.register('gotOffer', (opt) => this[$onGotOffer](opt));
 		cp.register('gotAnswer', (opt) => this[$onGotAnswer](opt));
 		cp.register('gotIceCandidates', (opt) => this[$onGotIceCandidates](opt));
+		cp.register('cancelCommunication', (opt) => this[$onCancelCommunication](opt));
 
 		this[$createPeerConnection]();
 		let pc = this[$pc];
@@ -189,6 +191,12 @@ class WebrouletteClient {
 				this[$iceSender].okToSend();
 			});
 		});
+	}
+
+	[$onCancelCommunication](opt) {
+		console.log('onCancelCommunication', opt);
+		this[$pc].close();
+		delete this[$pc];
 	}
 }
 

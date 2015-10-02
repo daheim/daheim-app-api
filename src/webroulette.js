@@ -44,10 +44,17 @@ class Webroulette {
 					var offerThis = this.offerPartner(partner);
 					var offerThat = partner.offerPartner(this);
 					Promise.all([offerThis, offerThat]).then(() => {
-						this.startCommunication({initiator: false});
-						partner.startCommunication({initiator: true});
-					}).catch((err) => {
-						console.error('someone fucker rejected', err.stack);
+						console.log('offers accepted');
+						return Promise.all([
+							this.startCommunication({initiator: false}),
+							partner.startCommunication({initiator: true})
+						]);
+					}).then(() => {
+						console.log('communication started');
+					}).catch(err => {
+						console.error('offer rejected', err.stack);
+						this.cancelCommunication({reason: err});
+						partner.cancelCommunication({reason: err});
 					});
 				});
 			} else {
@@ -108,6 +115,25 @@ class Webroulette {
 		this[$state] = initiator ? SendingOffer : WaitingForOffer;
 		this[$cp].send('startCommunication', {initiator});
 		// timeout for sendAnswer
+	}
+
+	/**
+	 * Invoked when either one of the parties rejected the offered partner,
+	 * or startCommunication did not succeed.
+	 *
+	 * @param {Error} opt.reason
+	 */
+	cancelCommunication(opt) {
+		opt = opt || {};
+		return Promise.resolve().then(() => {
+			this[$state] = Init;
+			this[$cp].send('cancelCommunication', {
+				reason: {
+					name: opt.reason.name,
+					message: opt.reason.message
+				}
+			});
+		});
 	}
 
 	gotAnswer(opt) {
