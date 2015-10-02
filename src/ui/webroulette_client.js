@@ -76,6 +76,15 @@ class WebrouletteClient {
 		cp.register('gotIceCandidates', (opt) => this[$onGotIceCandidates](opt));
 
 		this[$createPeerConnection]();
+		let pc = this[$pc];
+		console.log('using pc', pc);
+		// async chain broken
+		pc.createOffer().then((desc) => {
+			console.log('offer', desc);
+			return pc.setLocalDescription(desc).then(() => {
+				console.log('local desc set');
+			});
+		});
 	}
 
 	get peerConnection() { return this[$pc]; }
