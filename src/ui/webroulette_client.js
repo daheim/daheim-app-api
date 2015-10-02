@@ -128,7 +128,8 @@ class WebrouletteClient {
 
 		this[$iceSender] = new IceSender(this[$cp]);
 		let pc = this[$pc] = new WebRTC.RTCPeerConnection({
-			iceServers: [{url: 'stun:stun.l.google.com:19302'}]
+			//iceServers: [{url: 'stun:stun.l.google.com:19302'}]
+			"iceServers": [{"url": "stun:global.stun.twilio.com:3478?transport=udp"}, {"url": "turn:global.turn.twilio.com:3478?transport=udp", "username": "9491bbdcd3ef6226625728c0de1f34613efeafc0ef6a4bcf272c8e8520f25785", "credential": "L2ZOSCIGxJD66RdZZT2aAn7oMBgBRf1rfxmQCThbgps="}]
 		});
 		pc.onicecandidate = (e) => this[$onIceCandidate](e);
 		pc.onaddstream = (e) => this[$onAddStream](e);
