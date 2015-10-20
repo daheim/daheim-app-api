@@ -180,14 +180,14 @@ module.exports = function(grunt) {
 
 		ngAnnotate: {
 			options: {
-        singleQuotes: true,
-        sourceMap: true
-      },
-      ui: {
-      	files: {
-      		'<%=browserify.ui.dest%>': ['<%=browserify.ui.dest%>']
-      	}
-      }
+				singleQuotes: true,
+				sourceMap: true
+			},
+			ui: {
+				files: {
+					'<%=browserify.ui.dest%>': ['<%=browserify.ui.dest%>']
+				}
+			}
 		},
 
 		replace: {
