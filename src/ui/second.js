@@ -1,9 +1,9 @@
-import CommandProtocol from '../command_protocol';
 import WebRTC from 'webrtc-adapter-test';
 import Promise from 'bluebird';
-import WebrouletteClient from './webroulette_client';
 import SocketService from './socket_service';
 import ResizeDirective from './window_resize';
+let CommandProtocol;
+let WebrouletteClient;
 
 console.log('WebRTC', WebRTC);
 

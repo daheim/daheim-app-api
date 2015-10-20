@@ -87,6 +87,7 @@ function start() {
 	server.on('error', function(err) {
 		log.error({err: err}, 'express error');
 	});
+	return server;
 }
 
 module.exports = {

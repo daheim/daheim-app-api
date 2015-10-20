@@ -26,7 +26,7 @@ function Socket($scope) {
 	var events = ['connect', 'connect_error', 'connect_timeout', 'disconnect', 'error', 'reconnect', 'reconnect_attempt', 'reconnect_failed', 'reconnect_error', 'reconnecting'];
 	events.forEach(function(name) {
 		socket.on(name, function() {
-			console.log(prefix + name, arguments);
+			//console.log(prefix + name, arguments);
 			$scope.$emit(prefix + name, arguments);
 		});
 	});
@@ -34,7 +34,7 @@ function Socket($scope) {
 	var onevent = socket.onevent;
 	socket.onevent = function(msg) {
 		onevent.apply(socket, arguments);
-		console.log(prefix + msg.data[0], msg.data[1]);
+		//console.log(prefix + msg.data[0], msg.data[1]);
 		$scope.$emit(prefix + msg.data[0], msg.data[1]);
 	};
 
