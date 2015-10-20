@@ -202,6 +202,18 @@ module.exports = function(grunt) {
 					to: '<script src="js/ui.js"></script>'
 				}]
 			}
+		},
+
+		esdoc : {
+			dist : {
+				options: {
+					source: 'src',
+					destination: 'build/doc',
+					plugins: [
+						{name: 'esdoc-es7-plugin'}
+					]
+				}
+			}
 		}
 	});
 
@@ -220,6 +232,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-ng-annotate');
 	grunt.loadNpmTasks('grunt-text-replace');
 	grunt.loadNpmTasks('grunt-eslint');
+	grunt.loadNpmTasks('grunt-esdoc');
 
 	var isDevel = process.env.DEVEL === '1';
 	var srcTasks = ['babel:src', 'browserify:ui', 'ngAnnotate:ui', 'exorcise:ui', 'exorcise:src'];
@@ -234,6 +247,7 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('default', ['clean', 'lib', 'public', 'css', 'src']);
 
+	grunt.registerTask('doc', ['esdoc']);
 	grunt.registerTask('src', srcTasks);
 	grunt.registerTask('public', publicTasks);
 	grunt.registerTask('lib', libTasks);
