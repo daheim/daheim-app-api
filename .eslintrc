@@ -1,0 +1,24 @@
+{
+	"parser": "babel-eslint",
+	"rules": {
+		"indent": [2, "tab"],
+		"linebreak-style": [2, "unix"],
+		"semi": [2, "always"],
+
+		"no-unused-vars": 1,
+		"no-console": 1
+
+	},
+	"env": {
+		"es6": true,
+		"node": true,
+		"browser": true,
+		"mocha": true,
+		"jasmine": true,
+		"protractor": true
+	},
+	"globals": {
+		"angular": true
+	},
+	"extends": "eslint:recommended"
+}

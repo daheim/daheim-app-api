@@ -10,5 +10,6 @@
 	"requireSpaceBeforeObjectValues": false,
 	"validateQuoteMarks": false,
 	"requireDotNotation": false,
-	"jsDoc": false
+	"jsDoc": false,
+	"esnext": true
 }

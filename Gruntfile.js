@@ -28,15 +28,6 @@ module.exports = function(grunt) {
 			}
 		},
 
-		jshint: {
-			node: {
-				src: ['src/**/*.js', 'test/**/*.js', 'public/js/**/*.js'],
-				options: {
-					jshintrc: true
-				}
-			}
-		},
-
 		jscs: {
 			node: {
 				src: ['src/**/*.js', 'test/**/*.js', 'public/js/**/*.js'],
@@ -45,6 +36,14 @@ module.exports = function(grunt) {
 					verbose: true
 				}
 			}
+		},
+
+		eslint: {
+			node: [
+				'src',
+				'test',
+				'public/js'
+			]
 		},
 
 		concat: {
@@ -210,7 +209,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-exec');
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-concat');
-	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-babel');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-jscs');
@@ -221,6 +219,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-exorcise');
 	grunt.loadNpmTasks('grunt-ng-annotate');
 	grunt.loadNpmTasks('grunt-text-replace');
+	grunt.loadNpmTasks('grunt-eslint');
 
 	var isDevel = process.env.DEVEL === '1';
 	var srcTasks = ['babel:src', 'browserify:ui', 'ngAnnotate:ui', 'exorcise:ui', 'exorcise:src'];
@@ -241,7 +240,7 @@ module.exports = function(grunt) {
 	grunt.registerTask('css', ['cssmin:lib']);
 
 
-	grunt.registerTask('check', ['jscs', 'jshint', 'babel', 'test']);
+	grunt.registerTask('check', ['jscs', 'eslint', 'babel', 'test']);
 	grunt.registerTask('test', ['mochaTest']);
 	grunt.registerTask('cover', ['exec:cover']);
 };
