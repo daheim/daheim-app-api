@@ -12,3 +12,5 @@ build
 /npm-debug.log
 /.settings
 /newrelic_agent.log
+/out
+/tmp
