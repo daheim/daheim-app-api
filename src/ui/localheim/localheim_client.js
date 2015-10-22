@@ -14,6 +14,8 @@ const $localheimObject = Symbol();
 const $partner = Symbol();
 const $me = Symbol();
 
+const $startConnection = Symbol();
+
 export default class LocalheimClient extends EventEmitter {
 
 	constructor({zero, stream}) {
@@ -81,18 +83,14 @@ export default class LocalheimClient extends EventEmitter {
 			}
 		}
 		this.emit('negotiate');
-
-		let conn = this[$conn] = new RtcConnection({
-			stream: this[$stream],
-			client: this,
-			initiator: this.partner.id > this.me.id,
-			iceServers
-		});
-		conn.on('stream', stream => this.emit('stream', stream));
-		conn.start();
+		this[$startConnection]({iceServers});
 	}
 
 	renegotiate({iceServers} = {}) {
+		this[$startConnection]({iceServers});
+	}
+
+	[$startConnection]({iceServers}) {
 		if (this[$conn]) {
 			this[$conn].close();
 		}
@@ -103,7 +101,7 @@ export default class LocalheimClient extends EventEmitter {
 			initiator: this.partner.id > this.me.id,
 			iceServers
 		});
-		conn.on('stream', stream => console.log('stream', stream));
+		conn.on('stream', stream => this.emit('stream', stream));
 		conn.start();
 	}
 }
