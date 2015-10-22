@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import uuid from 'node-uuid';
 import {WhitelistReceiver} from './ozora';
+import SerialPool from './serial_pool';
 import createDebug from 'debug';
 
 let debug = createDebug('dhm:localheim');
@@ -9,6 +10,7 @@ const $id = Symbol('id');
 const $state = Symbol('state');
 const $members = Symbol('members');
 const $registry = Symbol();
+const $iceServerProvider = Symbol();
 
 const $close = Symbol();
 
@@ -26,13 +28,14 @@ const StateClosed = 'closed';
 
 export class Encounter {
 
-	constructor({registry, participants} = {}) {
+	constructor({registry, participants, iceServerProvider} = {}) {
 		if (!Array.isArray(participants)) { throw new Error(`participants must be defined as an array`); }
 		if (participants.length !== 2) { throw new Error(`only 2 participants are supported`); }
 
 		this[$registry] = registry;
 		this[$id] = uuid.v4();
 		this[$state] = StateNew;
+		this[$iceServerProvider] = iceServerProvider;
 
 		this[$members] = {};
 		let currentId = 1;
@@ -71,7 +74,7 @@ export class Encounter {
 		return { id: partner.id };
 	}
 
-	reconnect(member) {
+	async reconnect(member) {
 		if (this[$state] === StateClosed) { throw new Error('encounter already closed'); }
 
 		let found = Object.values(this[$members]).some(desc => {
@@ -95,10 +98,11 @@ export class Encounter {
 		if (this[$state] === StateMatch) {
 			setImmediate(() => member.callback.invoke('match', {members: people}));
 		} else if (this[$state] === StateNegotiate) {
-			setImmediate(() => member.callback.invoke('negotiate', {members: people}));
+			let iceServers = await this[$iceServerProvider].get();
+			setImmediate(() => member.callback.invoke('negotiate', {iceServers, members: people}));
 			for (let {member:member2} of Object.values(this[$members])) {
 				if (member === member2) { return; }
-				member2.callback.invoke('renegotiate', {partner: this[$members][member.userId].id});
+				member2.callback.invoke('renegotiate', {iceServers, partner: this[$members][member.userId].id});
 			}
 		} else {
 			throw new Error(`cannot reconnect in state '${this[$state]}'`);
@@ -114,9 +118,10 @@ export class Encounter {
 		let everyoneReady = Object.values(this[$members]).every(member => member.ready);
 		if (everyoneReady) {
 			this[$state] = StateNegotiate;
-			setImmediate(() => {
+			setImmediate(async () => {
+				let iceServers = await this[$iceServerProvider].get();
 				for (let desc of Object.values(this[$members])) {
-					desc.member.callback.invoke('negotiate');
+					desc.member.callback.invoke('negotiate', {iceServers});
 				}
 			});
 		}
@@ -133,18 +138,21 @@ export class Encounter {
 
 	[$memberReject]() {
 		if (this[$state] !== StateMatch && this[$state] !== StateNegotiate) { throw new Error(`cannot reject in state '${this[$state]}'`); }
-		setImmediate(() => this[$close]());
+		this[$close]();
 	}
 
 	[$close]() {
 		if (this[$state] === StateClosed) { return; }
+		this[$state] = StateClosed;
 		for (let desc of Object.values(this[$members])) {
 			desc.member.callback.invoke('closed');
 		}
 		this[$registry][$encounterClosed](this);
 	}
-
 }
+
+SerialPool.decorate(Encounter, 'start', 'reconnect', $memberAccept, $memberRelay, $memberReject, $close);
+
 
 const $objectId = Symbol();
 const $callback = Symbol();
@@ -194,7 +202,8 @@ export class EncounterMember extends EventEmitter {
 
 export default class EncounterRegistry {
 
-	constructor() {
+	constructor({iceServerProvider}) {
+		this[$iceServerProvider] = iceServerProvider;
 		this.userEncounters = {};
 		this.encounters = {};
 	}
@@ -219,6 +228,7 @@ export default class EncounterRegistry {
 
 			debug('%s and %s matched', me.userId, partner.userId);
 			let encounter = new Encounter({
+				iceServerProvider: this[$iceServerProvider],
 				registry: this,
 				participants: [
 					{member: me},

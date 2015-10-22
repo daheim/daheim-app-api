@@ -2,6 +2,7 @@ import sio from 'socket.io';
 import Promise from 'bluebird';
 import EncounterRegistry from './localheim';
 import EventEmitter from 'events';
+import IceServerProvider from './ice_server_provider';
 import {default as Ozora, SioChannel, SimpleReceiver, WhitelistReceiver} from './ozora';
 
 
@@ -21,9 +22,8 @@ class Realtime {
 		let io = this[$io] = sio.listen(opt.server);
 		io.on('connection', (client) => this._onConnection(client));
 
-		this.encounters = {};
-		this.userEncounters = {};
-		this[$registry] = new EncounterRegistry();
+		let iceServerProvider = new IceServerProvider();
+		this[$registry] = new EncounterRegistry({iceServerProvider});
 	}
 
 	static create(opt) {

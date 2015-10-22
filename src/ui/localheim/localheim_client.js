@@ -69,7 +69,7 @@ export default class LocalheimClient extends EventEmitter {
 		this.emit('closed');
 	}
 
-	negotiate({members, sdpServers} = {}) {
+	negotiate({members, iceServers} = {}) {
 		if (members) {
 			this[$members] = members;
 			for (let member of members) {
@@ -86,13 +86,13 @@ export default class LocalheimClient extends EventEmitter {
 			stream: this[$stream],
 			client: this,
 			initiator: this.partner.id > this.me.id,
-			sdpServers
+			iceServers
 		});
 		conn.on('stream', stream => this.emit('stream', stream));
 		conn.start();
 	}
 
-	renegotiate({sdpServers} = {}) {
+	renegotiate({iceServers} = {}) {
 		if (this[$conn]) {
 			this[$conn].close();
 		}
@@ -101,7 +101,7 @@ export default class LocalheimClient extends EventEmitter {
 			stream: this[$stream],
 			client: this,
 			initiator: this.partner.id > this.me.id,
-			sdpServers
+			iceServers
 		});
 		conn.on('stream', stream => console.log('stream', stream));
 		conn.start();
