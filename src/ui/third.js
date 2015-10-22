@@ -132,10 +132,17 @@ app.directive('dhmMaxVideoSize', function() {
 	};
 });
 
-app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, socketService, $anchorScroll, $mdDialog) {
+app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, socketService, $anchorScroll, $mdDialog, $location, user) {
+
+	if (!user.userId) {
+		$location.path('/');
+		return;
+	}
+
 	let socket = socketService.connect($scope);
 	let userId;
 	let localheim;
+	let localheimClient;
 
 	let channel = {
 		send: function(data) {
@@ -150,13 +157,75 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 	});
 	let zero = ozora.getObject(0);
 
+	async function ready() {
+		await zero.invoke('auth', {userId: user.userId});
+		let localStream = await navigator.mediaDevices.getUserMedia({
+			audio: true,
+			video: true
+			// video: {
+			// 	width: {
+			// 		min: 300,
+			// 		max: 1920
+			// 	},
+			// 	height: {
+			// 		min: 200,
+			// 		max: 1080
+			// 	}
+			// },
+			// optional: {
+			// 	googEchoCancellation:true,
+			// 	googAutoGainControl:true,
+			// 	googNoiseSuppression:true,
+			// 	googHighpassFilter:true,
+			// 	googAudioMirroring:false,
+			// 	googNoiseSuppression2:true,
+			// 	googEchoCancellation2:true,
+			// 	googAutoGainControl2:true,
+			// 	googDucking:false
+			// }
+		});
+
+		$scope.$apply(() => $scope.localStream = localStream);
+		localheimClient = new LocalheimClient({zero, stream: $scope.localStream});
+		localheimClient.on('match', () => showMatchDialog(localheimClient));
+		localheimClient.on('stream', stream => $scope.$apply(() => $scope.remoteStream = stream));
+
+		await localheimClient.ready();
+	}
+
+	ready();
+
 	$scope.signIn = async () => {
 		$scope.userId = $scope.userId || '' + Math.random();
 		await zero.invoke('auth', {userId: $scope.userId});
 	};
 
 	$scope.ready = async () => {
-		let localStream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+		let localStream = await navigator.mediaDevices.getUserMedia({
+			audio: true,
+			video: true
+			// video: {
+			// 	width: {
+			// 		min: 300,
+			// 		max: 1920
+			// 	},
+			// 	height: {
+			// 		min: 200,
+			// 		max: 1080
+			// 	}
+			// },
+			// optional: {
+			// 	googEchoCancellation:true,
+			// 	googAutoGainControl:true,
+			// 	googNoiseSuppression:true,
+			// 	googHighpassFilter:true,
+			// 	googAudioMirroring:false,
+			// 	googNoiseSuppression2:true,
+			// 	googEchoCancellation2:true,
+			// 	googAutoGainControl2:true,
+			// 	googDucking:false
+			// }
+		});
 		$scope.$apply(() => $scope.localStream = localStream);
 		let localheimClient = this[$localheimClient] = new LocalheimClient({zero, stream: $scope.localStream});
 		localheimClient.on('match', () => showMatchDialog(localheimClient));
@@ -166,16 +235,10 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 	};
 
 	$scope.klose = () => {
-		return this[$localheimClient].reject();
-	};
-
-	$scope.stats = async (ev) => {
-
-		console.log('ok');
-	};
-
-	$scope.fs = () => {
-		angular.element('#fs')[0].webkitRequestFullScreen();
+		if (localheimClient) {
+			localheimClient.reject();
+		}
+		$location.path('/');
 	};
 
 	function showMatchDialog(localheimClient) {

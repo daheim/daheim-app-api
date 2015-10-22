@@ -7,3 +7,4 @@ require('source-map-support').install();
 require('./core');
 require('./second');
 require('./third');
+require('./ready');
