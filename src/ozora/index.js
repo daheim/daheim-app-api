@@ -39,6 +39,7 @@ export default class Ozora extends EventEmitter {
 				command.reject(new Error('disconnected'));
 			}
 			this[$commands] = {};
+			this[$objects] = {0: zero};
 			this.emit('disconnect');
 		};
 	}
@@ -81,6 +82,10 @@ export default class Ozora extends EventEmitter {
 		let id = this[$nextId]++;
 		this[$objects][id] = object;
 		return id;
+	}
+
+	unregister(id) {
+		delete this[$objects][id];
 	}
 
 	getObject(id) {
@@ -169,9 +174,8 @@ export class OzoraObject extends EventEmitter {
 		this[$ozora].on('disconnect', () => this.emit('disconnect'));
 	}
 
-	get ozora() {
-		return this[$ozora];
-	}
+	get ozora() { return this[$ozora]; }
+	get disconnected() { return this[$ozora].disconnected; }
 
 	invoke(method, ...args) {
 		return this[$ozora].invoke(this[$id], method, args);
