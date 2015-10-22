@@ -29,6 +29,7 @@ const $localDescriptionPromise = Symbol();
 const $haveToSignal = Symbol();
 const $connected = Symbol();
 const $disconnected = Symbol();
+const $localheimClient = Symbol();
 
 const $startSignaling = Symbol();
 const $localDescription = Symbol();
@@ -60,12 +61,17 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 	};
 
 	$scope.ready = async () => {
-		$scope.localStream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
-		let localheimClient = new LocalheimClient({zero, stream: $scope.localStream});
-
+		let localStream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+		$scope.$apply(() => $scope.localStream = localStream);
+		let localheimClient = this[$localheimClient] = new LocalheimClient({zero, stream: $scope.localStream});
 		localheimClient.on('match', () => showMatchDialog(localheimClient));
+		localheimClient.on('stream', stream => $scope.$apply(() => $scope.remoteStream = stream));
 
 		await localheimClient.ready();
+	};
+
+	$scope.klose = () => {
+		return this[$localheimClient].reject();
 	};
 
 	$scope.stats = async (ev) => {
@@ -99,6 +105,10 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 					localheimClient.removeListener('negotiate', onNegotiate);
 				});
 
+				localheimClient.on('closed', () => {
+					$mdDialog.cancel();
+				});
+
 				$scope.accept = () => {
 					localheimClient.accept();
 					$scope.accepted = true;
@@ -108,7 +118,10 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 						$mdDialog.hide();
 					}
 				});
-				$scope.reject = () => $mdDialog.cancel();
+				$scope.reject = () => {
+					localheimClient.reject();
+					$mdDialog.cancel();
+				};
 			}
 		});
 	}

@@ -18,7 +18,7 @@ export default class LocalheimClient extends EventEmitter {
 
 	constructor({zero, stream}) {
 		super();
-		WhitelistReceiver.mixin(this, ['match', 'negotiate', 'receiveRelay']);
+		WhitelistReceiver.mixin(this, ['match', 'negotiate', 'receiveRelay', 'closed', 'renegotiate']);
 
 		this[$zero] = zero;
 		this[$stream] = stream;
@@ -54,12 +54,48 @@ export default class LocalheimClient extends EventEmitter {
 		this[$localheimObject] = this[$zero].ozora.getObject(res.id);
 	}
 
-	async accept() {
-		await this[$localheimObject].invoke('accept');
+	accept() {
+		return this[$localheimObject].invoke('accept');
 	}
 
-	async negotiate(sdpServers) {
+	reject() {
+		return this[$localheimObject].invoke('reject');
+	}
+
+	closed() {
+		if (this[$conn]) {
+			this[$conn].close();
+		}
+		this.emit('closed');
+	}
+
+	negotiate({members, sdpServers} = {}) {
+		if (members) {
+			this[$members] = members;
+			for (let member of members) {
+				if (member.self) {
+					this[$me] = member;
+				} else {
+					this[$partner] = member;
+				}
+			}
+		}
 		this.emit('negotiate');
+
+		let conn = this[$conn] = new RtcConnection({
+			stream: this[$stream],
+			client: this,
+			initiator: this.partner.id > this.me.id,
+			sdpServers
+		});
+		conn.on('stream', stream => this.emit('stream', stream));
+		conn.start();
+	}
+
+	renegotiate({sdpServers} = {}) {
+		if (this[$conn]) {
+			this[$conn].close();
+		}
 
 		let conn = this[$conn] = new RtcConnection({
 			stream: this[$stream],

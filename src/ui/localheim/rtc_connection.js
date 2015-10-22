@@ -116,4 +116,10 @@ export default class RtcConnection extends EventEmitter {
 		this[$haveToSignal] = false;
 		this[$iceGatherer].ready();
 	}
+
+	close() {
+		if (this[$pc].signalingState !== 'closed') {
+			this[$pc].close();
+		}
+	}
 }
