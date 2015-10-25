@@ -6,6 +6,48 @@ import {default as Ozora, WhitelistReceiver} from '../ozora';
 
 let debug = createDebug('dhm:third');
 
+class NavigationGuard {
+
+	constructor({$scope, callback, $mdDialog}) {
+		$scope.$on('$locationChangeStart', async (ev, newUrl, oldUrl) => {
+			if (this._allowed) { return; }
+			let question = callback(newUrl);
+			if (typeof question !== 'string') { return; }
+			ev.preventDefault();
+
+			try {
+				await $mdDialog.show($mdDialog.confirm()
+					.title('Confirm Navigation')
+					.content(question + '<br/><br/>' + 'Are you sure you want to leave this page?')
+					.ok('Leave this Page')
+					.cancel('Stay on this Page'));
+				this._allowed = true;
+				window.location.href = newUrl;
+			} catch (ex) {
+				// nothing
+			}
+		});
+
+		window.onbeforeunload = event => {
+			let question = callback();
+			if (typeof question !== 'string') { return; }
+
+			if (typeof event == 'undefined') {
+				event = window.event;
+			}
+			if (event) {
+				event.returnValue = question;
+			}
+			return question;
+		};
+
+		$scope.$on('$destroy', () => window.onbeforeunload = undefined);
+	}
+}
+
+
+
+
 let app = window.angular.module('dhm');
 
 app.config(function($routeProvider) {
@@ -144,6 +186,17 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 	let userId;
 	let localheim;
 	let localheimClient;
+	let matched = false;
+
+	let rg = new NavigationGuard({
+		$scope,
+		$mdDialog,
+		callback: () => {
+			if (matched) {
+				return 'You are in a video session.';
+			}
+		}
+	});
 
 	let channel = {
 		send: function(data) {
@@ -249,6 +302,8 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 	$scope.$on('$destroy', () => screenfull.exit());
 
 	function showMatchDialog(localheimClient) {
+
+		matched = true;
 
 		$mdDialog.show({
 			parent: angular.element('#fs'),
