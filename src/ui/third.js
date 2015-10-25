@@ -1,4 +1,5 @@
 import LocalheimClient from './localheim/localheim_client';
+import screenfull from 'screenfull';
 import createDebug from 'debug';
 
 import {default as Ozora, WhitelistReceiver} from '../ozora';
@@ -241,6 +242,12 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 		$location.path('/');
 	};
 
+	$scope.toggleFullscreen = () => {
+		screenfull.toggle();
+	};
+
+	$scope.$on('$destroy', () => screenfull.exit());
+
 	function showMatchDialog(localheimClient) {
 
 		$mdDialog.show({
@@ -248,6 +255,14 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 			template: matchDialogTemplate,
 			controller: function($scope, $mdDialog, $interval) {
 				debug('members', localheimClient.members, localheimClient);
+
+				$scope.full = window.localStorage.fullscreen;
+				if ($scope.full === undefined) {
+					$scope.full = true;
+				} else {
+					$scope.full = new Boolean($scope.full);
+				}
+				$scope.fullEnabled = screenfull.enabled;
 
 				let partner = localheimClient.members.filter(({self}) => !self)[0];
 				$scope.partnerUserId = partner.userId;
@@ -273,6 +288,13 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 				});
 
 				$scope.accept = () => {
+					if (screenfull.enabled) {
+						window.localStorage.fullscreen = $scope.full;
+						debug('full', $scope.full);
+						if ($scope.full) {
+							screenfull.request();
+						}
+					}
 					localheimClient.accept();
 					$scope.accepted = true;
 				};
@@ -303,11 +325,12 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 					<li>Dogs</li>
 					<li>Rain</li>
 				</ul>
+				<md-checkbox ng-model="full" ng-if="fullEnabled">fullscreen</md-checkbox>
 			</md-dialog-content>
 			<div class="md-actions" style="background-color: #aaaaaa" md-theme="video">
 				<span>{{countdown / 1000 | number:0}}<span>
-				<md-button ng-disabled="accepted" ng-click="accept()" class="md-primary">Accept</md-button>
 				<md-button ng-disabled="accepted" ng-click="reject()">Reject</md-button>
+				<md-button ng-disabled="accepted" ng-click="accept()" class="md-primary">Accept</md-button>
 			</div>
 		</md-dialog>
 	`;

@@ -54,42 +54,12 @@ app.service('user', UserService);
 
 app.controller('ReadyCtrl', ($scope, camera, $location, $mdDialog, user) => {
 
-	$scope.full = true;
-
-	var fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
-	var fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled;
-	if (fullscreenEnabled) {
-		if (document.exitFullscreen) {
-			document.exitFullscreen();
-		} else if (document.mozCancelFullScreen) {
-			document.mozCancelFullScreen();
-		} else if (document.webkitExitFullscreen) {
-			document.webkitExitFullscreen();
-		}
-	}
-
 	$scope.ready = () => {
 		if (!$scope.userId) {
 			$mdDialog.show($mdDialog.alert().ok('Alright').title('Well...').content('A name! I need a name!'));
 			return;
 		}
 		user.userId = $scope.userId;
-		if ($scope.full) {
-			try {
-				let element = window.document.body;
-				if (element.requestFullscreen) {
-					element.requestFullscreen();
-				} else if (element.mozRequestFullScreen) {
-					element.mozRequestFullScreen();
-				} else if (element.webkitRequestFullscreen) {
-					element.webkitRequestFullscreen();
-				} else if (element.msRequestFullscreen) {
-					element.msRequestFullscreen();
-				}
-			} catch (ex) {
-				console.error('fullscreen', ex);
-			}
-		}
 		$location.path('/third');
 	};
 	//camera.start();

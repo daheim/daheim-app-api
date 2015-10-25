@@ -7,6 +7,12 @@
 		</div>
 	</div>
 
+	<div style="position: absolute; top: 10px; right: 10px; z-index: 20">
+		<md-button ng-click="toggleFullscreen()" class="md-icon-button" aria-label="Fullscreen">
+			<md-icon>aspect_ratio</md-icon>
+		</md-button>
+	</div>
+
 	<video dhm-src-object="remoteStream" dhm-max-video-size="contentSize" dhm-center autoplay style="border: solid transparent 1px; position: absolute;"></video>
 	<md-progress-circular ng-if="!remoteStream" dhm-center md-mode="indeterminate"></md-progress-circular>
 	<video dhm-src-object="localStream" dhm-max-video-size="{w:contentSize.w/4,h:contentSize.h/4}" autoplay muted style="transform: scale(-1, 1); -webkit-transform: scale(-1, 1); border: solid transparent 1px; position: absolute; bottom: 10px; right: 10px;"></video>
