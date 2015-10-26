@@ -8,3 +8,4 @@ require('./core');
 require('./second');
 require('./third');
 require('./ready');
+require('./directives');
