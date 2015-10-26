@@ -36,9 +36,10 @@
 		$locationProvider.hashPrefix('!');
 	})
 
-	.controller('SiteCtrl', function($scope, $timeout, $mdSidenav) {
+	.controller('SiteCtrl', function($scope, $timeout, $mdSidenav, $mdMedia) {
 		var self = this;
 
+		$scope.$media = $mdMedia;
 		$scope.openMenu = function() {
 			$timeout(function() { $mdSidenav('left').open(); });
 		};

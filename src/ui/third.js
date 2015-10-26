@@ -1,51 +1,9 @@
 import LocalheimClient from './localheim/localheim_client';
+import NavigationGuard from './navigation_guard';
+import {default as Ozora, WhitelistReceiver} from '../ozora';
 import screenfull from 'screenfull';
 import createDebug from 'debug';
-
-import {default as Ozora, WhitelistReceiver} from '../ozora';
-
 let debug = createDebug('dhm:third');
-
-class NavigationGuard {
-
-	constructor({$scope, callback, $mdDialog}) {
-		$scope.$on('$locationChangeStart', async (ev, newUrl, oldUrl) => {
-			if (this._allowed) { return; }
-			let question = callback(newUrl);
-			if (typeof question !== 'string') { return; }
-			ev.preventDefault();
-
-			try {
-				await $mdDialog.show($mdDialog.confirm()
-					.title('Confirm Navigation')
-					.content(question + '<br/><br/>' + 'Are you sure you want to leave this page?')
-					.ok('Leave this Page')
-					.cancel('Stay on this Page'));
-				this._allowed = true;
-				window.location.href = newUrl;
-			} catch (ex) {
-				// nothing
-			}
-		});
-
-		window.onbeforeunload = event => {
-			let question = callback();
-			if (typeof question !== 'string') { return; }
-
-			if (typeof event == 'undefined') {
-				event = window.event;
-			}
-			if (event) {
-				event.returnValue = question;
-			}
-			return question;
-		};
-
-		$scope.$on('$destroy', () => window.onbeforeunload = undefined);
-	}
-}
-
-
 
 
 let app = window.angular.module('dhm');
@@ -58,27 +16,14 @@ app.config(function($routeProvider) {
 		});
 });
 
-const $stream = Symbol();
-const $initiator = Symbol();
-const $conn = Symbol();
-
-
-
-
-const $pc = Symbol();
-const $client = Symbol();
-const $iceGatherer = Symbol();
-const $localDescriptionPromise = Symbol();
-const $haveToSignal = Symbol();
-const $connected = Symbol();
-const $disconnected = Symbol();
-const $localheimClient = Symbol();
-
-const $startSignaling = Symbol();
-const $localDescription = Symbol();
-
 app.config(function($mdThemingProvider) {
-	$mdThemingProvider.theme('video').dark();
+	console.log('theming', $mdThemingProvider);
+	$mdThemingProvider
+		.theme('video')
+		.dark()
+		.backgroundPalette('grey', {
+			default: '900'
+		});
 });
 
 app.directive('dhmSizeWatcher', function() {
@@ -87,7 +32,6 @@ app.directive('dhmSizeWatcher', function() {
 		link: ($scope, $element, attributes) => {
 			let watcherFn = () => { return {w: $element.width(), h: $element.height()}; };
 			$scope.$watch(watcherFn, function(value) {
-				debug('dhmSizeWatcher watch', value, attributes.dhmSizeWatcher, $element);
 				if (!value) { return; }
 				$scope[attributes.dhmSizeWatcher] = value;
 			}, true);
@@ -104,6 +48,8 @@ app.directive('dhmCenter', function() {
 		restrict: 'A',
 		link: ($scope, $element, attributes) => {
 
+			$element.css('position', 'absolute');
+
 			function check() {
 				return {
 					w: $element.outerWidth(),
@@ -114,7 +60,6 @@ app.directive('dhmCenter', function() {
 			}
 
 			$scope.$watch(check, value => {
-				debug('dhmCenter watch', value);
 				if (!value) { return; }
 				let left = Math.floor((value.pw - value.w) / 2);
 				let top = Math.floor((value.ph - value.h) / 2);
@@ -137,7 +82,6 @@ app.directive('dhmMaxVideoSize', function() {
 		restrict: 'A',
 		link: ($scope, $element, attributes) => {
 			$scope.$watch(attributes.dhmMaxVideoSize, value => {
-				debug('dhmMaxVideoSize watch', value);
 				setSize();
 			});
 
@@ -175,7 +119,7 @@ app.directive('dhmMaxVideoSize', function() {
 	};
 });
 
-app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, socketService, $anchorScroll, $mdDialog, $location, user) {
+app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval, config, socketService, $anchorScroll, $mdDialog, $location, user) {
 
 	if (!user.userId) {
 		$location.path('/');
@@ -188,6 +132,29 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 	let localheimClient;
 	let matched = false;
 
+	$scope.languages = [{
+		language: 'Hungarian',
+		level: 'native'
+	}, {
+		language: 'English',
+		level: 'high'
+	}, {
+		language: 'German',
+		level: 'sucks'
+	}];
+
+	//$scope.topics = ['cars', 'food', 'hiking', 'children', 'cars1', 'food1', 'hiking1', 'children1', 'cars2', 'food2', 'hiking2', 'children2', 'cars4', 'food4', 'hiking4', 'children4'];
+	$scope.topics = ['cars', 'food'];
+
+	let mouseMoveTimer;
+	$scope.mouseMove = () => {
+		if (mouseMoveTimer) {
+			$timeout.cancel(mouseMoveTimer);
+		}
+		mouseMoveTimer = $timeout(() => $scope.showControls = false, 3000);
+		$scope.showControls = true;
+	};
+
 	let rg = new NavigationGuard({
 		$scope,
 		$mdDialog,
@@ -197,6 +164,8 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 			}
 		}
 	});
+
+	$scope.state = 'queued';
 
 	let channel = {
 		send: function(data) {
@@ -216,33 +185,15 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 		let localStream = await navigator.mediaDevices.getUserMedia({
 			audio: true,
 			video: true
-			// video: {
-			// 	width: {
-			// 		min: 300,
-			// 		max: 1920
-			// 	},
-			// 	height: {
-			// 		min: 200,
-			// 		max: 1080
-			// 	}
-			// },
-			// optional: {
-			// 	googEchoCancellation:true,
-			// 	googAutoGainControl:true,
-			// 	googNoiseSuppression:true,
-			// 	googHighpassFilter:true,
-			// 	googAudioMirroring:false,
-			// 	googNoiseSuppression2:true,
-			// 	googEchoCancellation2:true,
-			// 	googAutoGainControl2:true,
-			// 	googDucking:false
-			// }
 		});
 
 		$scope.$apply(() => $scope.localStream = localStream);
 		localheimClient = new LocalheimClient({zero, stream: $scope.localStream});
 		localheimClient.on('match', () => showMatchDialog(localheimClient));
 		localheimClient.on('stream', stream => $scope.$apply(() => $scope.remoteStream = stream));
+		localheimClient.on('negotiate', () => {
+			$scope.$apply(() => $scope.state = 'video');
+		});
 
 		await localheimClient.ready();
 	}
@@ -252,40 +203,6 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 	$scope.signIn = async () => {
 		$scope.userId = $scope.userId || '' + Math.random();
 		await zero.invoke('auth', {userId: $scope.userId});
-	};
-
-	$scope.ready = async () => {
-		let localStream = await navigator.mediaDevices.getUserMedia({
-			audio: true,
-			video: true
-			// video: {
-			// 	width: {
-			// 		min: 300,
-			// 		max: 1920
-			// 	},
-			// 	height: {
-			// 		min: 200,
-			// 		max: 1080
-			// 	}
-			// },
-			// optional: {
-			// 	googEchoCancellation:true,
-			// 	googAutoGainControl:true,
-			// 	googNoiseSuppression:true,
-			// 	googHighpassFilter:true,
-			// 	googAudioMirroring:false,
-			// 	googNoiseSuppression2:true,
-			// 	googEchoCancellation2:true,
-			// 	googAutoGainControl2:true,
-			// 	googDucking:false
-			// }
-		});
-		$scope.$apply(() => $scope.localStream = localStream);
-		let localheimClient = this[$localheimClient] = new LocalheimClient({zero, stream: $scope.localStream});
-		localheimClient.on('match', () => showMatchDialog(localheimClient));
-		localheimClient.on('stream', stream => $scope.$apply(() => $scope.remoteStream = stream));
-
-		await localheimClient.ready();
 	};
 
 	$scope.klose = () => {
@@ -304,90 +221,41 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $interval, config, s
 	function showMatchDialog(localheimClient) {
 
 		matched = true;
+		$scope.state = 'match';
 
-		$mdDialog.show({
-			parent: angular.element('#fs'),
-			template: matchDialogTemplate,
-			controller: function($scope, $mdDialog, $interval) {
-				debug('members', localheimClient.members, localheimClient);
+		let partner = localheimClient.members.filter(({self}) => !self)[0];
+		$scope.partnerUserId = partner.userId;
 
-				$scope.full = window.localStorage.fullscreen;
-				if ($scope.full === undefined) {
-					$scope.full = true;
-				} else {
-					$scope.full = new Boolean($scope.full);
-				}
-				$scope.fullEnabled = screenfull.enabled;
-
-				let partner = localheimClient.members.filter(({self}) => !self)[0];
-				$scope.partnerUserId = partner.userId;
-
-				let create = new Date().getTime();
-				let iv = $interval(() => {
-					let now = new Date().getTime();
-					$scope.countdown = Math.max(0, 60000 - (now - create));
-				}, 50);
-				$scope.countdown = 60000;
-				$scope.$on('$destroy', () => {
-					$interval.cancel(iv);
-				});
-
-				function onNegotiate() { $scope.$apply(() => $scope.negotiated = true); }
-				localheimClient.on('negotiate', onNegotiate);
-				$scope.$on('$destroy', () => {
-					localheimClient.removeListener('negotiate', onNegotiate);
-				});
-
-				localheimClient.on('closed', () => {
-					$mdDialog.cancel();
-				});
-
-				$scope.accept = () => {
-					if (screenfull.enabled) {
-						window.localStorage.fullscreen = $scope.full;
-						debug('full', $scope.full);
-						if ($scope.full) {
-							screenfull.request();
-						}
-					}
-					localheimClient.accept();
-					$scope.accepted = true;
-				};
-				$scope.$watch('negotiated && accepted', (value) => {
-					if (value) {
-						$mdDialog.hide();
-					}
-				});
-				$scope.reject = () => {
-					localheimClient.reject();
-					$mdDialog.cancel();
-				};
-			}
+		let create = new Date().getTime();
+		let iv = $interval(() => {
+			let now = new Date().getTime();
+			$scope.countdown = Math.max(0, 60000 - (now - create));
+		}, 50);
+		$scope.countdown = 60000;
+		$scope.$on('$destroy', () => {
+			$interval.cancel(iv);
 		});
-	}
 
-	const matchDialogTemplate = `
-		<md-dialog aria-label="Match" style="background-color: #cccccc" md-theme="default">
-			<md-dialog-content layout="column" layout-align="start start">
-				<div layout="column" layout-align="center center" flex="grow">
-					<img ng-src="http://images.sodahead.com/polls/0/0/2/7/3/2/3/2/7/1716433898_ugly_person_03_answer_2_xlarge.jpeg" style="width: 70px; height: 70px; border-radius: 50%;" />
-					<p><b>{{partnerUserId}}</b></p>
-				</div>
-				<p>Languages: English, Jamaican</p>
-				<div>Areas of interest</div>
-				<ul>
-					<li>Cats</li>
-					<li>Dogs</li>
-					<li>Rain</li>
-				</ul>
-				<md-checkbox ng-model="full" ng-if="fullEnabled">fullscreen</md-checkbox>
-			</md-dialog-content>
-			<div class="md-actions" style="background-color: #aaaaaa" md-theme="video">
-				<span>{{countdown / 1000 | number:0}}<span>
-				<md-button ng-disabled="accepted" ng-click="reject()">Reject</md-button>
-				<md-button ng-disabled="accepted" ng-click="accept()" class="md-primary">Accept</md-button>
-			</div>
-		</md-dialog>
-	`;
+		function onNegotiate() { $scope.$apply(() => $scope.negotiated = true); }
+		localheimClient.on('negotiate', onNegotiate);
+		$scope.$on('$destroy', () => {
+			localheimClient.removeListener('negotiate', onNegotiate);
+		});
+
+		localheimClient.on('closed', () => {
+			//$mdDialog.cancel();
+			// TODO: handle
+		});
+
+		$scope.accept = () => {
+			localheimClient.accept();
+			$scope.accepted = true;
+		};
+		$scope.reject = () => {
+			localheimClient.reject();
+			//$mdDialog.cancel();
+		};
+
+	}
 
 });

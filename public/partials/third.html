@@ -1,33 +1,92 @@
-<md-content md-theme="video" layout="column" window-resize dhm-size-watcher="contentSize" style="background: #222; overflow: hidden; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 5;" id="fs">
+<md-content md-theme="video" window-resize dhm-size-watcher="contentSize" style="background: #222; overflow: hidden; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 5;" id="fs" layout="column" ng-mousemove="mouseMove()">
 
-	<div style="position: absolute; z-index: 10">
-		<p>Connection status: {{socket_state}}</p>
-		<div layout="row" layout-align="start center" layout-wrap>
-			<md-button ng-click="klose()">Close</md-button>
-		</div>
-	</div>
+	<video dhm-src-object="remoteStream" dhm-max-video-size="contentSize" dhm-center autoplay style="z-index: -1;" ng-if="remoteStream"></video>
+	<video dhm-src-object="localStream" dhm-max-video-size="{w:contentSize.w/4,h:contentSize.h/4}" autoplay muted style="transform: scale(-1, 1); -webkit-transform: scale(-1, 1); border: solid rgba(255, 255, 255, 0.2) 2px; position: absolute; bottom: 10px; right: 10px; z-index: 20;" ng-if="!$media('sm') || state === 'video'"></video>
 
-	<div style="position: absolute; top: 10px; right: 10px; z-index: 20">
+	<div style="position: absolute; top: 10px; right: 10px; z-index: 20" ng-show="showControls" class="fade">
 		<md-button ng-click="toggleFullscreen()" class="md-icon-button" aria-label="Fullscreen">
 			<md-icon>aspect_ratio</md-icon>
 		</md-button>
 	</div>
 
-	<video dhm-src-object="remoteStream" dhm-max-video-size="contentSize" dhm-center autoplay style="border: solid transparent 1px; position: absolute;"></video>
-	<md-progress-circular ng-if="!remoteStream" dhm-center md-mode="indeterminate"></md-progress-circular>
-	<video dhm-src-object="localStream" dhm-max-video-size="{w:contentSize.w/4,h:contentSize.h/4}" autoplay muted style="transform: scale(-1, 1); -webkit-transform: scale(-1, 1); border: solid transparent 1px; position: absolute; bottom: 10px; right: 10px;"></video>
-
-	<!--
-
-	<div layout="row" layout-align="center center">
-			<div id="lenyeg" flex="60" flex-sm="95" flex-md="95" style="position: relative;">
-				<video dhm-resize="remoteResized()" ng-if="callState=='connected'" dhm-src-object="remoteVideoObject" autoplay style="border: solid black 1px; width: 100%; max-height: {{windowHeight - 64}}px"></video>
-				<div class="fourthree" ng-if="callState!=='connected'">
-					<div style="border: solid black 1px; width: 100%; background-color: pink; position: absolute; top: 0; left: 0; bottom: 0; right: 0; text-align: center;">Waiting for video</div>
-				</div>
-				<video dhm-src-object="localVideoObject" autoplay muted style="transform: scale(-1, 1); -webkit-transform: scale(-1, 1); border: solid black 1px; margin-right: -2px; margin-bottom: 3px; position: absolute; bottom: 10px; right: 10px; width: {{localSize.w}}px; height: {{localSize.h}}px;"></video>
-			</div>
+	<div ng-if="state === 'queued'" dhm-center style="text-align: center;">
+		<md-progress-circular md-mode="indeterminate" style="margin-left: auto; margin-right: auto;"></md-progress-circular>
+		<p>Looking for a chat partner</p>
 	</div>
-	-->
+
+	<style>
+		/* Hack to handle readonly md-chips correctly */
+		.md-chips .md-chip .md-chip-content {
+			padding-right: 0;
+		}
+
+		.md-chips-static .md-chips .md-chip {
+			padding-right: 12px;
+		}
+
+
+		.fade.ng-hide-add {
+		  transition: all linear 0.2s;
+		}
+
+		.fade.ng-hide-remove {
+		  transition: all linear 0.5s;
+		}
+
+		.fade {
+			opacity: 1;
+		}
+
+		.fade.ng-hide {
+			opacity: 0;
+		}
+	</style>
+
+	<div flex ng-if="state === 'match'" layout="column" layout-align="start center">
+		<md-content flex="initial" md-scroll-y layout="row" layout-align="center start" style="width: 100%">
+			<div flex="50" flex-sm="95" layout="column">
+				<div layout="column" layout-align="start center">
+					<div layout="column" layout-align="center center" flex>
+						<img ng-src="http://images.sodahead.com/polls/0/0/2/7/3/2/3/2/7/1716433898_ugly_person_03_answer_2_xlarge.jpeg" style="width: 150px; height: 150px; border-radius: 50%; margin-top: 10px;" />
+						<p><b>{{partnerUserId}}</b></p>
+					</div>
+				</div>
+				<div layout="column" layout-align="start start" layout-margin>
+					<div>
+						<h3 class="md-title">Spoken Languages</h3>
+						<md-chips readonly="true" ng-model="languages" class="md-chips-static">
+							<md-chip-template>
+								<strong>{{$chip.language}}</strong>
+								<em>({{$chip.level}})</em>
+							</md-chip-template>
+						</md-chips>
+					</div>
+					<div>
+						<h3 class="md-title">Likes to talk about</h3>
+						<md-chips readonly="true" ng-model="topics" class="md-chips-static">
+						</md-chips>
+					</div>
+				</div>
+			</div>
+		</md-content>
+
+		<div flex="none" layout="row" layout-align="center center" style="width: 100%">
+			<div flex="50" flex-sm="95" layout="column">
+				<div flex layout="row" layout-align="center center" style="z-index: 30;">
+					<div flex layout="row" layout-align="start">
+						<span flex>{{countdown / 1000 | number:0}}</span>
+					</div>
+					<div flex layout="row" layout-align="end">
+						<md-button flex ng-disabled="accepted" ng-click="reject()">Reject</md-button>
+						<md-button flex ng-disabled="accepted" ng-click="accept()" class="md-primary md-raised">Accept</md-button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div ng-show="state === 'queued' || (state === 'video' &amp;&amp; showControls)" style="z-index: 30; position: absolute; bottom: 10px; left: 0; right: 0;" layout="row" layout-align="center" class="fade">
+		<md-button class="md-warn md-primary" ng-class="{'md-raised': state === 'video'}" ng-click="klose()">Exit Conversation</md-button>
+	</div>
 
 </md-content>
