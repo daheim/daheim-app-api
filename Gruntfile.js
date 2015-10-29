@@ -22,6 +22,18 @@ module.exports = function(grunt) {
 			}
 		},
 
+		remapIstanbul: {
+			build: {
+				src: './build/coverage/coverage.json',
+				options: {
+					reports: {
+						'html': 'build/coverage/report-babel',
+						'json': 'build/coverage/coverage-babel.json'
+					}
+				}
+			}
+		},
+
 		clean: {
 			all: {
 				src: ['build']
@@ -233,6 +245,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-text-replace');
 	grunt.loadNpmTasks('grunt-eslint');
 	grunt.loadNpmTasks('grunt-esdoc');
+	grunt.loadNpmTasks('remap-istanbul');
 
 	var isDevel = process.env.DEVEL === '1';
 	var srcTasks = ['babel:src', 'browserify:ui', 'ngAnnotate:ui', 'exorcise:ui', 'exorcise:src'];
@@ -256,5 +269,5 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('check', ['jscs', 'eslint', 'babel', 'test']);
 	grunt.registerTask('test', ['mochaTest']);
-	grunt.registerTask('cover', ['exec:cover']);
+	grunt.registerTask('cover', ['exec:cover', 'remapIstanbul:build']);
 };
