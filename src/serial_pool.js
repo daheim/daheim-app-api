@@ -25,7 +25,7 @@ export default class SerialPool {
 				let args = arguments;
 				let serialPool = this[symbol];
 				if (!serialPool) { serialPool = this[symbol] = new SerialPool(); }
-				serialPool.run(() => original.apply(this, args));
+				return serialPool.run(() => original.apply(this, args));
 			};
 		}
 		return symbol;
