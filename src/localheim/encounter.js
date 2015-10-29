@@ -33,7 +33,7 @@ export default class Encounter {
 		for (let {member} of participants) {
 			let id = currentId++;
 			if (this[$members][member.userId]) { throw new Error(`participant ${id} is already a member`); }
-			this[$members][member.userId] = {id, member, session: 1};
+			this[$members][member.userId] = {id, member};
 		}
 
 		debug('new encounter %s with members', this[$id], Object.keys(this[$members]));
@@ -47,10 +47,9 @@ export default class Encounter {
 		this[$state] = StateMatch;
 
 		for (let {id: selfId, member} of Object.values(this[$members])) {
-			let people = Object.values(this[$members]).map(({id, member, session}) => {
+			let people = Object.values(this[$members]).map(({id, member}) => {
 				return {
 					id,
-					session,
 					self: id === selfId,
 					userId: member.userId
 				};
@@ -76,24 +75,32 @@ export default class Encounter {
 		desc.member.close({reason: Registry.ReasonReplaced});
 
 		desc.member = me;
-		desc.session++;
 
-		let members = Object.values(this[$members]).map(({id, member, session}) => {
+		let members = Object.values(this[$members]).map(({id, member}) => {
 			return {
 				id,
-				session,
 				self: member === me,
 				userId: member.userId
 			};
 		});
 
 		let iceServers = await this[$iceServerProvider].get();
-		setImmediate(() => {
-			me.callback.invoke('onNegotiate', {iceServers, members});
+		setImmediate(async () => {
+			try {
+				await me.callback.invoke('onNegotiate', {iceServers, members});
+			} catch (err) {
+				me.close({reason: Registry.ReasonProtocolError, notify: true});
+			}
 		});
 		for (let {member} of Object.values(this[$members])) {
 			if (member === me) { continue; }
-			member.callback.invoke('onRenegotiate', {iceServers, partner: desc.id, session: desc.session});
+			(async () => {
+				try {
+					await member.callback.invoke('onRenegotiate', {iceServers, partner: desc.id});
+				} catch (err) {
+					member.close({reason: Registry.ReasonProtocolError, notify: true});
+				}
+			})();
 		}
 
 		return 'renegotiate';
@@ -112,13 +119,19 @@ export default class Encounter {
 			setImmediate(async () => {
 				let iceServers = await this[$iceServerProvider].get();
 				for (let desc of Object.values(this[$members])) {
-					desc.member.callback.invoke('onNegotiate', {iceServers});
+					(async () => {
+						try {
+							await desc.member.callback.invoke('onNegotiate', {iceServers});
+						} catch (err) {
+							desc.member.close({reason: Registry.ReasonProtocolError});
+						}
+					})();
 				}
 			});
 		}
 	}
 
-	interfaceSendRelay(me, {message, participant, session} = {}) {
+	interfaceSendRelay(me, {message, participant} = {}) {
 		if (this[$state] !== StateNegotiate) { throw new Error(`cannot relay in state '${this[$state]}'`); }
 		if (!message) { throw new Error('message must be defined'); }
 		let desc = this[$members][me.userId];
@@ -128,14 +141,11 @@ export default class Encounter {
 		if (targetMember.id !== participant) {
 			throw new Error('invalid participant');
 		}
-		if (targetMember.session !== session) {
-			throw new Error('invalid session');
-		}
 		return targetMember.member.callback.invoke('onRelay', {message});
 	}
 
 	interfaceClose(me, {reason}) {
-		if (this[$state] === StateNegotiate && reason === Registry.ReasonDisconnected) {
+		if (this[$state] === StateNegotiate && (reason === Registry.ReasonDisconnected || reason === Registry.ReasonReplaced)) {
 			debug('user %s disconnected after negotiation state and may reconnect', me.userId);
 			return;
 		}

@@ -86,8 +86,8 @@ describe('Localheim Integration', () => {
 		await cb1.onNegotiate.get(0);
 		await cb2.onNegotiate.get(0);
 
-		await e1.invoke('sendRelay', {message: {rekeke: 'susu'}, participant: p1.id, session: p1.session});
-		await e2.invoke('sendRelay', {message: {sarkany: 'fu'}, participant: p2.id, session: p2.session});
+		await e1.invoke('sendRelay', {message: {rekeke: 'susu'}, participant: p1.id});
+		await e2.invoke('sendRelay', {message: {sarkany: 'fu'}, participant: p2.id});
 
 		expect(await cb1.onRelay.get(0)).to.have.deep.property('0.message.sarkany', 'fu');
 		expect(await cb2.onRelay.get(0)).to.have.deep.property('0.message.rekeke', 'susu');
@@ -182,17 +182,12 @@ describe('Localheim Integration', () => {
 		members2 = n2[0].members;
 		p2 = members2.filter(m => !m.self)[0];
 
-		// sending message to old session
-		await e1.invoke('sendRelay', {message: {sarkany: 'fu'}, participant: p1.id, session: p1.session}).should.be.rejected;
-
 		let reneg1 = await cb1.onRenegotiate.get(0);
 		reneg1.should.have.deep.property('0.iceServers');
 		reneg1.should.have.deep.property('0.partner');
-		reneg1.should.have.deep.property('0.session');
-		p1.session = reneg1[0].session;
 
-		await e2.invoke('sendRelay', {message: {sarkany: 'fu'}, participant: p2.id, session: p2.session});
-		await e1.invoke('sendRelay', {message: {rekeke: 'susu'}, participant: p1.id, session: p1.session});
+		await e2.invoke('sendRelay', {message: {sarkany: 'fu'}, participant: p2.id});
+		await e1.invoke('sendRelay', {message: {rekeke: 'susu'}, participant: p1.id});
 
 		expect(await cb1.onRelay.get(0)).to.have.deep.property('0.message.sarkany', 'fu');
 		expect(await cb2.onRelay.get(0)).to.have.deep.property('0.message.rekeke', 'susu');
