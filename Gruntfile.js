@@ -13,6 +13,16 @@ module.exports = function(grunt) {
 				},
 				src: ['build/dist/test/unit/**/*.js'],
 			},
+
+			integration: {
+				options: {
+					reporter: process.env.TEST_REPORT_JUNIT === '1' ? 'mocha-junit-reporter' : 'spec',
+					reporterOptions: {
+						mochaFile: './build/test-results-integration.xml'
+					},
+				},
+				src: ['build/dist/test/integration/**/*.js'],
+			}
 		},
 
 		exec: {
