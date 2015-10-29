@@ -1,6 +1,7 @@
 import LocalheimClient from './localheim/localheim_client';
 import NavigationGuard from './navigation_guard';
-import {default as Ozora, WhitelistReceiver} from '../ozora';
+import {default as Ozora, SioChannel} from '../ozora';
+import io from 'socket.io-client';
 import screenfull from 'screenfull';
 import createDebug from 'debug';
 let debug = createDebug('dhm:third');
@@ -17,7 +18,6 @@ app.config(function($routeProvider) {
 });
 
 app.config(function($mdThemingProvider) {
-	console.log('theming', $mdThemingProvider);
 	$mdThemingProvider
 		.theme('video')
 		.dark()
@@ -26,18 +26,63 @@ app.config(function($mdThemingProvider) {
 		});
 });
 
-app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval, config, socketService, $anchorScroll, $mdDialog, $location, user) {
+const $zero = Symbol();
+
+app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval, config, $anchorScroll, $mdDialog, $location, user) {
 
 	if (!user.userId) {
 		$location.path('/');
 		return;
 	}
 
-	let socket = socketService.connect($scope);
-	let userId;
-	let localheim;
-	let localheimClient;
+	//let socket = socketService.connect($scope);
 	let matched = false;
+	//let ozora;
+	//let zero;
+
+	let localheimClient;
+
+
+	let socket = io(undefined, {multiplex: false});
+	socket.on('connect', async () => {
+
+		let channel = new SioChannel({socket});
+		let ozora = new Ozora({channel, zero: {}});
+		let zero = this[$zero] = ozora.getObject(0);
+		await zero.invoke('auth', {userId: user.userId});
+
+		let stream = $scope.localStream = await navigator.mediaDevices.getUserMedia({
+			audio: true,
+			video: true
+		});
+
+		let local = new LocalheimClient({ozora, stream});
+		local.on('match', () => showMatchDialog(local));
+		local.on('negotiate', () => {
+			$scope.$apply(() => $scope.state = 'video');
+		});
+		local.on('stream', stream => $scope.$apply(() => $scope.remoteStream = stream));
+
+		try {
+			let id = await zero.invoke('createEncounter', {callbackId: local.callbackObjectId});
+			await local.start(id);
+			localheimClient = local;
+		} catch (err) {
+			debug('cannot start', err);
+			local.close();
+		}
+
+	});
+
+
+	// let zeroProvider = new ZeroProvider({socket, userId: user.userId});
+	// let localheimClient = new LocalheimClient({zeroProvider});
+
+	// localheimClient.on('match', () => showMatchDialog(localheimClient));
+	// localheimClient.on('stream', stream => $scope.$apply(() => $scope.remoteStream = stream));
+	// localheimClient.on('negotiate', () => {
+	// 	$scope.$apply(() => $scope.state = 'video');
+	// });
 
 	$scope.languages = [{
 		language: 'Hungarian',
@@ -62,7 +107,7 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 		$scope.showControls = true;
 	};
 
-	let rg = new NavigationGuard({
+	new NavigationGuard({
 		$scope,
 		$mdDialog,
 		callback: () => {
@@ -74,47 +119,14 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 
 	$scope.state = 'queued';
 
-	let channel = {
-		send: function(data) {
-			socket._socket.emit('ozora', data);
-		}
-	};
-	socket._socket.on('ozora', msg => channel.onMessage(msg));
-
-	let ozora = new Ozora({
-		zero: {},
-		channel
-	});
-	let zero = ozora.getObject(0);
-
-	async function ready() {
-		await zero.invoke('auth', {userId: user.userId});
-		let localStream = await navigator.mediaDevices.getUserMedia({
-			audio: true,
-			video: true
-		});
-
-		$scope.$apply(() => $scope.localStream = localStream);
-		localheimClient = new LocalheimClient({zero, stream: $scope.localStream});
-		localheimClient.on('match', () => showMatchDialog(localheimClient));
-		localheimClient.on('stream', stream => $scope.$apply(() => $scope.remoteStream = stream));
-		localheimClient.on('negotiate', () => {
-			$scope.$apply(() => $scope.state = 'video');
-		});
-
-		await localheimClient.ready();
-	}
-
-	ready();
-
 	$scope.signIn = async () => {
 		$scope.userId = $scope.userId || '' + Math.random();
-		await zero.invoke('auth', {userId: $scope.userId});
+		await this.zero.invoke('auth', {userId: $scope.userId});
 	};
 
 	$scope.klose = () => {
 		if (localheimClient) {
-			localheimClient.reject();
+			localheimClient.close({reason: 'bye'});
 		}
 		$location.path('/');
 	};
@@ -130,7 +142,7 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 		matched = true;
 		$scope.state = 'match';
 
-		let partner = localheimClient.members.filter(({self}) => !self)[0];
+		let partner = localheimClient.partner;
 		$scope.partnerUserId = partner.userId;
 
 		let create = new Date().getTime();
@@ -159,7 +171,7 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 			$scope.accepted = true;
 		};
 		$scope.reject = () => {
-			localheimClient.reject();
+			localheimClient.close();
 			//$mdDialog.cancel();
 		};
 
