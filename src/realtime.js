@@ -1,6 +1,6 @@
 import sio from 'socket.io';
 import Promise from 'bluebird';
-import EncounterRegistry from './localheim';
+import {default as EncounterRegistry, OzoraUserEncounterInterface} from './localheim';
 import EventEmitter from 'events';
 import IceServerProvider from './ice_server_provider';
 import {default as Ozora, SioChannel, SimpleReceiver, WhitelistReceiver} from './ozora';
@@ -52,7 +52,7 @@ const $serial = Symbol();
 class Client extends WhitelistReceiver {
 
 	constructor({socket, registry}) {
-		super(['auth', 'getUserId', 'ready']);
+		super(['auth', 'getUserId', 'ready', 'createEncounter']);
 		this[$socket] = socket;
 		this[$ozora] = new Ozora({
 			channel: new SioChannel({socket}),
@@ -78,6 +78,12 @@ class Client extends WhitelistReceiver {
 			let callback = this[$ozora].getObject(callbackId);
 			return this[$registry].ready({callback});
 		});
+	}
+
+	createEncounter({callbackId}) {
+		let callback = this[$ozora].getObject(callbackId);
+		let iface = new OzoraUserEncounterInterface({callback, registry: this[$registry]});
+		return iface.objectId;
 	}
 
 }
