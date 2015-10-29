@@ -35,6 +35,9 @@ export default class Ozora extends EventEmitter {
 		this[$channel] = channel;
 		channel.onMessage = data => this[$onMessage](data);
 		channel.onDisconnect = () => {
+			channel.onMessage = x=>x;
+			channel.onDisconnect = x=>x;
+
 			for (let command of Object.values(this[$commands])) {
 				command.reject(new Error('disconnected'));
 			}
@@ -64,6 +67,10 @@ export default class Ozora extends EventEmitter {
 	 * @param {number} [opt.timeout=10000]
 	 */
 	async invoke(object, method, args = [], {timeout = 10000} = {}) {
+		if (this[$channel].disconnected) {
+			throw new Error('socket disconnected');
+		}
+
 		let id = this[$nextId]++;
 		let resolver = Promise.pending();
 		let data = {id, object, method, args};
