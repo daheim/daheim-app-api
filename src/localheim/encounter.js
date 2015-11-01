@@ -145,7 +145,7 @@ export default class Encounter {
 	}
 
 	interfaceClose(me, {reason}) {
-		if (this[$state] === StateNegotiate && (reason === Registry.ReasonDisconnected || reason === Registry.ReasonReplaced)) {
+		if (this[$state] === StateNegotiate && reason !== Registry.ReasonBye) {
 			debug('user %s disconnected after negotiation state and may reconnect', me.userId);
 			return;
 		}
