@@ -66,7 +66,7 @@ export default class Ozora extends EventEmitter {
 	 * @param {object} [opt={}]
 	 * @param {number} [opt.timeout=10000]
 	 */
-	async invoke(object, method, args = [], {timeout = 10000} = {}) {
+	async invoke(object, method, args = [], {timeout = 1000000} = {}) {
 		if (this[$channel].disconnected) {
 			throw new Error('socket disconnected');
 		}
