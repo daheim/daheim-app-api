@@ -8,7 +8,7 @@ import createDebug from 'debug';
 
 let debug = createDebug('dhm:localheim:client');
 
-const $stream = Symbol();
+const $streamGuard = Symbol();
 const $negotiator = Symbol();
 const $members = Symbol();
 const $partner = Symbol();
@@ -17,17 +17,25 @@ const $closed = Symbol();
 const $ozora = Symbol();
 const $callbackObjectId = Symbol();
 const $interface = Symbol();
+const $state = Symbol();
 
 const $setMembers = Symbol();
+const $setState = Symbol();
 
 export default class LocalheimClient extends EventEmitter {
-	constructor({ozora, stream}) {
+	constructor({ozora, streamGuard}) {
 		super();
 		WhitelistReceiver.mixin(this, ['onMatch', 'onNegotiate', 'onRenegotiate', 'onRelay', 'onClose']);
 
 		this[$ozora] = ozora;
+		this[$ozora].on('disconnect', () => this.close());
+
+		this[$streamGuard] = streamGuard;
+		this[$streamGuard].on('close', () => this.close());
+
 		this[$callbackObjectId] = this[$ozora].register(this);
-		this[$stream] = stream;
+
+		this[$state] = 'connecting';
 	}
 
 	get callbackObjectId() { return this[$callbackObjectId]; }
@@ -35,12 +43,40 @@ export default class LocalheimClient extends EventEmitter {
 	get partner() { return this[$partner]; }
 	get me() { return this[$me]; }
 
+	get state() { return this[$state]; }
+
+	static createAndStart({ozora, streamGuard}) {
+		let localheimClient = new LocalheimClient({ozora, streamGuard});
+		(async () => {
+			try {
+				let zero = ozora.getObject(0);
+				let id = await zero.invoke('createEncounter', {callbackId: localheimClient.callbackObjectId});
+				await localheimClient.start(id);
+			}	catch (err) {
+				debug('cannot start', err);
+				localheimClient.close({reason: 'protocol_error'});
+			}
+		})();
+		return localheimClient;
+	}
+
+	[$setState](state) {
+		if (this[$state] === state) { return debug('trying to set same state %s', state); }
+		this[$state] = state;
+		this.emit('stateUpdate');
+	}
+
 	async start(interfaceObjectId) {
+		if (this[$closed]) { return; }
+
 		if (this[$interface]) { throw new Error('already started'); }
 		this[$interface] = this[$ozora].getObject(interfaceObjectId);
 		this[$interface].on('disconnect', () => this.close('disconnected'));
 
 		let startType = await this[$interface].invoke('start');
+		if (this[$state] === 'connecting') {
+			this[$setState]('need-partner');
+		}
 		debug('started with %s', startType);
 		return startType;
 	}
@@ -55,14 +91,21 @@ export default class LocalheimClient extends EventEmitter {
 		}
 	}
 
-	accept() {
-		this[$interface].invoke('accept');
+	async accept() {
+		if (this[$state] !== 'match') { return debug('trying to accept in state %s', this[$state]); }
+		this[$setState]('accepted');
+		try {
+			return await this[$interface].invoke('accept');
+		} catch (err) {
+			debug('accept error', err);
+			this.close();
+		}
 	}
 
 	onMatch({members}) {
 		if (this[$closed]) { return; }
 		this[$setMembers](members);
-		this.emit('match');
+		this[$setState]('match');
 	}
 
 	onNegotiate({members, iceServers}) {
@@ -72,14 +115,14 @@ export default class LocalheimClient extends EventEmitter {
 		}
 		this[$negotiator] = new Negotiator({
 			iceServers,
-			stream: this[$stream],
+			streamGuard: this[$streamGuard],
 			localheim: this,
 			participant: this.partner.id,
 			session: this.partner.session,
 			initiator: this.partner.id > this.me.id
 		});
 		this[$negotiator].start();
-		this.emit('negotiate');
+		this[$setState]('negotiate');
 	}
 
 	onRenegotiate({iceServers, partner}) {
@@ -92,14 +135,14 @@ export default class LocalheimClient extends EventEmitter {
 		}
 		this[$negotiator] = new Negotiator({
 			iceServers,
-			stream: this[$stream],
+			streamGuard: this[$streamGuard],
 			localheim: this,
 			participant: this.partner.id,
 			session: this.partner.session,
 			initiator: this.partner.id > this.me.id
 		});
 		this[$negotiator].start();
-		this.emit('negotiate');
+		this[$setState]('negotiate');
 	}
 
 	onClose({reason}) {
@@ -116,25 +159,46 @@ export default class LocalheimClient extends EventEmitter {
 		}
 	}
 
-	onNegotiatorClose(negotiator) {
+	async onNegotiatorClose(negotiator) {
 		if (negotiator !== this[$negotiator]) { return; }
 		delete this[$negotiator];
+
+		this[$setState]('negotiate');
+
+		// try {
+		// 	return await this[$interface].invoke('renegotiate');
+		// } catch (err) {
+		// 	debug('renegotiate error', err);
+		// 	this.close();
+		// }
+
+		// TODO: change state
 		// TODO: use reason constant
-		this.close({reason: 'cannot_negotiate'});
+		// this.close({reason: 'cannot_negotiate'});
+	}
+
+	onNegotiatorConnected(negotiator) {
+		if (negotiator !== this[$negotiator]) { return; }
+		if (this[$state] !== 'negotiate') { return debug('trying to onNegotiatorConnected in state %s', this[$state]); }
+		this[$setState]('connected');
 	}
 
 	onNegotiatorStream(negotiator, stream) {
 		if (negotiator !== this[$negotiator]) { return; }
-		this.emit('stream', stream);
+		this.emit('remoteStream', stream);
 	}
 
-	close({reason}) {
+	close({reason = 'protocol_error'} = {}) {
 		if (this[$closed]) { return; }
 		this[$closed] = true;
+
+		debug('LocalheimClient close reason: %s', reason);
+
+		this[$setState]('closed');
 		this.emit('close', reason);
 		this.removeAllListeners();
 		if (this[$interface]) {
-			this[$interface].invoke('close', {reason});
+			this[$interface].invoke('close', {reason}).catch(x=>x);
 		}
 		if (this[$negotiator]) {
 			this[$negotiator].close({reason});
@@ -148,24 +212,26 @@ const $localheim = Symbol();
 const $participant = Symbol();
 const $session = Symbol();
 const $initiator = Symbol();
-//const $stream = Symbol();
 const $pc = Symbol();
 const $negotiationId = Symbol();
 const $iceGatherer = Symbol();
+const $connectedSent = Symbol();
 
 class Negotiator {
 
-	constructor({iceServers, localheim, participant, session, initiator, stream}) {
+	constructor({iceServers, localheim, participant, session, initiator, streamGuard}) {
 		this[$iceServers] = iceServers;
 		this[$localheim] = localheim;
 		this[$participant] = participant;
 		this[$session] = session;
 		this[$initiator] = initiator;
-		this[$stream] = stream;
+		this[$streamGuard] = streamGuard;
 	}
 
 	start() {
 		if (this[$pc]) { throw new Error('already started'); }
+
+		this[$streamGuard].on('close', () => this.close());
 
 		this[$iceGatherer] = new IceGatherer();
 		this[$iceGatherer].on('send', async ({iceCandidates, iceComplete}) => {
@@ -194,30 +260,16 @@ class Negotiator {
 		this[$pc].oniceconnectionstatechange = e => {
 			let state = e.target.iceConnectionState;
 			debug('ICE %s', state);
-			return;
-			// if (state === 'failed' || state === 'closed' || state === 'disconnected') {
-			// 	debug('ICE %s', state);
-			// 	if (state !== 'closed') {
-			// 		this[$pc].close();
-			// 	}
-			// 	if (!this[$disconnected]) {
-			// 		this[$disconnected] = true;
-			// 		this.emit('close');
-			// 	}
-			// } else if (state === 'connected' || state === 'completed') {
-			// 	debug('ICE connected');
-			// 	if (!this[$connected]) {
-			// 		this[$connected] = true;
-			// 		this.emit('connected');
-			// 	}
-			// } else if (state === 'checking') {
-			// 	// nothing
-			// } else {
-			// 	debug('unknown ICE state: %s', state);
-			// }
+			if (state === 'connected' || state === 'completed') {
+				if (!this[$connectedSent]) {
+					this[$connectedSent] = true;
+					this[$localheim].onNegotiatorConnected(this);
+				}
+			} else if (state === 'failed' || state === 'closed' || state === 'disconnected') {
+				this.close();
+			}
 		};
-
-		this[$pc].addStream(this[$stream]);
+		this[$pc].addStream(this[$streamGuard].stream);
 		debug('RtcConnection created');
 
 		if (this[$initiator]) {
@@ -296,6 +348,8 @@ class Negotiator {
 	close() {
 		if (this[$closed]) { return; }
 		this[$closed] = true;
+
+		debug('Negotiator close');
 
 		if (this[$pc] && this[$pc].signalingState !== 'closed') {
 			debug('closing RTCPeerConnection');

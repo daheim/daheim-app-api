@@ -1,8 +1,9 @@
 import LocalheimClient from './localheim/localheim_client';
 import NavigationGuard from './navigation_guard';
-import {default as Ozora, SioChannel} from '../ozora';
 import io from 'socket.io-client';
 import screenfull from 'screenfull';
+import {OzoraProvider, LocalheimManager} from './localheim';
+
 import createDebug from 'debug';
 let debug = createDebug('dhm:third');
 
@@ -26,8 +27,14 @@ app.config(function($mdThemingProvider) {
 		});
 });
 
-const $zero = Symbol();
 
+
+
+
+
+
+
+const $zero = Symbol();
 app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval, config, $anchorScroll, $mdDialog, $location, user) {
 
 	if (!user.userId) {
@@ -35,54 +42,50 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 		return;
 	}
 
-	//let socket = socketService.connect($scope);
-	let matched = false;
-	//let ozora;
-	//let zero;
-
-	let localheimClient;
-
+	$scope.$location = $location;
 
 	let socket = io(undefined, {multiplex: false});
-	socket.on('connect', async () => {
+	let ozoraProvider = new OzoraProvider({socket, userId: user.userId});
+	ozoraProvider.start();
 
-		let channel = new SioChannel({socket});
-		let ozora = new Ozora({channel, zero: {}});
-		let zero = this[$zero] = ozora.getObject(0);
-		await zero.invoke('auth', {userId: user.userId});
+	let localheimManager;
 
-		let stream = $scope.localStream = await navigator.mediaDevices.getUserMedia({
-			audio: true,
-			video: true
+	$scope.$on('$destroy', () => {
+		$timeout(() => {
+			localheimManager.close();
+			ozoraProvider.close();
+			socket.close();
 		});
-
-		let local = new LocalheimClient({ozora, stream});
-		local.on('match', () => showMatchDialog(local));
-		local.on('negotiate', () => {
-			$scope.$apply(() => $scope.state = 'video');
-		});
-		local.on('stream', stream => $scope.$apply(() => $scope.remoteStream = stream));
-
-		try {
-			let id = await zero.invoke('createEncounter', {callbackId: local.callbackObjectId});
-			await local.start(id);
-			localheimClient = local;
-		} catch (err) {
-			debug('cannot start', err);
-			local.close();
-		}
-
 	});
 
 
-	// let zeroProvider = new ZeroProvider({socket, userId: user.userId});
-	// let localheimClient = new LocalheimClient({zeroProvider});
+	$scope.start = () => {
+		$timeout(() => {
+			if (localheimManager) {
+				localheimManager.close();
+			}
+			localheimManager = new LocalheimManager({
+				ozoraProvider,
+				constraints: {audio: true, video: true}
+			});
+			localheimManager.on('localStream', guard => {
+				$scope.$apply(() => $scope.localStream = guard.stream);
+			});
+			localheimManager.on('remoteStream', stream => {
+				$scope.$apply(() => $scope.remoteStream = stream);
+			});
+			localheimManager.on('stateUpdate', () => {
+				debug('localheim state: %s', localheimManager.state);
+				$scope.$apply(() => {
+					$scope.localheimState = localheimManager.state;
+					$scope.partner = localheimManager.partner;
+				});
+			});
+			localheimManager.start();
+		});
+	};
 
-	// localheimClient.on('match', () => showMatchDialog(localheimClient));
-	// localheimClient.on('stream', stream => $scope.$apply(() => $scope.remoteStream = stream));
-	// localheimClient.on('negotiate', () => {
-	// 	$scope.$apply(() => $scope.state = 'video');
-	// });
+	$scope.start();
 
 	$scope.languages = [{
 		language: 'Hungarian',
@@ -111,24 +114,14 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 		$scope,
 		$mdDialog,
 		callback: () => {
-			if (matched) {
+			if (localheimManager.state !== 'closed') {
 				return 'You are in a video session.';
 			}
 		}
 	});
 
-	$scope.state = 'queued';
-
-	$scope.signIn = async () => {
-		$scope.userId = $scope.userId || '' + Math.random();
-		await this.zero.invoke('auth', {userId: $scope.userId});
-	};
-
 	$scope.klose = () => {
-		if (localheimClient) {
-			localheimClient.close({reason: 'bye'});
-		}
-		$location.path('/');
+		$timeout(() => localheimManager.close({reason: 'bye'}));
 	};
 
 	$scope.toggleFullscreen = () => {
@@ -137,14 +130,16 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 
 	$scope.$on('$destroy', () => screenfull.exit());
 
-	function showMatchDialog(localheimClient) {
 
-		matched = true;
-		$scope.state = 'match';
+	$scope.accept = () => {
+		$timeout(() => localheimManager.accept());
+		$scope.accepted = true;
+	};
+	$scope.reject = () => {
+		$timeout(() => localheimManager.close());
+	};
 
-		let partner = localheimClient.partner;
-		$scope.partnerUserId = partner.userId;
-
+	function startCountdown(time) {
 		let create = new Date().getTime();
 		let iv = $interval(() => {
 			let now = new Date().getTime();
@@ -154,27 +149,5 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 		$scope.$on('$destroy', () => {
 			$interval.cancel(iv);
 		});
-
-		function onNegotiate() { $scope.$apply(() => $scope.negotiated = true); }
-		localheimClient.on('negotiate', onNegotiate);
-		$scope.$on('$destroy', () => {
-			localheimClient.removeListener('negotiate', onNegotiate);
-		});
-
-		localheimClient.on('closed', () => {
-			//$mdDialog.cancel();
-			// TODO: handle
-		});
-
-		$scope.accept = () => {
-			localheimClient.accept();
-			$scope.accepted = true;
-		};
-		$scope.reject = () => {
-			localheimClient.close();
-			//$mdDialog.cancel();
-		};
-
 	}
-
 });

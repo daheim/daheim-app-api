@@ -1,6 +1,6 @@
 <md-content md-theme="video" window-resize dhm-size-watcher="contentSize" style="background: #222; overflow: hidden; position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 5;" id="fs" layout="column" ng-mousemove="mouseMove()">
 
-	<video dhm-src-object="remoteStream" dhm-max-video-size="contentSize" dhm-center autoplay style="z-index: -1;" ng-if="remoteStream"></video>
+	<video ng-if="localheimState === 'connected'" dhm-src-object="remoteStream" dhm-max-video-size="contentSize" dhm-center autoplay style="z-index: -1;" ng-if="remoteStream"></video>
 	<video dhm-src-object="localStream" dhm-max-video-size="{w:contentSize.w/4,h:contentSize.h/4}" autoplay muted style="transform: scale(-1, 1); -webkit-transform: scale(-1, 1); border: solid rgba(255, 255, 255, 0.2) 2px; position: absolute; bottom: 10px; right: 10px; z-index: 20;" ng-if="!$media('sm') || state === 'video'"></video>
 
 	<div style="position: absolute; top: 10px; right: 10px; z-index: 20" ng-show="showControls" class="fade">
@@ -9,9 +9,29 @@
 		</md-button>
 	</div>
 
-	<div ng-if="state === 'queued'" dhm-center style="text-align: center;">
+	<div ng-if="localheimState === 'connecting'" dhm-center style="text-align: center;">
+		<md-progress-circular md-mode="indeterminate" style="margin-left: auto; margin-right: auto;"></md-progress-circular>
+		<p>Connecting to Daheim network</p>
+	</div>
+
+	<div ng-if="localheimState === 'need-partner'" dhm-center style="text-align: center;">
 		<md-progress-circular md-mode="indeterminate" style="margin-left: auto; margin-right: auto;"></md-progress-circular>
 		<p>Looking for a chat partner</p>
+	</div>
+
+	<div ng-if="localheimState === 'negotiate'" dhm-center style="text-align: center;">
+		<md-progress-circular md-mode="indeterminate" style="margin-left: auto; margin-right: auto;"></md-progress-circular>
+		<p>Connecting to partner</p>
+	</div>
+
+	<div ng-if="localheimState === 'closed'" dhm-center style="text-align: center;">
+		<p>Your conversation has ended.</p>
+		<md-button ng-click="start()">Restart</md-button><a ng-click="$location.path('/')">go back</a>
+	</div>
+
+
+	<div ng-if="localheimState === 'need-stream'" dhm-center style="text-align: center;">
+		<p>Please enable your camera!</p>
 	</div>
 
 	<style>
@@ -42,7 +62,7 @@
 		}
 	</style>
 
-	<div flex ng-if="state === 'match'" layout="column" layout-align="start center">
+	<div flex ng-if="localheimState === 'match' || localheimState === 'accepted'" layout="column" layout-align="start center">
 		<md-content flex="initial" md-scroll-y layout="row" layout-align="center start" style="width: 100%">
 			<div flex="50" flex-sm="95" layout="column">
 				<div layout="column" layout-align="start center">
@@ -77,15 +97,15 @@
 						<span flex>{{countdown / 1000 | number:0}}</span>
 					</div>
 					<div flex layout="row" layout-align="end">
-						<md-button flex ng-disabled="accepted" ng-click="reject()">Reject</md-button>
-						<md-button flex ng-disabled="accepted" ng-click="accept()" class="md-primary md-raised">Accept</md-button>
+						<md-button flex ng-disabled="localheimState === 'accepted'" ng-click="reject()">Reject</md-button>
+						<md-button flex ng-disabled="localheimState === 'accepted'" ng-click="accept()" class="md-primary md-raised">Accept</md-button>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<div ng-show="state === 'queued' || (state === 'video' &amp;&amp; showControls)" style="z-index: 30; position: absolute; bottom: 10px; left: 0; right: 0;" layout="row" layout-align="center" class="fade">
+	<div ng-show="localheimState !== 'match' &amp;&amp; localheimState !== 'accepted' &amp;&amp; localheimState !== 'closed' &amp;&amp; (localheimState !== 'video' || showControls)" style="z-index: 30; position: absolute; bottom: 10px; left: 0; right: 0;" layout="row" layout-align="center" class="fade">
 		<md-button class="md-warn md-primary" ng-class="{'md-raised': state === 'video'}" ng-click="klose()">Exit Conversation</md-button>
 	</div>
 
