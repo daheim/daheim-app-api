@@ -1,3 +1,6 @@
+import ResizeDirective from './window_resize';
+import WebRTC from 'webrtc-adapter-test';
+
 let app = window.angular.module('dhm');
 
 app.directive('dhmSizeWatcher', function() {
@@ -89,6 +92,41 @@ app.directive('dhmMaxVideoSize', function() {
 
 			$element.on('resize', setSize);
 			$scope.$on('$destroy', () => $element.off('resize', setSize));
+		}
+	};
+});
+
+app.directive('windowResize', ResizeDirective);
+
+app.filter('trusted', function($sce) {
+	return function(url) {
+		return $sce.trustAsResourceUrl(url);
+	};
+});
+
+app.directive('dhmSrcObject', function($window) {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attributes, controller, transcludeFn) {
+			scope.$watch(attributes.dhmSrcObject, function(value) {
+				if (value) {
+					WebRTC.attachMediaStream(element[0], value);
+				}
+			});
+		}
+	};
+});
+
+app.directive('dhmResize', ($parse) => {
+	return {
+		restrict: 'A',
+		link: ($scope, $element, $attributes) => {
+			let fn = $parse($attributes.dhmResize);
+			let handler = () => fn($scope);
+			$element.on('resize', handler);
+			$scope.$on('$destroy', () => {
+				$element.off('resize', handler);
+			});
 		}
 	};
 });
