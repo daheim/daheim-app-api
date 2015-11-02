@@ -20,7 +20,7 @@
     "angular-route": "^1.4.6",
     "angulartics": "^0.20.1",
     "angulartics-google-analytics": "^0.1.1",
-    "bluebird": "^2.9.33",
+    "bluebird": "^3.0.5",
     "body-parser": "^1.13.3",
     "bunyan": "^1.4.0",
     "express": "^4.13.1",

@@ -3,7 +3,7 @@
  */
 
 import Promise from 'bluebird';
-import BluebirdUtil from 'bluebird/js/main/util';
+import BluebirdUtil from 'bluebird/js/release/util';
 import EventEmitter from 'events';
 import createDebug from 'debug';
 
@@ -72,7 +72,7 @@ export default class Ozora extends EventEmitter {
 		}
 
 		let id = this[$nextId]++;
-		let resolver = Promise.pending();
+		let resolver = pending();
 		let data = {id, object, method, args};
 		resolver[$request] = data;
 
@@ -310,3 +310,14 @@ export class WhitelistReceiver extends Receiver {
 		return await this[method].apply(this, args);
 	}
 }
+
+function pending() {
+	var deferred = {};
+	var promise = new Promise(function(resolve, reject) {
+		deferred.resolve = resolve;
+		deferred.reject  = reject;
+	});
+	deferred.promise = promise;
+	return deferred;
+}
+
