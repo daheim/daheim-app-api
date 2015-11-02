@@ -28,10 +28,10 @@ export default class LocalheimClient extends EventEmitter {
 		WhitelistReceiver.mixin(this, ['onMatch', 'onNegotiate', 'onRenegotiate', 'onRelay', 'onClose']);
 
 		this[$ozora] = ozora;
-		this[$ozora].on('disconnect', () => this.close());
+		this[$ozora].on('disconnect', () => this.close({reason: 'ozora-gone'}));
 
 		this[$streamGuard] = streamGuard;
-		this[$streamGuard].on('close', () => this.close());
+		this[$streamGuard].on('close', () => this.close({reason: 'stream-gone'}));
 
 		this[$callbackObjectId] = this[$ozora].register(this);
 
@@ -44,6 +44,7 @@ export default class LocalheimClient extends EventEmitter {
 	get me() { return this[$me]; }
 
 	get state() { return this[$state]; }
+	get remoteStream() { return this[$negotiator] ? this[$negotiator].remoteStream : undefined; }
 
 	static createAndStart({ozora, streamGuard}) {
 		let localheimClient = new LocalheimClient({ozora, streamGuard});
@@ -54,7 +55,7 @@ export default class LocalheimClient extends EventEmitter {
 				await localheimClient.start(id);
 			}	catch (err) {
 				debug('cannot start', err);
-				localheimClient.close({reason: 'protocol_error'});
+				localheimClient.close({reason: 'protocol-error'});
 			}
 		})();
 		return localheimClient;
@@ -71,7 +72,7 @@ export default class LocalheimClient extends EventEmitter {
 
 		if (this[$interface]) { throw new Error('already started'); }
 		this[$interface] = this[$ozora].getObject(interfaceObjectId);
-		this[$interface].on('disconnect', () => this.close('disconnected'));
+		this[$interface].on('disconnect', () => this.close({reason: 'disconnected'}));
 
 		let startType = await this[$interface].invoke('start');
 		if (this[$state] === 'connecting') {
@@ -98,7 +99,7 @@ export default class LocalheimClient extends EventEmitter {
 			return await this[$interface].invoke('accept');
 		} catch (err) {
 			debug('accept error', err);
-			this.close();
+			this.close({reason: 'protocol-error'});
 		}
 	}
 
@@ -131,7 +132,7 @@ export default class LocalheimClient extends EventEmitter {
 		if (this[$negotiator]) {
 			let oldNegotiator = this[$negotiator];
 			delete this[$negotiator];
-			oldNegotiator.close();
+			oldNegotiator.close({reason: 'renegotiate'});
 		}
 		this[$negotiator] = new Negotiator({
 			iceServers,
@@ -159,22 +160,11 @@ export default class LocalheimClient extends EventEmitter {
 		}
 	}
 
-	async onNegotiatorClose(negotiator) {
+	async onNegotiatorClose(negotiator, reason) {
 		if (negotiator !== this[$negotiator]) { return; }
 		delete this[$negotiator];
 
-		this[$setState]('negotiate');
-
-		// try {
-		// 	return await this[$interface].invoke('renegotiate');
-		// } catch (err) {
-		// 	debug('renegotiate error', err);
-		// 	this.close();
-		// }
-
-		// TODO: change state
-		// TODO: use reason constant
-		// this.close({reason: 'cannot_negotiate'});
+		this[$setState]('partner-reconnect');
 	}
 
 	onNegotiatorConnected(negotiator) {
@@ -188,15 +178,16 @@ export default class LocalheimClient extends EventEmitter {
 		this.emit('remoteStream', stream);
 	}
 
-	close({reason = 'protocol_error'} = {}) {
+	close({reason}) {
 		if (this[$closed]) { return; }
 		this[$closed] = true;
 
-		debug('LocalheimClient close reason: %s', reason);
+		debug('close: %s', reason);
 
 		this[$setState]('closed');
 		this.emit('close', reason);
 		this.removeAllListeners();
+
 		if (this[$interface]) {
 			this[$interface].invoke('close', {reason}).catch(x=>x);
 		}
@@ -216,6 +207,7 @@ const $pc = Symbol();
 const $negotiationId = Symbol();
 const $iceGatherer = Symbol();
 const $connectedSent = Symbol();
+const $remoteStream = Symbol();
 
 class Negotiator {
 
@@ -228,10 +220,12 @@ class Negotiator {
 		this[$streamGuard] = streamGuard;
 	}
 
+	get remoteStream() { return this[$remoteStream]; }
+
 	start() {
 		if (this[$pc]) { throw new Error('already started'); }
 
-		this[$streamGuard].on('close', () => this.close());
+		this[$streamGuard].on('close', () => this.close({reason: 'stream_closed'}));
 
 		this[$iceGatherer] = new IceGatherer();
 		this[$iceGatherer].on('send', async ({iceCandidates, iceComplete}) => {
@@ -248,13 +242,16 @@ class Negotiator {
 					}
 				});
 			} catch (err) {
-				this.close();
+				this.close({reason: 'error', error: err});
 			}
 		});
 
-		this[$pc] = new WebRTC.RTCPeerConnection({iceServers: this[$iceServers]});
+		this[$pc] = new WebRTC.RTCPeerConnection({
+			iceServers: this[$iceServers]
+		});
 		this[$pc].onicecandidate = e => this[$iceGatherer].add(e.candidate);
 		this[$pc].onaddstream = e => {
+			this[$remoteStream] = e.stream;
 			this[$localheim].onNegotiatorStream(this, e.stream);
 		};
 		this[$pc].oniceconnectionstatechange = e => {
@@ -266,11 +263,10 @@ class Negotiator {
 					this[$localheim].onNegotiatorConnected(this);
 				}
 			} else if (state === 'failed' || state === 'closed' || state === 'disconnected') {
-				this.close();
+				this.close({reason: 'disconnected', state});
 			}
 		};
 		this[$pc].addStream(this[$streamGuard].stream);
-		debug('RtcConnection created');
 
 		if (this[$initiator]) {
 			this[$negotiationId] = uuid.v4();
@@ -291,7 +287,7 @@ class Negotiator {
 					this[$iceGatherer].ready();
 				} catch (err) {
 					debug('offer error', err);
-					this.close();
+					this.close({reason: 'error', error: err});
 				}
 			})();
 		}
@@ -325,7 +321,7 @@ class Negotiator {
 					});
 				} catch (err) {
 					debug('answer error', err);
-					this.close();
+					this.close({reason: 'error', error: err});
 				}
 			})();
 
@@ -338,24 +334,41 @@ class Negotiator {
 			let desc = new RTCSessionDescription({sdp: message.sdp, type: 'answer'});
 			await this[$pc].setRemoteDescription(desc);
 		} else if (message.type === 'ice') {
+			if (!this[$negotiationId]) { throw new Error('got ice before offer'); }
+			if (this[$negotiationId] !== message.negotiationId) { throw new Error('invalid negotiation id'); }
+
 			debug('received ICE candidates complete=%s', message.complete, message.candidates);
-			await Promise.map(message.candidates, candidate => this[$pc].addIceCandidate(new RTCIceCandidate(candidate)));
+			let result = await Promise.map(message.candidates, async candidate => {
+				try {
+					await this[$pc].addIceCandidate(new RTCIceCandidate(candidate));
+				} catch (err) {
+					return {
+						candidate,
+						error: err
+					};
+				}
+			});
+			result = result.filter(x => x);
+			if (result.length) {
+				debug('ICE candidate errors', result);
+				throw new Error('cannot add ICE candidates: ' + JSON.stringify(result));
+			}
 		} else {
 			throw new Error('unknown message type');
 		}
 	}
 
-	close() {
+	close({reason}) {
 		if (this[$closed]) { return; }
 		this[$closed] = true;
 
-		debug('Negotiator close');
+		debug('Negotiator close: %s', reason);
 
 		if (this[$pc] && this[$pc].signalingState !== 'closed') {
 			debug('closing RTCPeerConnection');
 			this[$pc].close();
 		}
-		this[$localheim].onNegotiatorClose(this);
+		this[$localheim].onNegotiatorClose(this, reason);
 		delete this[$localheim];
 	}
 

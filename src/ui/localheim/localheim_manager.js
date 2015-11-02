@@ -13,6 +13,7 @@ const $onSocketConnect = Symbol();
 const $ozora = Symbol();
 const $localheimClient = Symbol();
 const $closed = Symbol();
+const $closeReason = Symbol();
 
 const $updateState = Symbol();
 
@@ -26,26 +27,26 @@ export default class LocalheimManager extends EventEmitter {
 	}
 
 	get partner() { return this[$localheimClient] ? this[$localheimClient].partner : undefined; }
+	get closeReason() { return this[$closeReason]; }
+	get localStream() { return this[$streamGuard] ? this[$streamGuard].stream : undefined; }
+	get remoteStream() { return this[$localheimClient] ? this[$localheimClient].remoteStream : undefined; }
 
 	start() {
 		if (this[$started]) { throw new Error('already started'); }
 		this[$started] = true;
 
-		debug('starting');
-
 		this[$mediaStreamRequester].on('stream', guard => {
 			this[$streamGuard] = guard;
-			this.emit('localStream', guard);
 			this[$streamGuard].on('close', () => {
 				delete this[$streamGuard];
 				this[$updateState]();
 			});
 			this[$updateState]();
+			this.emit('localStream', guard);
 		});
 		this[$mediaStreamRequester].start();
 
 		this[$ozoraProvider].on('connect', this[$onSocketConnect] = ozora => {
-			debug('ozora connect');
 			this[$ozora] = ozora;
 			this[$ozora].on('disconnect', () => {
 				delete this[$ozora];
@@ -71,8 +72,11 @@ export default class LocalheimManager extends EventEmitter {
 			return 'need-stream';
 		} else if (!this[$ozora]) {
 			return 'connecting';
-		} else {
+		} else if (this[$localheimClient]) {
 			return this[$localheimClient].state;
+		} else {
+			debug('get state() with no localheimClient');
+			return 'partner-reconnect';
 		}
 	}
 
@@ -86,12 +90,16 @@ export default class LocalheimManager extends EventEmitter {
 			});
 			this[$localheimClient].on('stateUpdate', () => this.emit('stateUpdate'));
 			this[$localheimClient].on('remoteStream', stream => this.emit('remoteStream', stream));
-			this[$localheimClient].on('close', () => {
+			this[$localheimClient].on('close', reason => {
+				debug('localheimClient closed: %s', reason);
 				delete this[$localheimClient];
+				if (reason === 'bye' || reason === 'replaced') {
+					this.close({reason});
+				}
 			});
 		} else {
 			if (this[$localheimClient]) {
-				this[$localheimClient].close();
+				this[$localheimClient].close({reason: 'requirements-gone'});
 				delete this[$localheimClient];
 			}
 		}
@@ -99,22 +107,29 @@ export default class LocalheimManager extends EventEmitter {
 	}
 
 	accept() {
-		if (!this[$localheimClient]) { return debug('no localheim client'); }
+		if (!this[$localheimClient]) { return debug('cannot accept without localheim client'); }
 		this[$localheimClient].accept();
 	}
 
-	close() {
+	close({reason = 'bye'} = {}) {
 		if (this[$closed]) { return; }
 		this[$closed] = true;
 
-		debug('LocalheimManager close');
+		this[$closeReason] = reason;
+
+		debug('close: %s', reason);
+		if (this[$localheimClient]) {
+			this[$localheimClient].close({reason});
+		}
 
 		this[$mediaStreamRequester].close();
+		if (this[$streamGuard]) {
+			this[$streamGuard].close();
+		}
 		this[$ozoraProvider].removeListener('connect', this[$onSocketConnect]);
 
-		if (this[$localheimClient]) {
-			this[$localheimClient].close({reason: 'bye'});
-		}
+		this.emit('stateUpdate');
+		this.emit('close', reason);
 	}
 
 }
