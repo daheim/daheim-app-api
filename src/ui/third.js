@@ -60,29 +60,21 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 
 
 	$scope.start = () => {
-		$timeout(() => {
-			if (localheimManager) {
-				localheimManager.close();
-			}
-			localheimManager = new LocalheimManager({
-				ozoraProvider,
-				constraints: {audio: true, video: true}
-			});
-			localheimManager.on('localStream', guard => {
-				$scope.$apply(() => $scope.localStream = guard.stream);
-			});
-			localheimManager.on('remoteStream', stream => {
-				$scope.$apply(() => $scope.remoteStream = stream);
-			});
-			localheimManager.on('stateUpdate', () => {
-				debug('localheim state: %s', localheimManager.state);
-				$scope.$apply(() => {
-					$scope.localheimState = localheimManager.state;
-					$scope.partner = localheimManager.partner;
-				});
-			});
-			localheimManager.start();
+		if (localheimManager) {
+			localheimManager.close();
+		}
+		localheimManager = new LocalheimManager({
+			ozoraProvider,
+			constraints: {audio: true, video: true}
 		});
+		localheimManager.on('localStream', () => $timeout(() => $scope.$apply()));
+		localheimManager.on('remoteStream', () => $timeout(() => $scope.$apply()));
+		localheimManager.on('stateUpdate', () => {
+			debug('localheim state: %s', localheimManager.state);
+			$timeout(() => $scope.$apply());
+		});
+		localheimManager.start();
+		$scope.localheimManager = localheimManager;
 	};
 
 	$scope.start();
