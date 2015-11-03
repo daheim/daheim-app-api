@@ -4,7 +4,7 @@ module.exports = function(grunt) {
 		pkg: grunt.file.readJSON('package.json'),
 
 		mochaTest: {
-			test: {
+			unit: {
 				options: {
 					reporter: process.env.TEST_REPORT_JUNIT === '1' ? 'mocha-junit-reporter' : 'spec',
 					reporterOptions: {
@@ -277,7 +277,7 @@ module.exports = function(grunt) {
 	grunt.registerTask('css', ['cssmin:lib']);
 
 
-	grunt.registerTask('check', ['jscs', 'eslint', 'babel', 'test']);
+	grunt.registerTask('check', ['jscs', 'eslint', 'babel', 'mochaTest:unit']);
 	grunt.registerTask('test', ['mochaTest']);
 	grunt.registerTask('cover', ['exec:cover', 'remapIstanbul:build']);
 };
