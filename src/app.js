@@ -1,6 +1,11 @@
 require('./bootstrap');
 if (process.env.NEW_RELIC_LICENSE_KEY) {require('newrelic');}
 
+import Azure from './azure';
+import User from './user';
+import UserStore from './user_store';
+import TokenHandler from './token_handler';
+
 var express = require('express');
 
 var request = require('request-promise');
@@ -14,6 +19,8 @@ var log = require('./log');
 var app = express();
 var server = require('http').Server(app);
 
+let azure = Azure.createFromEnv();
+
 require('./realtime').create({log, server});
 //var io = require('socket.io').listen(server);
 
@@ -24,6 +31,11 @@ app.disable('x-powered-by');
 app.use(bodyParser.json());
 
 app.use(express.static(__dirname + '/../../../build/public'));
+
+let tokenHandler = new TokenHandler({secret: process.env.SECRET});
+let userStore = new UserStore({azure});
+let user = new User({userStore, tokenHandler});
+app.use('/users', user.router);
 
 app.get('/', function(req, res) {
 	res.send('Hello World!');
