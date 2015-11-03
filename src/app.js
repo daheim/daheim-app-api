@@ -1,6 +1,7 @@
 require('./bootstrap');
 if (process.env.NEW_RELIC_LICENSE_KEY) {require('newrelic');}
 
+import {Passport} from 'passport';
 import Azure from './azure';
 import User from './user';
 import UserStore from './user_store';
@@ -32,9 +33,12 @@ app.use(bodyParser.json());
 
 app.use(express.static(__dirname + '/../../../build/public'));
 
-let tokenHandler = new TokenHandler({secret: process.env.SECRET});
+let passport = new Passport();
+let tokenHandler = new TokenHandler({passport, secret: process.env.SECRET});
 let userStore = new UserStore({azure});
-let user = new User({userStore, tokenHandler});
+let user = new User({userStore, tokenHandler, passport});
+
+app.use(passport.initialize());
 app.use('/users', user.router);
 
 app.get('/', function(req, res) {
