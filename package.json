@@ -39,6 +39,7 @@
     "grunt-ng-annotate": "^1.0.1",
     "grunt-text-replace": "^0.4.0",
     "jquery": "^2.1.4",
+    "jsonwebtoken": "^5.4.1",
     "le_node": "^1.0.14",
     "newrelic": "^1.22.0",
     "node-uuid": "^1.4.3",
