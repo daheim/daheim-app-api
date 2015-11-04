@@ -123,6 +123,15 @@ module.exports = function(grunt) {
 				files: {
 					'build/public/style/lib.min.css': [require.resolve('angular-material/angular-material.css')]
 				}
+			},
+			ui: {
+				options: {
+					sourceMap: true
+				},
+				files: [{
+					src: 'style/**/*.css',
+					dest: 'build/public/style/ui.min.css'
+				}]
 			}
 		},
 
@@ -166,6 +175,13 @@ module.exports = function(grunt) {
 			public: {
 				files: ['public/**'],
 				tasks: ['public'],
+				options: {
+					atBegin: true
+				}
+			},
+			cssui: {
+				files: ['style/**/*.css'],
+				tasks: ['cssmin:ui'],
 				options: {
 					atBegin: true
 				}
@@ -274,7 +290,7 @@ module.exports = function(grunt) {
 	grunt.registerTask('src', srcTasks);
 	grunt.registerTask('public', publicTasks);
 	grunt.registerTask('lib', libTasks);
-	grunt.registerTask('css', ['cssmin:lib']);
+	grunt.registerTask('css', ['cssmin:lib', 'cssmin:ui']);
 
 
 	grunt.registerTask('check', ['jscs', 'eslint', 'babel', 'mochaTest:unit']);

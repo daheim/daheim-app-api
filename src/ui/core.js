@@ -1,9 +1,11 @@
+import DhmProfileCamera from './dhm_profile_camera';
+
 (function(window, undefined) {
 	"use strict";
 
 	var angular = window.angular;
 
-	angular.module('dhm', ['ngRoute', 'ngMaterial', 'ngResource', 'angulartics', 'angulartics.google.analytics'])
+	angular.module('dhm', ['ngRoute', 'ngMaterial', 'ngResource', 'angulartics', 'angulartics.google.analytics', DhmProfileCamera.name])
 
 	.config(function($routeProvider) {
 		$routeProvider

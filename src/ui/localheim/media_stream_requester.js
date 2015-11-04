@@ -20,6 +20,8 @@ export default class MediaStreamRequester extends EventEmitter {
 		this.run();
 	}
 
+	get current() { return this[$current]; }
+
 	async run() {
 		if (this[$closed] || this[$running] || this[$current]) { return; }
 
