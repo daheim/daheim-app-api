@@ -8,7 +8,6 @@ if (global.localStorage && typeof global.localStorage.debug === 'string' && glob
 }
 
 require('./core');
-require('./second');
 require('./third');
 require('./ready');
 require('./directives');
