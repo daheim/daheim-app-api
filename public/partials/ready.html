@@ -1,10 +1,124 @@
-<md-content layout layout-padding layout-align="center center" flex>
-
-<div layout="column" flex="50">
-	<md-input-container md-no-float flex>
-		<input ng-model="userId" placeholder="Please tell me your name">
-	</md-input-container>
-	<md-button ng-click="ready()" flex>and find me a conversation</md-button>
+<div layout="row" layout-align="center">
+	<md-content class="md-whiteframe-z1" layout-margin style="max-width: 600px; border-radius: 4px;" flex="grow">
+		<div layout="column" layout-padding>
+			<div layout-padding>
+				<h1 class="md-headline">Welcome to Daheim!</h2>
+			</div>
+			<div layout-padding>
+				<p class="md-body-1">Daheim matches you with other people to practice the language. Just type in you email address to get started.</p>
+			</div>
+			<div layout-padding>
+				<md-input-container>
+					<label>Email Address</label>
+					<input type="text" ng-model="email" required>
+				</md-input-container>
+				<div layout="row" layout-align="center">
+					<md-button class="md-primary md-raised" ng-click="register()">Start!</md-button>
+				</div>
+			</div>
+		</div>
+	</md-content>
 </div>
 
-</md-content>
+<div layout="row" layout-align="center">
+	<md-content class="md-whiteframe-z1" layout-margin style="max-width: 600px; border-radius: 4px;" flex="grow">
+		<div layout="column" layout-padding>
+			<div layout-padding>
+				<h1 class="md-headline">Test</h2>
+			</div>
+			<div layout-padding>
+				<p class="md-body-1">This area is to test video communication easily. Choose a name and wait for a partner to join.</p>
+			</div>
+			<div layout-padding>
+				<md-input-container md-no-float>
+					<input ng-model="userId" placeholder="Chosen user ID">
+				</md-input-container>
+				<div layout="row" layout-align="center">
+					<md-button class="md-primary md-raised" ng-click="ready()">To the video room!</md-button>
+				</div>
+			</div>
+		</div>
+	</md-content>
+</div>
+
+
+<div layout="row" layout-align="center">
+	<md-content class="md-whiteframe-z1" layout-margin style="max-width: 600px; border-radius: 4px;" flex="grow">
+		<div layout="column" layout-padding>
+			<div layout-padding>
+				<h1 class="md-headline">Profile</h2>
+			</div>
+			<div layout-padding>
+				<md-input-container>
+					<label>How may we call you?</label>
+					<input type="text" ng-model="name" required>
+				</md-input-container>
+			</div>
+			<div layout-padding>
+				<h2 class="md-subhead">Languages</h2>
+				<md-chips ng-model="languages" md-autocomplete-snap md-require-match="true">
+					<md-autocomplete
+							md-selected-item="languageSelected"
+							md-search-text="languageSearch"
+							md-items="item in languageSuggest(languageSearch)"
+							md-item-text="item.language"
+							placeholder="Add languages">
+						<span md-highlight-text="languageSearch">{{item.language}} ({{item.level}})</span>
+					</md-autocomplete>
+					<md-chip-template>
+						<span>
+							<strong>{{$chip.language}}</strong>
+							<em>({{$chip.level}})</em>
+						</span>
+					</md-chip-template>
+				</md-chips>
+			</div>
+			<div layout-padding>
+				<h2 class="md-subhead">Interesting Topics</h2>
+				<md-chips ng-model="topics"></md-chips>
+			</div>
+		</div>
+
+		<div layout="row" layout-align="start center" layout-padding style="background: rgba(0,0,0,0.1)">
+			<div ng-show="!saving &amp;&amp; !error" flex="grow"></div>
+			<p class="md-body-1 md-warn" ng-show="saving" flex="grow">Saving...</p>
+			<p ng-show="!saving &amp;&amp; error" class="md-body-1 md-warn" flex="grow">{{error}}</p>
+			<md-button ng-disabled="needToSave !== lastSaved" ng-click="saveProfile()" class="md-raised">Continue</md-button>
+		</div>
+
+		<div style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.3)" ng-show="loading" class="fade"></div>
+
+	</md-content>
+</div>
+
+
+<div layout="row" layout-align="center">
+	<md-content class="md-whiteframe-z1" layout-margin style="max-width: 600px; border-radius: 4px;" flex="grow">
+		<div layout="column" layout-padding>
+			<div layout-padding>
+				<h1 class="md-headline">Profile Picture</h2>
+			</div>
+			<div layout-padding>
+				<p class="md-body-1">Let's use your camera to shoot a nice picture of you.</p>
+			</div>
+			<div layout-padding>
+				<div style="width: 128px; height: 128px; margin-left: auto; margin-right: auto;">
+					<dhm-profile-camera picture-width="256" picture-height="256" active="cameraActive" snap="cameraSnap" image-data="imageData"></dhm-profile-camera>
+				</div>
+			</div>
+			<div layout-padding>
+				<div layout="row" layout-align="center">
+					<p class="md-caption">Smile! :)</p>
+				</div>
+			</div>
+		</div>
+
+		<div layout="row" layout-align="end center" layout-padding style="background: rgba(0,0,0,0.1)">
+			<md-button ng-hide="cameraActive" ng-click="photoActive()" class="md-primary md-raised">Turn on Camera</md-button>
+
+			<md-button ng-hide="imageData" ng-click="takePhoto()" class="md-primary md-raised">Take a Photo</md-button>
+			<md-button ng-show="imageData" ng-click="takePhoto()" class="">Retry</md-button>
+			<md-button ng-show="imageData" class="md-primary md-raised">Done</md-button>
+		</div>
+	</md-content>
+</div>

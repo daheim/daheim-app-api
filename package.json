@@ -41,6 +41,7 @@
     "jquery": "^2.1.4",
     "jsonwebtoken": "^5.4.1",
     "le_node": "^1.0.14",
+    "lodash": "^3.10.1",
     "newrelic": "^1.22.0",
     "node-uuid": "^1.4.3",
     "passport": "^0.3.0",

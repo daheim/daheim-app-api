@@ -14,7 +14,11 @@
 	<style>
 		body {
 			width: 100%;
-			height: 100%;
+			background: #f2f2f2;
+		}
+
+		html {
+			background: #f2f2f2;
 		}
 	</style>
 
@@ -44,7 +48,6 @@
 	<div layout="column" role="main" flex id="content">
 
 		<md-toolbar class="md-whiteframe-glow-z1 site-content-toolbar" >
-
 			<div class="md-toolbar-tools docs-toolbar-tools" ng-click="openMenu()" tabIndex="-1">
 				<md-button class="md-icon-button" aria-label="Toggle Menu">
 					<md-icon md-svg-src="img/ic_menu_24px.svg"></md-icon>
@@ -61,7 +64,6 @@
 					</div>
 				</div>
 			</div>
-
 		</md-toolbar>
 
 		<div ng-view md-scroll-y flex></div>

@@ -1,3 +1,6 @@
+import createDebug from 'debug';
+let debug = createDebug('dhm:core');
+
 import DhmProfileCamera from './dhm_profile_camera';
 
 (function(window, undefined) {
