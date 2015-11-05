@@ -48,9 +48,9 @@
 	<div layout="column" role="main" flex id="content">
 
 		<md-toolbar class="md-whiteframe-glow-z1 site-content-toolbar" >
-			<div class="md-toolbar-tools docs-toolbar-tools" ng-click="openMenu()" tabIndex="-1">
-				<md-button class="md-icon-button" aria-label="Toggle Menu">
-					<md-icon md-svg-src="img/ic_menu_24px.svg"></md-icon>
+			<div class="md-toolbar-tools docs-toolbar-tools" tabIndex="-1">
+				<md-button class="md-icon-button" aria-label="Toggle Menu" ng-click="openMenu()">
+					<md-icon md-24>menu</md-icon>
 				</md-button>
 
 				<div layout="row" flex class="fill-height">
@@ -59,8 +59,11 @@
 					</h2>
 
 					<span flex></span>
+					<div layout="row">
+						<md-button ng-show="auth.accessToken" ng-click="logout()">Logout</md-button>
+					</div>
 					<div class="md-toolbar-item docs-tools" layout="row">
-
+						{{auth.displayName}}
 					</div>
 				</div>
 			</div>
