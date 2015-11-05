@@ -96,7 +96,7 @@ app.controller('LoginTokenCtrl', ($scope, $routeParams, $location, User, auth) =
 		delete $scope.error;
 
 		User.login({token: $routeParams.token}).$promise.then(res => {
-			auth.acceessToken = res.accessToken;
+			auth.accessToken = res.accessToken;
 			$location.path('/ready');
 		}).catch(err => {
 			debug('err', err);
@@ -110,7 +110,7 @@ app.controller('LoginTokenCtrl', ($scope, $routeParams, $location, User, auth) =
 });
 
 
-app.controller('LoginCtrl', ($scope, session, $location, User) => {
+app.controller('LoginCtrl', ($scope, session, $location, User, $mdDialog) => {
 	if (!session.username) {
 		debug('username is not defined in session');
 		return $location.path('/');
@@ -120,10 +120,21 @@ app.controller('LoginCtrl', ($scope, session, $location, User) => {
 	$scope.hasPassword = session.hasPassword;
 
 	$scope.sendLink = () => {
+		if ($scope.sending) { return; }
+		$scope.sending = true;
+
 		User.requestLoginLink({email: $scope.username}).$promise.then(res => {
-			debug('res', res);
+			$mdDialog.show($mdDialog.alert({
+				content: 'Message sent. Please check your inbox.',
+				ok: 'OK'
+			}));
 		}).catch(err => {
-			debug('error', err);
+			$mdDialog.show($mdDialog.alert({
+				content: 'Could not send message: ' + (err.data || 'network error'),
+				ok: 'OK'
+			}));
+		}).finally(() => {
+			$scope.sending = false;
 		});
 	};
 });
@@ -243,8 +254,12 @@ app.controller('RegisterPictureCtrl', ($scope, $location) => {
 
 });
 
-app.controller('ReadyCtrl', ($scope, $location) => {
-	$scope.state = 'ready';
+app.controller('ReadyCtrl', ($scope, $location, auth) => {
+	if (!auth.accessToken) {
+		debug('no access token, changing page');
+		return $location.path('/');
+	}
+
 
 	$scope.$watch('auth.accessToken', value => {
 		debug('access token', value);

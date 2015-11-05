@@ -1,7 +1,13 @@
 import express from 'express';
+import Promise from 'bluebird';
+
+import createSendgrid from 'sendgrid';
+var sendgrid = createSendgrid(process.env.SENDGRID_KEY);
 
 import createDebug from 'debug';
 let debug = createDebug('dhm:user');
+
+Promise.promisifyAll(sendgrid);
 
 const $postRegister = Symbol('postRegister');
 const $postProfile = Symbol('postProfile');
@@ -71,6 +77,17 @@ export default class User {
 			}
 			let token = this[$tokenHandler].issueLoginToken(user.PartitionKey._);
 			debug('token', token);
+
+			let address = JSON.parse(user.Data._).email;
+			let email = new sendgrid.Email({
+				to: address,
+				from: 'daheim@mesellyounot.com',
+				fromname: 'Daheim',
+				subject: 'Daheim Login',
+				html: `Please click <a href="${process.env.URL}/#!/login/token/${token}">here to log in</a>.`
+			});
+			await sendgrid.sendAsync(email);
+
 			res.send({});
 		} catch (err) {
 			next(err);
