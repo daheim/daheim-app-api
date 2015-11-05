@@ -1,46 +1,7 @@
-import {MediaStreamRequester} from './localheim';
-
 import createDebug from 'debug';
 let debug = createDebug('dhm:ready');
 
 let app = window.angular.module('dhm');
-
-class CameraService {
-
-	constructor($rootScope) {
-		console.log($rootScope);
-	}
-
-	async start() {
-		let localStream = await navigator.mediaDevices.getUserMedia({
-			audio: true,
-			video: true
-			// video: {
-			// 	width: {
-			// 		min: 300,
-			// 		max: 1920
-			// 	},
-			// 	height: {
-			// 		min: 200,
-			// 		max: 1080
-			// 	}
-			// },
-			// optional: {
-			// 	googEchoCancellation:true,
-			// 	googAutoGainControl:true,
-			// 	googNoiseSuppression:true,
-			// 	googHighpassFilter:true,
-			// 	googAudioMirroring:false,
-			// 	googNoiseSuppression2:true,
-			// 	googEchoCancellation2:true,
-			// 	googAutoGainControl2:true,
-			// 	googDucking:false
-			// }
-		});
-		console.log('localStream', localStream);
-	}
-
-}
 
 class UserService {
 }
@@ -55,8 +16,21 @@ class AuthService {
 
 	get accessToken() { return this[$token]; }
 	set accessToken(token) {
+		debug('setting token %s %s', typeof token, token);
 		this[$token] = token;
-		window.localStorage.token = token;
+		if (token) {
+			window.localStorage.token = token;
+		} else {
+			delete window.localStorage.token;
+		}
+	}
+
+	get displayName() {
+		if (this.profile && this.profile.name) {
+			return this.profile.name;
+		} else {
+			return this.username;
+		}
 	}
 
 	get authHeader() { return () => 'Bearer ' + this.accessToken; }
@@ -67,42 +41,124 @@ class AuthService {
 app.factory('User', function($resource, auth) {
 	return $resource('/users/:method', null, {
 		register: {method: 'post', params: {method: 'register'}},
+		login: {method: 'post', params: {method: 'login'}},
+		requestLoginLink: {method: 'post', params: {method: 'loginLink'}},
 		saveProfile: {method: 'post', params: {method: 'profile'}, headers: auth.headers},
 		getProfile: {params: {method: 'profile'}, headers: auth.headers}
 	});
 });
 
-app.service('camera', CameraService);
 app.service('user', UserService);
 app.service('auth', AuthService);
+app.constant('session', {});
+
+app.factory('$exceptionHandler', function() {
+	return function(exception, cause) {
+		console.error('exception', exception, cause);
+	};
+});
 
 
+app.config($routeProvider => {
+	$routeProvider.when('/', {templateUrl: 'partials/home.html', controller: 'HomeCtrl'});
+	$routeProvider.when('/login', {templateUrl: 'partials/login.html', controller: 'LoginCtrl'});
+	$routeProvider.when('/register/profile', {templateUrl: 'partials/register_profile.html', controller: 'RegisterProfileCtrl'});
+	$routeProvider.when('/register/picture', {templateUrl: 'partials/register_picture.html', controller: 'RegisterPictureCtrl'});
+	$routeProvider.when('/login/token/:token', {templateUrl: 'partials/login_token.html', controller: 'LoginTokenCtrl'});
+	$routeProvider.when('/ready', {templateUrl: 'partials/ready.html', controller: 'ReadyCtrl'});
+});
 
-
-app.controller('ReadyCtrl', ($scope, camera, $location, $mdDialog, user, User, auth, $timeout) => {
-
-	// $scope.msr = new MediaStreamRequester({constraints: {video: true}});
-	// $scope.msr.on('stream', () => $scope.$apply());
-	// $scope.$on('$destroy', () => {
-	// 	if ($scope.msr.current) {
-	// 		$scope.msr.current.close();
-	// 	}
-	// 	$scope.msr.close();
+app.run(($rootScope, $mdDialog) => {
+	$rootScope.$on('$routeChangeError', (e, current, previous, err) => {
+		$mdDialog.show($mdDialog.alert({
+			content: err.message,
+			ok: 'OK'
+		}));
+		debug('$routeChangeError', e, current, previous, err);
+	});
+	// $rootScope.$on('$routeChangeSuccess', (e, current, previous) => {
+	// 	debug('$routeChangeSuccess', e, current, previous);
 	// });
-	// $scope.msr.start();
+	// $rootScope.$on('$routeChangeStart', (e, next, current) => {
+	// 	debug('$routeChangeStart', e, next, current);
+	// });
+});
 
+app.run(($rootScope, auth) => {
+	$rootScope.auth = auth;
+});
+
+
+app.controller('LoginTokenCtrl', ($scope, $routeParams, $location, User, auth) => {
+	$scope.retry = () => {
+		if ($scope.running) { return; }
+		$scope.running = true;
+		delete $scope.error;
+
+		User.login({token: $routeParams.token}).$promise.then(res => {
+			auth.acceessToken = res.accessToken;
+			$location.path('/ready');
+		}).catch(err => {
+			debug('err', err);
+			$scope.error = err;
+		}).finally(() => {
+			delete $scope.running;
+		});
+	};
+
+	$scope.retry();
+});
+
+
+app.controller('LoginCtrl', ($scope, session, $location, User) => {
+	if (!session.username) {
+		debug('username is not defined in session');
+		return $location.path('/');
+	}
+
+	$scope.username = session.username;
+	$scope.hasPassword = session.hasPassword;
+
+	$scope.sendLink = () => {
+		User.requestLoginLink({email: $scope.username}).$promise.then(res => {
+			debug('res', res);
+		}).catch(err => {
+			debug('error', err);
+		});
+	};
+});
+
+
+app.controller('RegisterProfileCtrl', ($scope, $location, User, $timeout) => {
 	$scope.languages = [];
 	$scope.topics = [];
 
+	$scope.languageSuggest = input => {
+		if (input.length) {
+			input = input.charAt(0).toUpperCase() + input.slice(1);
+		}
+		return ['none', 'beginner', 'intermediate', 'advanced', 'native'].map(level => {
+			return {
+				language: input,
+				level
+			};
+		});
+	};
+
+	$scope.next = () => {
+		$location.path('/register/picture');
+	};
 
 	$scope.loading = true;
 	User.getProfile(profile => {
 		$scope.loading = false;
+
 		debug('profile', profile);
+
 		$scope.languages = profile.languages || [];
 		$scope.topics = profile.topics || [];
 		$scope.name = profile.name;
-		//debug('$scope', $scope);
+
 		function watch(value, oldValue) {
 			if (value === oldValue) { return; }
 			debug('need save');
@@ -161,6 +217,17 @@ app.controller('ReadyCtrl', ($scope, camera, $location, $mdDialog, user, User, a
 			}
 		});
 	}
+});
+
+app.controller('RegisterPictureCtrl', ($scope, $location) => {
+
+	$scope.skip = () => {
+		$location.path('/ready');
+	};
+
+	$scope.upload = () => {
+		$location.path('/ready');
+	};
 
 	$scope.takePhoto = () => {
 		$scope.cameraSnap = !$scope.cameraSnap;
@@ -174,63 +241,51 @@ app.controller('ReadyCtrl', ($scope, camera, $location, $mdDialog, user, User, a
 		debug('image data %s', value);
 	});
 
-	$scope.saveProfile = async () => {
-		let profile = await User.saveProfile({
-			name: $scope.name,
-			languages: $scope.languages,
-			topics: $scope.topics
-		}).$promise;
-		debug('profile', profile);
-	};
+});
 
-	$scope.register = (e) => {
-		console.log('register');
+app.controller('ReadyCtrl', ($scope, $location) => {
+	$scope.state = 'ready';
 
-		(async () => {
-			let res = await User.register({email: $scope.email}).$promise;
-			console.log('register', res);
-			if (res.state === 'new') {
-				auth.accessToken = res.accessToken;
-			}
-			let profile = await User.profile().$promise;
-			debug('profile', profile);
-		})();
-
-	};
+	$scope.$watch('auth.accessToken', value => {
+		debug('access token', value);
+	});
 
 	$scope.ready = () => {
-		if (!$scope.userId) {
-			$mdDialog.show($mdDialog.alert().ok('Alright').title('Well...').content('A name! I need a name!'));
-			return;
-		}
-		user.userId = $scope.userId;
+		// if (!$scope.userId) {
+		// 	$mdDialog.show($mdDialog.alert().ok('Alright').title('Well...').content('A name! I need a name!'));
+		// 	return;
+		// }
+		// user.userId = $scope.userId;
 		$location.path('/third');
 	};
 
-	$scope.languageSuggest = input => {
-		if (input.length) {
-			input = input.charAt(0).toUpperCase() + input.slice(1);
-		}
-		return ['none', 'beginner', 'intermediate', 'advanced', 'native'].map(level => {
-			return {
-				language: input,
-				level
-			};
-		});
-	};
+});
 
-	//camera.start();
+app.controller('HomeCtrl', ($scope, $location, user, User, auth, $timeout, session) => {
 
-	async function getDevices() {
-		try {
-			let devices = await navigator.mediaDevices.enumerateDevices();
-			console.log(devices);
-		} catch (ex) {
-			console.error('cannot get devices', ex);
-		}
+	if (auth.accessToken) {
+		return $location.path('/ready');
 	}
 
-	getDevices();
+	$scope.register = () => {
+		if ($scope.working) { return; }
+		$scope.working = true;
+
+		let username = $scope.email;
+		User.register({email: username}).$promise.then(res => {
+			auth.username = $scope.email;
+			if (res.state === 'new') {
+				auth.accessToken = res.accessToken;
+				$location.path('/register/profile');
+			} else {
+				session.username = username;
+				session.hasPassword = res.hasPassword;
+				$location.path('/login');
+			}
+		}).finally(() => {
+			$scope.working = false;
+		});
+	};
 
 });
 

@@ -1,0 +1,29 @@
+<div layout="row" layout-align="center">
+	<md-content class="md-whiteframe-z1" layout-margin style="max-width: 600px; border-radius: 4px;" flex="grow">
+		<div layout="column" layout-padding ng-show="running">
+			<div layout-padding>
+				<div layout="row" layout-align="center">
+					<md-progress-circular md-diameter="100" md-mode="indeterminate"></md-progress-circular>
+				</div>
+			</div>
+		</div>
+		<div layout-padding ng-show="running">
+			<div layout="row" layout-align="center">
+				<div class="md-caption">Checking link...</div>
+			</div>
+		</div>
+		<div layout-padding ng-show="!running &amp;&amp; !error">
+			<div layout="row" layout-align="center">
+				<div class="md-display-3">:)</div>
+			</div>
+		</div>
+		<div layout-padding ng-show="!running &amp;&amp; error">
+			<div layout="row" layout-align="center">
+				<div class="md-body-1">An error occurred: {{error.data}}</div>
+			</div>
+			<div layout="row" layout-align="center">
+				<md-button ng-click="retry()">Retry</md-button>
+			</div>
+		</div>
+	</md-content>
+</div>

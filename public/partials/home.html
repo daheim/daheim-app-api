@@ -1,14 +1,28 @@
-
-<md-content>
-
-	<div layout layout-align="start center">
-		<span>{{state}}</span>
-		<md-button ng-click="iamGerman()" ng-disabled="sent">I speak German</md-button>
-		<md-button ng-click="iamFriend()" ng-disabled="sent">I want to learn German</md-button>
-	</div>
-	<div layout>
-		<div id="remotesVideos"></div>
-		<video height="50" id="localVideo"></video>
-	</div>
-
-</md-content>
+<div layout="row" layout-align="center">
+	<md-content class="md-whiteframe-z1" layout-margin style="max-width: 600px; border-radius: 4px;" flex="grow">
+		<div layout="column" layout-padding>
+			<div layout-padding>
+				<h1 class="md-headline">Welcome to Daheim!</h1>
+			</div>
+			<div layout-padding>
+				<p class="md-body-1">Daheim matches you with other people to practice the language. Just type in you email address to get started.</p>
+			</div>
+			<div layout-padding>
+				<form>
+					<md-input-container>
+						<label>Email Address</label>
+						<input name="username" type="text" ng-model="email" autofocus>
+					</md-input-container>
+					<md-input-container ng-show="showPassword">
+						<label>Password</label>
+						<input name="password" type="text" ng-model="password">
+					</md-input-container>
+					<div layout="row" layout-align="center">
+						<md-button class="md-primary md-raised" ng-click="register()" ng-hide="working">Start!</md-button>
+						<md-progress-circular md-mode="indeterminate" md-diameter="36" style="margin: -26px -24px !important;" ng-show="working"></md-progress-circular>
+					</div>
+				</form>
+			</div>
+		</div>
+	</md-content>
+</div>

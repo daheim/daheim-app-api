@@ -1,0 +1,48 @@
+<div layout="row" layout-align="center">
+	<md-content class="md-whiteframe-z1" layout-margin style="max-width: 600px; border-radius: 4px;" flex="grow">
+		<div layout="column" layout-padding>
+			<div layout-padding>
+				<h1 class="md-headline">Profile</h1>
+			</div>
+			<div layout-padding>
+				<md-input-container>
+					<label>How may we call you?</label>
+					<input type="text" ng-model="name" required>
+				</md-input-container>
+			</div>
+			<div layout-padding>
+				<h2 class="md-subhead">Languages</h2>
+				<md-chips ng-model="languages" md-autocomplete-snap md-require-match="true">
+					<md-autocomplete
+							md-selected-item="languageSelected"
+							md-search-text="languageSearch"
+							md-items="item in languageSuggest(languageSearch)"
+							md-item-text="item.language"
+							placeholder="Add languages">
+						<span md-highlight-text="languageSearch">{{item.language}} ({{item.level}})</span>
+					</md-autocomplete>
+					<md-chip-template>
+						<span>
+							<strong>{{$chip.language}}</strong>
+							<em>({{$chip.level}})</em>
+						</span>
+					</md-chip-template>
+				</md-chips>
+			</div>
+			<div layout-padding>
+				<h2 class="md-subhead">Interesting Topics</h2>
+				<md-chips ng-model="topics"></md-chips>
+			</div>
+		</div>
+
+		<div layout="row" layout-align="start center" layout-padding style="background: rgba(0,0,0,0.1)">
+			<div ng-show="!saving &amp;&amp; !error" flex="grow"></div>
+			<p class="md-body-1 md-warn" ng-show="saving" flex="grow">Saving...</p>
+			<p ng-show="!saving &amp;&amp; error" class="md-body-1 md-warn" flex="grow">{{error}}</p>
+			<md-button ng-disabled="needToSave !== lastSaved" ng-click="next()" class="md-raised">Continue</md-button>
+		</div>
+
+		<div style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.3)" ng-show="loading" class="fade"></div>
+
+	</md-content>
+</div>

@@ -1,12 +1,12 @@
 import express from 'express';
-import validator from 'validator';
-import uuid from 'node-uuid';
 
 import createDebug from 'debug';
 let debug = createDebug('dhm:user');
 
 const $postRegister = Symbol('postRegister');
 const $postProfile = Symbol('postProfile');
+const $postLoginLink = Symbol('postLoginLink');
+const $postLogin = Symbol('postLogin');
 const $getProfile = Symbol('getProfile');
 
 const $router = Symbol('router');
@@ -21,6 +21,8 @@ export default class User {
 		let router = this[$router] = express.Router();
 
 		router.post('/register', bind(this, this[$postRegister]));
+		router.post('/loginLink', bind(this, this[$postLoginLink]));
+		router.post('/login', bind(this, this[$postLogin]));
 		router.post('/profile', tokenHandler.auth, bind(this, this[$postProfile]));
 		router.get('/profile', tokenHandler.auth, bind(this, this[$getProfile]));
 	}
@@ -42,12 +44,47 @@ export default class User {
 	}
 
 	async [$getProfile](req, res, next) {
-		res.send(await this[$userStore].getProfile(req.user.id));
+		try {
+			res.send(await this[$userStore].getProfile(req.user.id));
+		} catch (err) {
+			next(err);
+		}
 	}
 
 	async [$postProfile](req, res, next) {
 		try {
-			res.send(await this[$userStore].updateProfile(req.user.id, req.body));
+			try {
+				res.send(await this[$userStore].updateProfile(req.user.id, req.body));
+			} catch (err) {
+				res.status(400).send(err.message);
+			}
+		} catch (err) {
+			next(err);
+		}
+	}
+
+	async [$postLoginLink](req, res, next) {
+		try {
+			let user = await this[$userStore].loadUserWithEmail(req.body.email);
+			if (!user) {
+				return res.status(400).send({error: 'UserNotFound'});
+			}
+			let token = this[$tokenHandler].issueLoginToken(user.PartitionKey._);
+			debug('token', token);
+			res.send({});
+		} catch (err) {
+			next(err);
+		}
+	}
+
+	async [$postLogin](req, res, next) {
+		try {
+			if (req.body.token) {
+				let accessToken = this[$tokenHandler].issueForLoginToken(req.body.token);
+				res.send({accessToken});
+			} else {
+				throw new Error('invalid login method');
+			}
 		} catch (err) {
 			next(err);
 		}
