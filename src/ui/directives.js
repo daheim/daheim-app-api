@@ -54,6 +54,15 @@ app.directive('dhmCenter', function() {
 	};
 });
 
+app.directive('dhmRef', () => {
+	return {
+		restrict: 'A',
+		link: ($scope, $element, attributes) => {
+			$scope[attributes['dhmRef']] = $element;
+		}
+	};
+});
+
 app.directive('dhmMaxVideoSize', function() {
 	return {
 		restrict: 'A',
