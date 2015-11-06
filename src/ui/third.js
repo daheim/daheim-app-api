@@ -35,9 +35,9 @@ app.config(function($mdThemingProvider) {
 
 
 const $zero = Symbol();
-app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval, config, $anchorScroll, $mdDialog, $location, user) {
+app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval, config, $anchorScroll, $mdDialog, $location, user, auth) {
 
-	if (!user.userId) {
+	if (!auth.accessToken) {
 		$location.path('/');
 		return;
 	}
@@ -45,7 +45,12 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 	$scope.$location = $location;
 
 	let socket = io(undefined, {multiplex: false});
-	let ozoraProvider = new OzoraProvider({socket, userId: user.userId});
+	let ozoraProvider = new OzoraProvider({socket, accessToken: auth.accessToken});
+	ozoraProvider.on('authError', err => {
+		if (err.message === 'disconnected') { return; }
+		debug('auth error', err);
+		$location.path('/');
+	});
 	ozoraProvider.start();
 
 	let localheimManager;

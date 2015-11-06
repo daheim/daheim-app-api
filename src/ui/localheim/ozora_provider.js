@@ -5,7 +5,7 @@ import createDebug from 'debug';
 let debug = createDebug('dhm:localheim:ozora');
 
 const $socket = Symbol();
-const $userId = Symbol();
+const $accessToken = Symbol();
 const $onSocketConnectHandler = Symbol();
 const $onSocketConnect = Symbol();
 const $closed = Symbol();
@@ -14,11 +14,11 @@ const $ozora = Symbol();
 
 export default class OzoraProvider extends EventEmitter {
 
-	constructor({socket, userId}) {
+	constructor({socket, accessToken}) {
 		super();
 
 		this[$socket] = socket;
-		this[$userId] = userId;
+		this[$accessToken] = accessToken;
 	}
 
 	start() {
@@ -43,12 +43,13 @@ export default class OzoraProvider extends EventEmitter {
 		let ozora = new Ozora({channel, zero: {}});
 		let zero = this[$zero] = ozora.getObject(0);
 		try {
-			await zero.invoke('auth', {userId: this[$userId]});
+			await zero.invoke('auth', {accessToken: this[$accessToken]});
 			if (this[$closed]) { return; }
 			this[$ozora] = ozora;
 			this.emit('connect', ozora);
 		} catch (err) {
 			debug('auth error', err);
+			this.emit('authError', err);
 		}
 	}
 
