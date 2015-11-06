@@ -5,11 +5,12 @@
 import Promise from 'bluebird';
 import BluebirdUtil from 'bluebird/js/release/util';
 import EventEmitter from 'events';
-import createDebug from 'debug';
 
+import createDebug from 'debug';
 let debug = createDebug('dhm:ozora');
 
 const $receiver = Symbol();
+const $setOzora = Symbol();
 
 const $nextId = Symbol('nextId');
 const $commands = Symbol('commands');
@@ -29,7 +30,7 @@ export default class Ozora extends EventEmitter {
 	 */
 	constructor({zero, channel}) {
 		super();
-		this[$nextId] = 1;
+		this[$nextId] = 0;
 		this[$objects] = {0: zero};
 		this[$commands] = {};
 		this[$channel] = channel;
@@ -42,9 +43,16 @@ export default class Ozora extends EventEmitter {
 				command.reject(new Error('disconnected'));
 			}
 			this[$commands] = {};
-			this[$objects] = {0: zero};
+			this[$objects] = {};
+			if (zero) {
+				this.register(zero);
+			}
 			this.emit('disconnect');
 		};
+	}
+
+	static get setOzoraSymbol() {
+		return $setOzora;
 	}
 
 	/**
@@ -57,6 +65,10 @@ export default class Ozora extends EventEmitter {
 
 	get disconnected() {
 		return this[$channel].disconnected;
+	}
+
+	get channel() {
+		return this[$channel];
 	}
 
 	/**
@@ -88,6 +100,9 @@ export default class Ozora extends EventEmitter {
 	register(object) {
 		let id = this[$nextId]++;
 		this[$objects][id] = object;
+		if (typeof object[$setOzora] === 'function') {
+			object[$setOzora](this);
+		}
 		return id;
 	}
 
@@ -103,8 +118,8 @@ export default class Ozora extends EventEmitter {
 	 * @private
 	 */
 	[$onMessage](data) {
-		if (data.ack) { return this[$processAck](data); }
-		if (data.id) { return this[$processRequest](data); }
+		if (typeof data.ack === 'number') { return this[$processAck](data); }
+		if (typeof data.id === 'number') { return this[$processRequest](data); }
 		debug('illegal incoming message', data);
 	}
 
@@ -248,6 +263,10 @@ export class SioChannel extends Channel {
 		return this[$socket].disconnected;
 	}
 
+	get socket() {
+		return this[$socket];
+	}
+
 	send(message) {
 		if (this[$socket].disconnected && this[$socket].io && !this[$socket].io.reconnecting) {
 			throw new Error('socket disconnected');
@@ -266,6 +285,14 @@ export class Receiver {
 	 */
 	[Ozora.receiver]({method, args}) {
 
+	}
+
+	[Ozora.setOzoraSymbol](ozora) {
+		this[$ozora] = ozora;
+	}
+
+	get ozora() {
+		return this[$ozora];
 	}
 }
 
@@ -297,8 +324,11 @@ export class WhitelistReceiver extends Receiver {
 	}
 
 	static mixin(object, whitelist) {
+		// TODO: this is a really poor solution
 		WhitelistReceiver[$mixinConstructor](object, whitelist);
 		object[Ozora.receiver] = WhitelistReceiver.prototype[Ozora.receiver];
+		object[Ozora.setOzoraSymbol] = WhitelistReceiver.prototype[Ozora.setOzoraSymbol];
+		Object.defineProperty(object, 'ozora', {get: function() { return this[$ozora]; }});
 		return object;
 	}
 
