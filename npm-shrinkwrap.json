@@ -9,6 +9,14 @@
           "version": "5.0.14"
         }
       }
+    },
+    "grunt-jscs": {
+      "version": "^2.1.0",
+      "dependencies": {
+        "jscs": {
+          "version": "2.4.0"
+        }
+      }
     }
   }
 }
