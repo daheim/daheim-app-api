@@ -21,7 +21,8 @@ describe('Realtime', function() {
 
 	beforeEach(function() {
 		server = require('http').createServer();
-		var realtime = Realtime.create({log, server});
+		let realtime = new Realtime({log, tokenHandler: {}});
+		realtime.listen(server);
 		server.listen(0);
 		url = 'http://0.0.0.0:' + server.address().port;
 	});

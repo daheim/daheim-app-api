@@ -5,100 +5,78 @@ import EventEmitter from 'events';
 import IceServerProvider from './ice_server_provider';
 import {default as Ozora, SioChannel, SimpleReceiver, WhitelistReceiver} from './ozora';
 
+import createDebug from 'debug';
+const debug = createDebug('dhm:realtime');
 
-const $io = Symbol();
-const $log = Symbol();
-const $registry = Symbol();
+
+const $io = Symbol('io');
+const $log = Symbol('log');
+const $registry = Symbol('registry');
+const $tokenHandler = Symbol('tokenHandler');
+
+const $onConnection = Symbol('onConnection');
 
 class Realtime {
 
-	constructor(opt) {
-		opt = opt || {};
-		if (!opt.server) { throw new Error('opt.server must be defined'); }
-		if (!opt.log) { throw new Error('opt.log must be defined'); }
+	constructor({log, tokenHandler}) {
+		if (!log) { throw new Error('log must be defined'); }
+		if (!tokenHandler) { throw new Error('tokenHandler must be defined'); }
 
-		this[$log] = opt.log;
-
-		let io = this[$io] = sio.listen(opt.server);
-		io.on('connection', (client) => this._onConnection(client));
+		this[$log] = log;
+		this[$tokenHandler] = tokenHandler;
 
 		let iceServerProvider = new IceServerProvider();
 		this[$registry] = new EncounterRegistry({iceServerProvider});
 	}
 
-	static create(opt) {
-		return new Realtime(opt);
+	listen(server) {
+		if (this[$io]) { throw new Error('already started'); }
+
+		let io = this[$io] = sio.listen(server);
+		io.on('connection', socket => this[$onConnection](socket));
 	}
 
-	_onConnection(client) {
-		let log = this[$log];
-		this[$log].info({clientId: client.id}, 'sio connection');
+	[$onConnection](socket) {
+		debug('new SIO connection: %s', socket.id);
 
-		let reelClient = new Client({socket: client, registry: this[$registry]});
+		let channel = new SioChannel({socket});
+		let ozora = new Ozora({channel});
+		let zero = new Zero({
+			registry: this[$registry],
+			tokenHandler: this[$tokenHandler]
+		});
+		ozora.register(zero);
 
-		client.on('error', (err) => {
+		socket.on('error', (err) => {
 			this[$log].error({err: err}, 'client error');
 		});
 
-		client.on('disconnect', () => {
-			this[$log].info({clientId: client.id}, 'sio disconnect');
+		socket.on('disconnect', () => {
+			debug('SIO disconnected: %s', socket.id);
 		});
 	}
 }
 
 const $socket = Symbol();
-const $ozora = Symbol();
-const $serial = Symbol();
-class Client extends WhitelistReceiver {
 
-	constructor({socket, registry}) {
+class Zero extends WhitelistReceiver {
+
+	constructor({registry, tokenHandler}) {
 		super(['auth', 'getUserId', 'ready', 'createEncounter']);
-		this[$socket] = socket;
-		this[$ozora] = new Ozora({
-			channel: new SioChannel({socket}),
-			zero: this
-		});
-		this[$serial] = new SerialRunner();
 		this[$registry] = registry;
+		this[$tokenHandler] = tokenHandler;
 	}
 
-	auth({userId}) {
-		this[$ozora].userId = userId;
-	}
-
-	getUserId() {
-		return this[$serial].run(() => {
-			console.log('running 2');
-			return this[$socket].userId;
-		});
-	}
-
-	ready({callbackId}) {
-		return this[$serial].run(() => {
-			let callback = this[$ozora].getObject(callbackId);
-			return this[$registry].ready({callback});
-		});
+	auth({accessToken}) {
+		this.ozora.userId = this[$tokenHandler].verifyAccessToken(accessToken);
 	}
 
 	createEncounter({callbackId}) {
-		let callback = this[$ozora].getObject(callbackId);
+		let callback = this.ozora.getObject(callbackId);
 		let iface = new OzoraUserEncounterInterface({callback, registry: this[$registry]});
 		return iface.objectId;
 	}
 
 }
-
-
-const $current = Symbol();
-class SerialRunner {
-	constructor() {
-		this[$current] = Promise.resolve();
-	}
-
-	run(fn) {
-		return this[$current] = this[$current].reflect().then(fn);
-	}
-}
-
 
 export default Realtime;

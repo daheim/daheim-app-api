@@ -6,6 +6,10 @@ import Azure from './azure';
 import User from './user';
 import UserStore from './user_store';
 import TokenHandler from './token_handler';
+import Realtime from './realtime';
+
+import createDebug from 'debug';
+let debug = createDebug('dhm:app');
 
 var express = require('express');
 
@@ -22,10 +26,6 @@ var server = require('http').Server(app);
 
 let azure = Azure.createFromEnv();
 
-require('./realtime').create({log, server});
-//var io = require('socket.io').listen(server);
-
-
 app.use(log.requestLogger());
 app.enable('trust proxy');
 app.disable('x-powered-by');
@@ -37,6 +37,9 @@ let passport = new Passport();
 let tokenHandler = new TokenHandler({passport, secret: process.env.SECRET});
 let userStore = new UserStore({azure});
 let user = new User({userStore, tokenHandler, passport});
+
+let realtime = new Realtime({log, tokenHandler});
+realtime.listen(server);
 
 app.use(passport.initialize());
 app.use('/users', user.router);
