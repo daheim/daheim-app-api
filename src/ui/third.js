@@ -111,7 +111,7 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 		$scope,
 		$mdDialog,
 		callback: () => {
-			if (localheimManager.state !== 'closed') {
+			if (localheimManager.state === 'connected' || localheimManager.state === 'negotiating') {
 				return 'You are in a video session.';
 			}
 		}
