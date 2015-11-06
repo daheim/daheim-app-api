@@ -24,6 +24,11 @@ export default class OzoraProvider extends EventEmitter {
 	start() {
 		this[$onSocketConnectHandler] = () => this[$onSocketConnect]();
 		this[$socket].on('connect', this[$onSocketConnectHandler]);
+		this[$socket].on('disconnect', () => {
+			if (this[$socket].io.skipReconnect) {
+				this.close('socket-closed');
+			}
+		});
 
 		if (this[$socket].connected) {
 			this[$onSocketConnectHandler]();
@@ -53,12 +58,14 @@ export default class OzoraProvider extends EventEmitter {
 		}
 	}
 
-	close() {
+	close({reason} = {}) {
 		if (this[$closed]) { return; }
 		this[$closed] = true;
 
 		this[$socket].removeListener('connect', this[$onSocketConnectHandler]);
 		// close ozora
+
+		this.emit('close', reason);
 	}
 
 }
