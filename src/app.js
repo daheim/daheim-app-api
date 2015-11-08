@@ -38,7 +38,7 @@ let tokenHandler = new TokenHandler({passport, secret: process.env.SECRET});
 let userStore = new UserStore({azure});
 let user = new User({userStore, tokenHandler, passport});
 
-let realtime = new Realtime({log, tokenHandler});
+let realtime = new Realtime({log, tokenHandler, userStore});
 realtime.listen(server);
 
 app.use(passport.initialize());

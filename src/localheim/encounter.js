@@ -51,7 +51,8 @@ export default class Encounter {
 				return {
 					id,
 					self: id === selfId,
-					userId: member.userId
+					userId: member.userId,
+					profile: member.profile
 				};
 			});
 
@@ -80,7 +81,8 @@ export default class Encounter {
 			return {
 				id,
 				self: member === me,
-				userId: member.userId
+				userId: member.userId,
+				profile: member.profile
 			};
 		});
 

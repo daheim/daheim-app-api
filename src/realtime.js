@@ -13,17 +13,20 @@ const $io = Symbol('io');
 const $log = Symbol('log');
 const $registry = Symbol('registry');
 const $tokenHandler = Symbol('tokenHandler');
+const $userStore = Symbol('userStore');
 
 const $onConnection = Symbol('onConnection');
 
 class Realtime {
 
-	constructor({log, tokenHandler}) {
+	constructor({log, tokenHandler, userStore}) {
 		if (!log) { throw new Error('log must be defined'); }
 		if (!tokenHandler) { throw new Error('tokenHandler must be defined'); }
+		if (!userStore) { throw new Error('userStore must be defined'); }
 
 		this[$log] = log;
 		this[$tokenHandler] = tokenHandler;
+		this[$userStore] = userStore;
 
 		let iceServerProvider = new IceServerProvider();
 		this[$registry] = new EncounterRegistry({iceServerProvider});
@@ -43,7 +46,8 @@ class Realtime {
 		let ozora = new Ozora({channel});
 		let zero = new Zero({
 			registry: this[$registry],
-			tokenHandler: this[$tokenHandler]
+			tokenHandler: this[$tokenHandler],
+			userStore: this[$userStore]
 		});
 		ozora.register(zero);
 
@@ -61,14 +65,18 @@ const $socket = Symbol();
 
 class Zero extends WhitelistReceiver {
 
-	constructor({registry, tokenHandler}) {
+	constructor({registry, tokenHandler, userStore}) {
 		super(['auth', 'getUserId', 'ready', 'createEncounter']);
 		this[$registry] = registry;
 		this[$tokenHandler] = tokenHandler;
+		this[$userStore] = userStore;
 	}
 
-	auth({accessToken}) {
-		this.ozora.userId = this[$tokenHandler].verifyAccessToken(accessToken);
+	async auth({accessToken}) {
+		let id = this[$tokenHandler].verifyAccessToken(accessToken);
+		let profile = await this[$userStore].getProfile(id);
+		this.ozora.user = {id, profile};
+		this.ozora.userId = id;
 	}
 
 	createEncounter({callbackId}) {

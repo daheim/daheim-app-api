@@ -26,6 +26,7 @@ export default class OzoraUserEncounterInterface {
 	get closed() { return this[$closed]; }
 
 	get userId() { return this[$callback].ozora.userId; }
+	get profile() { return this[$callback].ozora.user.profile; }
 	get objectId() { return this[$objectId]; }
 	get callback() { return this[$callback]; }
 

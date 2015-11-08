@@ -79,13 +79,13 @@
 				<div layout="column" layout-align="start center">
 					<div layout="column" layout-align="center center" flex>
 						<img ng-src="https://{{config.storageAccount}}.blob.core.windows.net/public/users/{{localheimManager.partner.userId}}/picture.png" style="width: 150px; height: 150px; border-radius: 50%; margin-top: 10px;" />
-						<p><b>{{localheimManager.partner.userId}}</b></p>
+						<p><b>{{localheimManager.partner.profile.name}}</b></p>
 					</div>
 				</div>
 				<div layout="column" layout-align="start start" layout-margin>
 					<div>
 						<h3 class="md-title">Spoken Languages</h3>
-						<md-chips readonly="true" ng-model="languages" class="md-chips-static">
+						<md-chips readonly="true" ng-model="localheimManager.partner.profile.languages" class="md-chips-static">
 							<md-chip-template>
 								<strong>{{$chip.language}}</strong>
 								<em>({{$chip.level}})</em>
@@ -94,7 +94,7 @@
 					</div>
 					<div>
 						<h3 class="md-title">Likes to talk about</h3>
-						<md-chips readonly="true" ng-model="topics" class="md-chips-static">
+						<md-chips readonly="true" ng-model="localheimManager.partner.profile.topics" class="md-chips-static">
 						</md-chips>
 					</div>
 				</div>
