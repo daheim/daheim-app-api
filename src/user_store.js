@@ -121,6 +121,14 @@ export default class UserStore {
 		}
 	}
 
+	uploadProfilePicture(userId, buffer) {
+		if (typeof userId !== 'string') { throw new Error('userId must be defined'); }
+		if (!(buffer instanceof Buffer)) { throw new Error('buffer must be defined'); }
+		return this[$azure].blobs.createBlockBlobFromTextAsync('public', `users/${encodeURIComponent(userId)}/picture.png`, buffer, {
+			contentType: 'image/png'
+		});
+	}
+
 	optimisticInsert(table, data, old) {
 		if (old) {
 			data['.metadata'] = data['.metadata'] || {};

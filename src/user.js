@@ -14,6 +14,7 @@ const $postProfile = Symbol('postProfile');
 const $postLoginLink = Symbol('postLoginLink');
 const $postLogin = Symbol('postLogin');
 const $getProfile = Symbol('getProfile');
+const $postProfilePicture = Symbol('postProfilePicture');
 
 const $router = Symbol('router');
 const $userStore = Symbol('userStore');
@@ -30,6 +31,7 @@ export default class User {
 		router.post('/loginLink', bind(this, this[$postLoginLink]));
 		router.post('/login', bind(this, this[$postLogin]));
 		router.post('/profile', tokenHandler.auth, bind(this, this[$postProfile]));
+		router.post('/profile/picture', tokenHandler.auth, bind(this, this[$postProfilePicture]));
 		router.get('/profile', tokenHandler.auth, bind(this, this[$getProfile]));
 	}
 
@@ -102,6 +104,19 @@ export default class User {
 			} else {
 				throw new Error('invalid login method');
 			}
+		} catch (err) {
+			next(err);
+		}
+	}
+
+	async [$postProfilePicture](req, res, next) {
+		try {
+			const header = 'data:image/png;base64,';
+			if (typeof req.body.data !== 'string') { throw new Error('data must be defined'); }
+			if (req.body.data.substring(0, header.length) !== header) { throw new Error('only base64 image/png data urls are supported'); }
+			let buffer = new Buffer(req.body.data.substring(header.length), 'base64');
+			let r = await this[$userStore].uploadProfilePicture(req.user.id, buffer);
+			res.send({});
 		} catch (err) {
 			next(err);
 		}

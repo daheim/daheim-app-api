@@ -41,6 +41,10 @@ import DhmProfileCamera from './dhm_profile_camera';
 		$locationProvider.hashPrefix('!');
 	})
 
+	.run(($rootScope, config) => {
+		$rootScope.config = config;
+	})
+
 	.controller('SiteCtrl', function($scope, $timeout, $mdSidenav, $mdMedia, auth, $location) {
 		var self = this;
 

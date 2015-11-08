@@ -39,12 +39,13 @@ class AuthService {
 }
 
 app.factory('User', function($resource, auth) {
-	return $resource('/users/:method', null, {
+	return $resource('/users/:method/:method2', null, {
 		register: {method: 'post', params: {method: 'register'}},
 		login: {method: 'post', params: {method: 'login'}},
 		requestLoginLink: {method: 'post', params: {method: 'loginLink'}},
 		saveProfile: {method: 'post', params: {method: 'profile'}, headers: auth.headers},
-		getProfile: {params: {method: 'profile'}, headers: auth.headers}
+		getProfile: {params: {method: 'profile'}, headers: auth.headers},
+		saveProfilePicture: {method: 'post', params: {method: 'profile', method2: 'picture'}, headers: auth.headers}
 	});
 });
 
@@ -230,14 +231,33 @@ app.controller('RegisterProfileCtrl', ($scope, $location, User, $timeout) => {
 	}
 });
 
-app.controller('RegisterPictureCtrl', ($scope, $location) => {
+app.controller('RegisterPictureCtrl', ($scope, $location, $mdDialog, User) => {
 
 	$scope.skip = () => {
 		$location.path('/ready');
 	};
 
 	$scope.upload = () => {
-		$location.path('/ready');
+		if ($scope.uploading) { return; }
+		$scope.uploading = true;
+
+		User.saveProfilePicture({
+			data: $scope.imageData
+		}).$promise.then(() => {
+			$location.path('/ready');
+		}).catch(err => {
+
+			debug('', err);
+			$mdDialog.show($mdDialog.alert({
+				content: err.status < 0 ? 'network error' : err.data,
+				ok: 'OK'
+			}));
+
+		}).finally(() => {
+			$scope.uploading = false;
+		});
+
+
 	};
 
 	$scope.takePhoto = () => {

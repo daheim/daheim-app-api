@@ -29,7 +29,7 @@ let azure = Azure.createFromEnv();
 app.use(log.requestLogger());
 app.enable('trust proxy');
 app.disable('x-powered-by');
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '1mb'}));
 
 app.use(express.static(__dirname + '/../../../build/public'));
 
@@ -50,7 +50,8 @@ app.get('/', function(req, res) {
 
 app.get('/js/config.js', function(req, res) {
 	var cfg = {
-		socketIoUrl: 'http://localhost:3000'
+		socketIoUrl: 'http://localhost:3000',
+		storageAccount: azure.blobs.storageAccount
 	};
 	res.send('angular.module("dhm").constant("config", ' + JSON.stringify(cfg) + ');');
 });
