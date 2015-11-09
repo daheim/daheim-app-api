@@ -7,6 +7,7 @@ import User from './user';
 import UserStore from './user_store';
 import TokenHandler from './token_handler';
 import Realtime from './realtime';
+import config from './config';
 
 import createDebug from 'debug';
 let debug = createDebug('dhm:app');
