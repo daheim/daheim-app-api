@@ -15,13 +15,17 @@ var io = require('socket.io-client');
 var log = require('../../src/log');
 var Realtime = require('../../src/realtime');
 
+import convict from 'convict';
+
 describe('Realtime', function() {
 	var url;
 	var server;
 
 	beforeEach(function() {
 		server = require('http').createServer();
-		let realtime = new Realtime({log, tokenHandler: {}, userStore: {}});
+		let config = convict({});
+		config.set('ice', {});
+		let realtime = new Realtime({log, config, tokenHandler: {}, userStore: {}});
 		realtime.listen(server);
 		server.listen(0);
 		url = 'http://0.0.0.0:' + server.address().port;

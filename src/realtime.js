@@ -19,7 +19,7 @@ const $onConnection = Symbol('onConnection');
 
 class Realtime {
 
-	constructor({log, tokenHandler, userStore}) {
+	constructor({log, tokenHandler, userStore, config}) {
 		if (!log) { throw new Error('log must be defined'); }
 		if (!tokenHandler) { throw new Error('tokenHandler must be defined'); }
 		if (!userStore) { throw new Error('userStore must be defined'); }
@@ -28,7 +28,7 @@ class Realtime {
 		this[$tokenHandler] = tokenHandler;
 		this[$userStore] = userStore;
 
-		let iceServerProvider = new IceServerProvider();
+		let iceServerProvider = new IceServerProvider(config.get('ice'));
 		this[$registry] = new EncounterRegistry({iceServerProvider});
 	}
 
