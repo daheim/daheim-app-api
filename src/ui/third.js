@@ -1,4 +1,3 @@
-import LocalheimClient from './localheim/localheim_client';
 import NavigationGuard from './navigation_guard';
 import io from 'socket.io-client';
 import screenfull from 'screenfull';
@@ -27,14 +26,6 @@ app.config(function($mdThemingProvider) {
 		});
 });
 
-
-
-
-
-
-
-
-const $zero = Symbol();
 app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval, config, $anchorScroll, $mdDialog, $location, user, auth) {
 
 	if (!auth.accessToken) {
@@ -136,7 +127,7 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 		$timeout(() => localheimManager.close());
 	};
 
-	function startCountdown(time) {
+	function startCountdownIgnored(timeIgnored) {
 		let create = new Date().getTime();
 		let iv = $interval(() => {
 			let now = new Date().getTime();

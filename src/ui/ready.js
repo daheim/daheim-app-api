@@ -55,7 +55,7 @@ app.constant('session', {});
 
 app.factory('$exceptionHandler', function() {
 	return function(exception, cause) {
-		console.error('exception', exception, cause);
+		console.error('exception', exception, cause); // eslint-disable-line no-console
 	};
 });
 
@@ -124,7 +124,7 @@ app.controller('LoginCtrl', ($scope, session, $location, User, $mdDialog) => {
 		if ($scope.sending) { return; }
 		$scope.sending = true;
 
-		User.requestLoginLink({email: $scope.username}).$promise.then(res => {
+		User.requestLoginLink({email: $scope.username}).$promise.then(resIgnored => {
 			$mdDialog.show($mdDialog.alert({
 				content: 'Message sent. Please check your inbox.',
 				ok: 'OK'

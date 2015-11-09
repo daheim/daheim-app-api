@@ -5,9 +5,8 @@
 		"linebreak-style": [2, "unix"],
 		"semi": [2, "always"],
 
-		"no-unused-vars": 1,
-		"no-console": 1
-
+		"no-unused-vars": [2, {vars:"all", "varsIgnorePattern": "[iI]gnored", "argsIgnorePattern": "[iI]gnored"}],
+		"no-console": 2
 	},
 	"env": {
 		"es6": true,

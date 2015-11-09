@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 
 import createDebug from 'debug';
-let debug = createDebug('dhm:localheim:msg');
+let debug = createDebug('dhm:localheim:msg'); // eslint-disable-line no-unused-vars
 
 const $stream = Symbol();
 const $closed = Symbol();

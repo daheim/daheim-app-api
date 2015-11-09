@@ -1,7 +1,7 @@
 export default class NavigationGuard {
 
 	constructor({$scope, callback, $mdDialog}) {
-		$scope.$on('$locationChangeStart', async (ev, newUrl, oldUrl) => {
+		$scope.$on('$locationChangeStart', async (ev, newUrl, oldUrlIgnored) => {
 			if (this._allowed) { return; }
 			let question = callback(newUrl);
 			if (typeof question !== 'string') { return; }

@@ -215,7 +215,7 @@ export class Channel {
 	 * Send an outbound message
 	 * @param {object} message
 	 */
-	send(message) {
+	send(message) { // eslint-disable-line no-unused-vars
 
 	}
 
@@ -227,7 +227,7 @@ export class Channel {
 	 * Notify user of an inbound message
 	 * @param {object} message
 	 */
-	onMessage(message) {
+	onMessage(message) { // eslint-disable-line no-unused-vars
 
 	}
 
@@ -283,7 +283,7 @@ export class Receiver {
 	 * @param {string} method Name of the method to invoke
 	 * @param {array} args Arguments to invoke with
 	 */
-	[Ozora.receiver]({method, args}) {
+	[Ozora.receiver]({method, args}) { // eslint-disable-line no-unused-vars
 
 	}
 

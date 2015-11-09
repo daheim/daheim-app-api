@@ -1,5 +1,5 @@
 import createDebug from 'debug';
-let debug = createDebug('dhm:core');
+let debug = createDebug('dhm:core'); // eslint-disable-line no-unused-vars
 
 import DhmProfileCamera from './dhm_profile_camera';
 
@@ -46,8 +46,6 @@ import DhmProfileCamera from './dhm_profile_camera';
 	})
 
 	.controller('SiteCtrl', function($scope, $timeout, $mdSidenav, $mdMedia, auth, $location) {
-		var self = this;
-
 		$scope.$media = $mdMedia;
 		$scope.openMenu = function() {
 			$timeout(function() { $mdSidenav('left').open(); });

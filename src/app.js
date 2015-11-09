@@ -2,25 +2,19 @@ require('./bootstrap');
 if (process.env.NEW_RELIC_LICENSE_KEY) {require('newrelic');}
 
 import {Passport} from 'passport';
+import express from 'express';
 import Azure from './azure';
 import User from './user';
 import UserStore from './user_store';
 import TokenHandler from './token_handler';
 import Realtime from './realtime';
 import config from './config';
+import bodyParser from 'body-parser';
+import log from './log';
 
 import createDebug from 'debug';
 let debug = createDebug('dhm:app');
-
-var express = require('express');
-
-var request = require('request-promise');
-var Promise = require('bluebird');
-var util = require('util');
-var zlib = require('zlib');
-var bodyParser = require('body-parser');
-
-var log = require('./log');
+debug('starting server');
 
 var app = express();
 var server = require('http').Server(app);
@@ -57,14 +51,6 @@ app.get('/js/config.js', function(req, res) {
 	res.send('angular.module("dhm").constant("config", ' + JSON.stringify(cfg) + ');');
 });
 
-
-
-var germans = [];
-var friends = [];
-
-
-
-
 // log errors
 app.use(log.errorLogger());
 
@@ -88,6 +74,8 @@ app.use(function(err, req, res, next) {
 	}
 
 	res.type('txt').send('Internal Server Error. Request identifier: ' + req.id);
+
+	next();
 });
 
 

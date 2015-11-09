@@ -38,12 +38,12 @@ function Socket($scope) {
 		$scope.$emit(prefix + msg.data[0], msg.data[1]);
 	};
 
-	socket.on('reconnecting', function(attempts) {
+	socket.on('reconnecting', function(attemptsIgnored) {
 		$scope.$apply(function() {
 			$scope[prefix + 'state'] = 'reconnecting';
 		});
 	});
-	socket.on('reconnect_error', function(err) {
+	socket.on('reconnect_error', function(errIgnored) {
 		$scope.$apply(function() {
 			$scope[prefix + 'state'] = 'error';
 		});
@@ -53,7 +53,7 @@ function Socket($scope) {
 			$scope[prefix + 'state'] = 'connected';
 		});
 	});
-	socket.on('error', function(err) {
+	socket.on('error', function(errIgnored) {
 		$scope.$apply(function() {
 			$scope[prefix + 'state'] = 'error';
 		});

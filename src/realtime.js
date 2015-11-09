@@ -1,9 +1,7 @@
 import sio from 'socket.io';
-import Promise from 'bluebird';
 import {default as EncounterRegistry, OzoraUserEncounterInterface} from './localheim';
-import EventEmitter from 'events';
 import IceServerProvider from './ice_server_provider';
-import {default as Ozora, SioChannel, SimpleReceiver, WhitelistReceiver} from './ozora';
+import {default as Ozora, SioChannel, WhitelistReceiver} from './ozora';
 
 import createDebug from 'debug';
 const debug = createDebug('dhm:realtime');
@@ -60,8 +58,6 @@ class Realtime {
 		});
 	}
 }
-
-const $socket = Symbol();
 
 class Zero extends WhitelistReceiver {
 

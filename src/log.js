@@ -21,7 +21,7 @@ function BunyanStream(opt) {
 
 	this.logger = new LogentriesLogger(opt);
 	this.logger.on('error', function(err) {
-		console.error('logentries error:', err);
+		console.error('logentries error:', err); // eslint-disable-line no-console
 	});
 }
 util.inherits(BunyanStream, stream.Writable);

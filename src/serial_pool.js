@@ -1,7 +1,7 @@
 import Promise from 'bluebird';
 import createDebug from 'debug';
 
-const debug = createDebug('dhm:serial');
+const debug = createDebug('dhm:serial'); // eslint-disable-line no-unused-vars
 
 const $current = Symbol();
 const $counter = Symbol();

@@ -4,7 +4,7 @@ function ResizeDirective($window) {
 
 	return {
 		restrict: 'A',
-		link: ($scope, $element) => {
+		link: ($scope) => {
 			//'ngInject';
 
 			let w = angular.element($window);
@@ -15,7 +15,7 @@ function ResizeDirective($window) {
 				};
 			};
 
-			$scope.$watch($scope.getWindowDimensions, function(newValue, oldValue) {
+			$scope.$watch($scope.getWindowDimensions, function(newValue, oldValueIgnored) {
 				$scope.windowHeight = newValue.h;
 				$scope.windowWidth = newValue.w;
 			}, true);

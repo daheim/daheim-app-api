@@ -160,7 +160,7 @@ export default class LocalheimClient extends EventEmitter {
 		}
 	}
 
-	async onNegotiatorClose(negotiator, reason) {
+	async onNegotiatorClose(negotiator, reason) { // eslint-disable-line no-unused-vars
 		if (negotiator !== this[$negotiator]) { return; }
 		delete this[$negotiator];
 

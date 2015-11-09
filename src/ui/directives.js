@@ -23,7 +23,7 @@ app.directive('dhmSizeWatcher', function() {
 app.directive('dhmCenter', function() {
 	return {
 		restrict: 'A',
-		link: ($scope, $element, attributes) => {
+		link: ($scope, $element) => {
 
 			$element.css('position', 'absolute');
 
@@ -67,7 +67,7 @@ app.directive('dhmMaxVideoSize', function() {
 	return {
 		restrict: 'A',
 		link: ($scope, $element, attributes) => {
-			$scope.$watch(attributes.dhmMaxVideoSize, value => {
+			$scope.$watch(attributes.dhmMaxVideoSize, () => {
 				setSize();
 			});
 
@@ -113,10 +113,10 @@ app.filter('trusted', function($sce) {
 	};
 });
 
-app.directive('dhmSrcObject', function($window) {
+app.directive('dhmSrcObject', function() {
 	return {
 		restrict: 'A',
-		link: function(scope, element, attributes, controller, transcludeFn) {
+		link: function(scope, element, attributes) {
 			scope.$watch(attributes.dhmSrcObject, function(value) {
 				if (value) {
 					WebRTC.attachMediaStream(element[0], value);

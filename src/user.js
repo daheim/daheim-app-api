@@ -115,7 +115,7 @@ export default class User {
 			if (typeof req.body.data !== 'string') { throw new Error('data must be defined'); }
 			if (req.body.data.substring(0, header.length) !== header) { throw new Error('only base64 image/png data urls are supported'); }
 			let buffer = new Buffer(req.body.data.substring(header.length), 'base64');
-			let r = await this[$userStore].uploadProfilePicture(req.user.id, buffer);
+			let rIgnored = await this[$userStore].uploadProfilePicture(req.user.id, buffer);
 			res.send({});
 		} catch (err) {
 			next(err);
