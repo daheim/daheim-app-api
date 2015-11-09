@@ -353,6 +353,14 @@ class OzoraSocket extends SimpleReceiver {
 
 	auth({userId}) {
 		this[$ozora].userId = userId;
+		this[$ozora].user = {
+			id: userId,
+			profile: {
+				name: userId,
+				languages: [],
+				topics: []
+			}
+		};
 	}
 
 	createEncounter({callbackId}) {
