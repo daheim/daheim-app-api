@@ -1,5 +1,5 @@
+import './optional_newrelic';
 import './bootstrap';
-if (process.env.NEW_RELIC_LICENSE_KEY) {require('newrelic');}
 
 import {Passport} from 'passport';
 import express from 'express';
