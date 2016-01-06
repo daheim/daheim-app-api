@@ -58,6 +58,18 @@ var log = bunyan.createLogger({
 });
 log.bunyanStream = bunyanStream;
 
+var eventLog = bunyan.createLogger({
+	name: 'event',
+	level: 'debug',
+	streams: streams,
+	serializers: {
+		err: bunyan.stdSerializers.err
+	}
+});
+log.event = function(name, data) {
+	eventLog.info(data, name);
+};
+
 function defaultGenerateRequestId(req) {
 	if (!req.id) {
 		req.id = uuid.v4();
