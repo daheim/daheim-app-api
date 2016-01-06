@@ -45,7 +45,8 @@ class Realtime {
 		let zero = new Zero({
 			registry: this[$registry],
 			tokenHandler: this[$tokenHandler],
-			userStore: this[$userStore]
+			userStore: this[$userStore],
+			log: this[$log]
 		});
 		ozora.register(zero);
 
@@ -61,18 +62,25 @@ class Realtime {
 
 class Zero extends WhitelistReceiver {
 
-	constructor({registry, tokenHandler, userStore}) {
+	constructor({registry, tokenHandler, userStore, log}) {
 		super(['auth', 'getUserId', 'ready', 'createEncounter']);
 		this[$registry] = registry;
 		this[$tokenHandler] = tokenHandler;
 		this[$userStore] = userStore;
+		this[$log] = log;
 	}
 
 	async auth({accessToken}) {
-		let id = this[$tokenHandler].verifyAccessToken(accessToken);
-		let profile = await this[$userStore].getProfile(id);
-		this.ozora.user = {id, profile};
-		this.ozora.userId = id;
+		try {
+			let id = this[$tokenHandler].verifyAccessToken(accessToken);
+			let profile = await this[$userStore].getProfile(id);
+			this[$log].event('ozora_auth_success', {userId: id});
+			this.ozora.user = {id, profile};
+			this.ozora.userId = id;
+		} catch (err) {
+			this[$log].event('ozora_auth_error', {err});
+			throw err;
+		}
 	}
 
 	createEncounter({callbackId}) {
