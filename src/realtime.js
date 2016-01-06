@@ -27,7 +27,7 @@ class Realtime {
 		this[$userStore] = userStore;
 
 		let iceServerProvider = new IceServerProvider(config.get('ice'));
-		this[$registry] = new EncounterRegistry({iceServerProvider});
+		this[$registry] = new EncounterRegistry({iceServerProvider, log});
 	}
 
 	listen(server) {

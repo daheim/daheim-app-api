@@ -9,8 +9,11 @@ const $state = Symbol('state');
 const $members = Symbol('members');
 const $registry = Symbol();
 const $iceServerProvider = Symbol();
+const $log = Symbol();
 
 const $close = Symbol();
+
+const $startTime = Symbol();
 
 const StateNew = 'new';
 const StateMatch = 'match';
@@ -19,13 +22,15 @@ const StateClosed = 'closed';
 
 export default class Encounter {
 
-	constructor({registry, participants, iceServerProvider} = {}) {
+	constructor({registry, participants, log, iceServerProvider} = {}) {
+		if (!log) { throw new Error('log must be defined'); }
 		if (!Array.isArray(participants)) { throw new Error(`participants must be defined as an array`); }
 		if (participants.length !== 2) { throw new Error(`only 2 participants are supported`); }
 
 		this[$registry] = registry;
 		this[$id] = uuid.v4();
 		this[$state] = StateNew;
+		this[$log] = log;
 		this[$iceServerProvider] = iceServerProvider;
 
 		this[$members] = {};
@@ -45,6 +50,9 @@ export default class Encounter {
 	start() {
 		if (this[$state] !== StateNew) { throw new Error(`cannot call start() in state '${this[$state]}'`); }
 		this[$state] = StateMatch;
+
+		this[$startTime] = new Date();
+		this[$log].event('encounter_started', {encounterId: this.id, userId: Object.keys(this[$members])});
 
 		for (let {id: selfId, member} of Object.values(this[$members])) {
 			let people = Object.values(this[$members]).map(({id, member}) => {
@@ -71,6 +79,8 @@ export default class Encounter {
 
 		let desc = this[$members][me.userId];
 		if (!desc) { throw new Error('user is not a member of the encounter'); }
+
+		this[$log].event('encounter_reconnect', {encounterId: this.id, userId: me.userId, encounterTime: new Date() - this[$startTime]});
 
 		debug('kicking out old user of %s', me.userId);
 		desc.member.close({reason: Registry.ReasonReplaced});
@@ -115,8 +125,12 @@ export default class Encounter {
 		if (desc.ready) { throw new Error('already accepted'); }
 		desc.ready = true;
 
+		this[$log].event('encounter_accept', {encounterId: this.id, userId: me.userId, encounterTime: new Date() - this[$startTime]});
+
 		let everyoneReady = Object.values(this[$members]).every(member => member.ready);
 		if (everyoneReady) {
+			this[$log].event('encounter_negotiate', {encounterId: this.id, userId: Object.keys(this[$members]), encounterTime: new Date() - this[$startTime]});
+
 			this[$state] = StateNegotiate;
 			setImmediate(async () => {
 				let iceServers = await this[$iceServerProvider].get();
@@ -157,7 +171,15 @@ export default class Encounter {
 
 	[$close]({reason}) {
 		if (this[$state] === StateClosed) { return; }
+		let success = this[$state] === StateNegotiate;
 		this[$state] = StateClosed;
+
+		this[$log].event('encounter_result', {
+			userId: Object.keys(this[$members]),
+			encounterTime: new Date() - this[$startTime],
+			result: success ? 'success' : 'rejected',
+			reason
+		});
 
 		if (reason !== Registry.ReasonBye) {
 			reason = Registry.ReasonPartnerClosed;
