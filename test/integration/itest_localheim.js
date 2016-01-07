@@ -9,6 +9,7 @@ import io from 'socket.io-client';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import createDebug from 'debug';
+import log from '../../src/log';
 
 let debug = createDebug('dhm:test:localheim');
 
@@ -24,7 +25,7 @@ describe('Localheim Integration', () => {
 
 	beforeEach(() => {
 		let iceServerProvider = new IceServerProvider();
-		let registry = new EncounterRegistry({iceServerProvider});
+		let registry = new EncounterRegistry({iceServerProvider, log});
 
 		server = http.createServer();
 		let io = sio.listen(server);
