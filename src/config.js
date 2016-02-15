@@ -24,7 +24,13 @@ convict.addFormat({
 			throw new Error('must be a JSON array');
 		}
 	},
-	coerce: val => JSON.parse(val)
+	coerce: val => {
+		try {
+			return JSON.parse(val);
+		} catch (err) {
+			return;
+		}
+	},
 });
 
 var conf = convict({
