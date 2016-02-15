@@ -297,6 +297,30 @@ app.controller('ReadyCtrl', ($scope, $location, auth) => {
 
 });
 
+import React from 'react';
+import TextField from 'material-ui/lib/text-field';
+import muiTheme from './theme';
+
+class A extends React.Component {
+	static childContextTypes = {
+		muiTheme: React.PropTypes.object,
+	};
+
+	getChildContext() {
+		return {muiTheme};
+	}
+
+	render() {
+		return (
+			<div>
+				<TextField fullWidth={true} floatingLabelText="Email Address" />
+			</div>
+		);
+	}
+}
+
+app.value('A', A);
+
 app.controller('HomeCtrl', ($scope, $location, user, User, auth, $timeout, session) => {
 
 	if (auth.accessToken) {

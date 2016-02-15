@@ -25,6 +25,8 @@ export default class User {
 	constructor({userStore, tokenHandler}) {
 		this[$userStore] = userStore;
 		this[$tokenHandler] = tokenHandler;
+		this.tokenHandler = tokenHandler;
+
 		let router = this[$router] = express.Router();
 
 		router.post('/register', bind(this, this[$postRegister]));
