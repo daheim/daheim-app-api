@@ -6,7 +6,9 @@
 		"semi": [2, "always"],
 
 		"no-unused-vars": [2, {vars:"all", "varsIgnorePattern": "[iI]gnored", "argsIgnorePattern": "[iI]gnored"}],
-		"no-console": 2
+		"no-console": 2,
+
+		"comma-dangle": [1, "always-multiline"]
 	},
 	"env": {
 		"es6": true,
