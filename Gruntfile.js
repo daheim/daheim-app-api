@@ -71,82 +71,12 @@ module.exports = function(grunt) {
 			]
 		},
 
-		concat: {
-			options: {
-				sourceMap: true
-			},
-			lib: {
-				src: [
-					require.resolve('jquery/dist/jquery.js'),
-					require.resolve('angular/angular.js'),
-					require.resolve('angular-aria/angular-aria.js'),
-					require.resolve('angular-animate/angular-animate.js'),
-					require.resolve('angular-material/angular-material.js'),
-					require.resolve('angular-route/angular-route.js'),
-					require.resolve('angular-resource/angular-resource.js'),
-					require.resolve('angulartics/src/angulartics.js'),
-					require.resolve('angulartics-google-analytics/lib/angulartics-google-analytics.js'),
-				],
-				dest: 'build/public/js/lib.js'
-			}
-		},
-
-		uglify: {
-			options: {
-				sourceMap: true,
-				sourceMapIncludeSources: true
-			},
-			lib: {
-				options: {
-					sourceMapIn: '<%=concat.lib.dest%>.map'
-				},
-				files: [{
-					expand: true,
-					src: '<%=concat.lib.dest%>',
-					ext: '.min.js'
-				}]
-			},
-			ui: {
-				options: {
-					sourceMapIn: '<%=exorcise.ui.dest%>'
-				},
-				files: [{
-					expand: true,
-					src: '<%=browserify.ui.dest%>',
-					ext: '.min.js'
-				}]
-			}
-		},
-
 		express: {
-			options: {
-				// Override defaults here
-			},
 			dev: {
 				options: {
 					script: 'app.js'
 				}
 			},
-		},
-
-		cssmin: {
-			lib: {
-				options: {
-					sourceMap: true
-				},
-				files: {
-					'build/public/style/lib.min.css': [require.resolve('angular-material/angular-material.css')]
-				}
-			},
-			ui: {
-				options: {
-					sourceMap: true
-				},
-				files: [{
-					src: 'style/**/*.css',
-					dest: 'build/public/style/ui.min.css'
-				}]
-			}
 		},
 
 		copy: {
@@ -194,67 +124,6 @@ module.exports = function(grunt) {
 					atBegin: true
 				}
 			},
-			cssui: {
-				files: ['style/**/*.css'],
-				tasks: ['cssmin:ui'],
-				options: {
-					atBegin: true
-				}
-			}
-		},
-
-		browserify: {
-			options: {
-				browserifyOptions: {
-					debug: true
-				}
-			},
-			ui: {
-				src: ['build/dist/src/ui/index.js'],
-				dest: 'build/public/js/ui.js'
-			}
-		},
-
-		exorcise: {
-			src: {
-				files: [{
-					expand: true,
-					cwd: 'build/dist/src/',
-					src: ['**/*.js'],
-					dest: 'build/dist/src/',
-					ext: '.js.map'
-				}]
-			},
-			ui: {
-				src: '<%=browserify.ui.dest%>',
-				dest: '<%=browserify.ui.dest%>.map'
-			}
-		},
-
-		ngAnnotate: {
-			options: {
-				singleQuotes: true,
-				sourceMap: true
-			},
-			ui: {
-				files: {
-					'<%=browserify.ui.dest%>': ['<%=browserify.ui.dest%>']
-				}
-			}
-		},
-
-		replace: {
-			indexDevel: {
-				src: ['build/public/index.html'],
-				overwrite: true,
-				replacements: [{
-					from: '<script src="js/lib.min.js"></script>',
-					to: '<script src="js/lib.js"></script>'
-				}, {
-					from: '<script src="js/ui.min.js"></script>',
-					to: '<script src="js/ui.js"></script>'
-				}]
-			}
 		},
 
 		esdoc : {
@@ -267,45 +136,18 @@ module.exports = function(grunt) {
 					]
 				}
 			}
-		}
+		},
+
+		webpack: {
+			ui: require('./webpack.config.js'),
+		},
 	});
 
-	grunt.loadNpmTasks('grunt-mocha-test');
-	grunt.loadNpmTasks('grunt-exec');
-	grunt.loadNpmTasks('grunt-contrib-clean');
-	grunt.loadNpmTasks('grunt-contrib-concat');
-	grunt.loadNpmTasks('grunt-babel');
-	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-jscs');
-	grunt.loadNpmTasks('grunt-contrib-copy');
-	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-cssmin');
-	grunt.loadNpmTasks('grunt-browserify');
-	grunt.loadNpmTasks('grunt-exorcise');
-	grunt.loadNpmTasks('grunt-ng-annotate');
-	grunt.loadNpmTasks('grunt-text-replace');
-	grunt.loadNpmTasks('grunt-eslint');
-	grunt.loadNpmTasks('grunt-esdoc');
-	grunt.loadNpmTasks('remap-istanbul');
-
-	var isDevel = process.env.DEVEL === '1';
-	var srcTasks = ['babel:src', 'browserify:ui', 'ngAnnotate:ui', 'exorcise:ui', 'exorcise:src'];
-	var libTasks = ['concat:lib'];
-	var publicTasks = ['copy:public'];
-	if (!isDevel) {
-		srcTasks.push('uglify:ui');
-		libTasks.push('uglify:lib');
-	} else {
-		publicTasks.push('replace:indexDevel');
-	}
-
-	grunt.registerTask('default', ['clean', 'lib', 'public', 'css', 'src']);
+	grunt.registerTask('default', ['clean', 'public', 'src', 'webpack']);
 
 	grunt.registerTask('doc', ['esdoc']);
-	grunt.registerTask('src', srcTasks);
-	grunt.registerTask('public', publicTasks);
-	grunt.registerTask('lib', libTasks);
-	grunt.registerTask('css', ['cssmin:lib', 'cssmin:ui']);
+	grunt.registerTask('src', ['babel:src']);
+	grunt.registerTask('public', ['copy:public']);
 
 	grunt.registerTask('server', ['loadEnv', 'express:dev']);
 

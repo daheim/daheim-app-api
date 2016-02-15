@@ -1,4 +1,3 @@
-import 'babel-core/polyfill';
 import Promise from 'bluebird';
 
 Promise.noConflict();

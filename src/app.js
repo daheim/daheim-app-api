@@ -21,6 +21,22 @@ var server = require('http').Server(app);
 
 let azure = Azure.createFromEnv();
 
+if (process.env.NODE_ENV === 'development') {
+	(function() {
+		var webpackDevMiddleware = require('webpack-dev-middleware');
+		var webpack = require('webpack');
+
+		var compiler = webpack(require('../../../webpack.config.js'));
+		app.use(webpackDevMiddleware(compiler, {
+			stats: {
+				colors: true,
+			},
+		}));
+	})();
+}
+
+
+
 app.use(log.requestLogger());
 app.enable('trust proxy');
 app.disable('x-powered-by');

@@ -13,8 +13,8 @@ var zlib = require('zlib');
 var io = require('socket.io-client');
 
 var log = require('../../src/log');
-var Realtime = require('../../src/realtime');
 
+import Realtime from '../../src/realtime';
 import convict from 'convict';
 
 describe('Realtime', function() {

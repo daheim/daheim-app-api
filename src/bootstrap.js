@@ -1,4 +1,4 @@
-import 'babel-core/polyfill';
+import 'babel-polyfill';
 import SourceMapSupport from 'source-map-support';
 SourceMapSupport.install();
 
