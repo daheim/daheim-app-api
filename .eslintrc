@@ -1,5 +1,6 @@
 {
 	"parser": "babel-eslint",
+	"plugins": ["react"],
 	"rules": {
 		"indent": [2, "tab"],
 		"linebreak-style": [2, "unix"],

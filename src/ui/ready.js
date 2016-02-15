@@ -42,6 +42,7 @@ app.factory('User', function($resource, auth) {
 	return $resource('/users/:method/:method2', null, {
 		register: {method: 'post', params: {method: 'register'}},
 		login: {method: 'post', params: {method: 'login'}},
+		changePassword: {method: 'post', params: {method: 'password'}, headers: auth.headers},
 		requestLoginLink: {method: 'post', params: {method: 'loginLink'}},
 		saveProfile: {method: 'post', params: {method: 'profile'}, headers: auth.headers},
 		getProfile: {params: {method: 'profile'}, headers: auth.headers},

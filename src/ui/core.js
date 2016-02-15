@@ -8,7 +8,7 @@ import DhmProfileCamera from './dhm_profile_camera';
 
 	var angular = window.angular;
 
-	angular.module('dhm', ['ngRoute', 'ngMaterial', 'ngResource', 'angulartics', 'angulartics.google.analytics', DhmProfileCamera.name])
+	angular.module('dhm', ['ngRoute', 'ngMaterial', 'ngResource', 'angulartics', 'angulartics.google.analytics', DhmProfileCamera.name, 'react'])
 
 	.config(function($routeProvider) {
 		$routeProvider
@@ -29,7 +29,7 @@ import DhmProfileCamera from './dhm_profile_camera';
 				controller: 'RealmStatusCtrl'
 			})
 			.when('/settings', {
-				templateUrl: 'settings.html',
+				templateUrl: 'partials/settings.html',
 				controller: 'SettingsCtrl'
 			})
 			.otherwise({

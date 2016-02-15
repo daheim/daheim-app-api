@@ -8,6 +8,7 @@ module.exports = {
 		lib: './vendor.js',
 		ui: [
 			path.join(__dirname, 'src/ui/index.js'),
+			'ngReact/ngReact.js',
 
 			'./style/default.css',
 			'./style/effects.css',
@@ -29,6 +30,7 @@ module.exports = {
 			chunksSortMode: 'dependency',
 		}),
 		new ExtractTextPlugin('style/[name].css'),
+		new webpack.optimize.DedupePlugin(),
 	],
 	module: {
 		loaders: [
