@@ -20,7 +20,7 @@ module.exports = {
 		filename: 'js/[name].js',
 		chunkFilename: '[chunkhash].js',
 	},
-	devtool: 'source-map',
+	devtool: 'eval',
 	plugins: [
 		new HtmlWebpackPlugin({
 			inject: 'head',
@@ -32,9 +32,9 @@ module.exports = {
 	],
 	module: {
 		loaders: [
+			{test: /\.jsx?$/, exclude: /(node_modules|bower_components)/, loader: 'ng-annotate!babel?cacheDirectory'},
 			{test: /\.json$/, loader: 'json'},
-			{test: /\.jsx?$/, exclude: /(node_modules|bower_components)/, loader: 'ng-annotate!babel'},
-			{test: /\.css$/, loader: ExtractTextPlugin.extract('style', 'css')}
+			{test: /\.css$/, loader: ExtractTextPlugin.extract('style', 'css')},
 		],
 	},
 	node: {
