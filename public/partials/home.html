@@ -13,7 +13,6 @@
 						<label>Email Address</label>
 						<input name="username" type="text" ng-model="email" autofocus>
 					</md-input-container>
-					<react-component name="A" props="props" watch-depth="reference" />
 					<md-input-container ng-show="showPassword">
 						<label>Password</label>
 						<input name="password" type="text" ng-model="password">
@@ -23,6 +22,9 @@
 						<md-progress-circular md-mode="indeterminate" md-diameter="36" style="margin: -26px -24px !important;" ng-show="working"></md-progress-circular>
 					</div>
 				</form>
+
+				<react-component name="RegistrationForm" props="props" watch-depth="reference" />
+
 			</div>
 		</div>
 	</md-content>

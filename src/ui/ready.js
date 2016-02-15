@@ -299,9 +299,13 @@ app.controller('ReadyCtrl', ($scope, $location, auth) => {
 
 import React from 'react';
 import TextField from 'material-ui/lib/text-field';
+import RaisedButton from 'material-ui/lib/raised-button';
+import Checkbox from 'material-ui/lib/checkbox';
 import muiTheme from './theme';
+import LinkedStateMixin from 'react-addons-linked-state-mixin';
+import reactMixin from 'react-mixin';
 
-class A extends React.Component {
+class RegistrationForm extends React.Component {
 	static childContextTypes = {
 		muiTheme: React.PropTypes.object,
 	};
@@ -310,18 +314,50 @@ class A extends React.Component {
 		return {muiTheme};
 	}
 
+	state = {
+		email: '',
+		password: '',
+		newsletter: false,
+		agree: false,
+	};
+
+	handleNewsletterChange = e => this.setState({newsletter: e.target.checked});
+	handleAgreeChange = e => this.setState({agree: e.target.checked});
+
+	handleRegisterClick = async e => {
+		e.preventDefault();
+
+		let resultIgnored = await this.props.ng.User.register({
+			email: this.state.email,
+			password: this.state.password,
+			newsletter: this.state.newsletter,
+		}).$promise;
+	};
+
 	render() {
 		return (
-			<div>
-				<TextField fullWidth={true} floatingLabelText="Email Address" />
-			</div>
+			<form onSubmit={this.handleRegisterClick}>
+				<TextField fullWidth={true} floatingLabelText="E-Mail Addresse" valueLink={this.linkState('email')} />
+				<TextField style={{marginTop: -10}} type="password" fullWidth={true} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
+				<Checkbox style={{marginTop: 20}} label="Ja, ich möchte zum Newsletter anmelden" checked={this.state.newsletter} onCheck={this.handleNewsletterChange} />
+				<Checkbox style={{marginTop: 10}} label="Ja, ich akzeptiere die Allgemeinen Geschäftsbedingungen" checked={this.state.agree} onCheck={this.handleAgreeChange} />
+				<RaisedButton disabled={!this.state.agree} type="submit" style={{marginTop: 20}} fullWidth={true} primary={true} label="Jetzt registrieren" />
+				<p style={{fontSize: 14, marginTop: 20}}>Klicken Sie hier um <a href="#">sich anzumelden</a>. <a href="#">Allgemeinen Geschäftsbedingungen</a> und <a href="#">Datenschutz</a></p>
+			</form>
 		);
 	}
 }
+reactMixin(RegistrationForm.prototype, LinkedStateMixin);
 
-app.value('A', A);
+app.value('RegistrationForm', RegistrationForm);
 
 app.controller('HomeCtrl', ($scope, $location, user, User, auth, $timeout, session) => {
+
+	$scope.props = {
+		ng: {
+			User,
+		},
+	};
 
 	if (auth.accessToken) {
 		return $location.path('/ready');
