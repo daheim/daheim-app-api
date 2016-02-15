@@ -1,24 +1,11 @@
 var path = require('path');
+var webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
-var ngAnnotatePlugin = require('ng-annotate-webpack-plugin');
 
 module.exports = {
 	entry: {
-		lib: [
-			'babel-polyfill',
-			'jquery/dist/jquery.js',
-			'angular/angular.js',
-			'angular-aria/angular-aria.js',
-			'angular-animate/angular-animate.js',
-			'angular-material/angular-material.js',
-			'angular-route/angular-route.js',
-			'angular-resource/angular-resource.js',
-			'angulartics/src/angulartics.js',
-			'angulartics-google-analytics/lib/angulartics-google-analytics.js',
-
-			'angular-material/angular-material.css',
-		],
+		lib: './vendor.js',
 		ui: [
 			path.join(__dirname, 'src/ui/index.js'),
 
@@ -42,16 +29,15 @@ module.exports = {
 			chunksSortMode: 'dependency',
 		}),
 		new ExtractTextPlugin('style/[name].css'),
-		new ngAnnotatePlugin({add: true, singleQuotes: true}),
 	],
 	module: {
 		loaders: [
 			{test: /\.json$/, loader: 'json'},
-			{test: /\.jsx?$/, exclude: /(node_modules|bower_components)/, loader: 'babel'},
-			{test: /\.css$/, loader: ExtractTextPlugin.extract("style-loader", "css-loader")}
+			{test: /\.jsx?$/, exclude: /(node_modules|bower_components)/, loader: 'ng-annotate!babel'},
+			{test: /\.css$/, loader: ExtractTextPlugin.extract('style', 'css')}
 		],
 	},
 	node: {
-	  fs: 'empty',
+		fs: 'empty',
 	},
 };
