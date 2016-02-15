@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import {default as Ozora, SioChannel} from '../../ozora';
+import {default as Ozora, SioChannel} from '../../server/ozora';
 
 import createDebug from 'debug';
 let debug = createDebug('dhm:localheim:ozora');

@@ -110,7 +110,7 @@ module.exports = function(grunt) {
 
 		watch: {
 			src: {
-				files: ['src/**/*.js', 'test/**/*.js'],
+				files: ['src/server/**/*.js', 'test/**/*.js'],
 				tasks: ['src', 'server'],
 				options: {
 					atBegin: true,

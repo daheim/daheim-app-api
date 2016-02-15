@@ -1,15 +1,15 @@
-import '../../src/bootstrap';
+import '../../src/server/bootstrap';
 import sio from 'socket.io';
 import Promise from 'bluebird';
-import {default as EncounterRegistry, OzoraUserEncounterInterface} from '../../src/localheim';
-import IceServerProvider from '../../src/ice_server_provider';
-import {default as Ozora, SioChannel, SimpleReceiver} from '../../src/ozora';
+import {default as EncounterRegistry, OzoraUserEncounterInterface} from '../../src/server/localheim';
+import IceServerProvider from '../../src/server/ice_server_provider';
+import {default as Ozora, SioChannel, SimpleReceiver} from '../../src/server/ozora';
 import http from 'http';
 import io from 'socket.io-client';
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import createDebug from 'debug';
-import log from '../../src/log';
+import log from '../../src/server/log';
 
 let debug = createDebug('dhm:test:localheim');
 

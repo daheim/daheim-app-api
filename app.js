@@ -1,2 +1,2 @@
-module.exports = require('./build/dist/src/app');
+module.exports = require('./build/dist/src/server/app');
 module.exports.start();

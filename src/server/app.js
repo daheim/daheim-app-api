@@ -11,6 +11,8 @@ import Realtime from './realtime';
 import config from './config';
 import bodyParser from 'body-parser';
 import log from './log';
+//import {User as ModelUser} from './model';
+
 
 import createDebug from 'debug';
 let debug = createDebug('dhm:app');
@@ -26,7 +28,7 @@ if (process.env.NODE_ENV === 'development') {
 		var webpackDevMiddleware = require('webpack-dev-middleware');
 		var webpack = require('webpack');
 
-		var compiler = webpack(require('../../../webpack.config.js'));
+		var compiler = webpack(require('../../../../webpack.config.js'));
 		app.use(webpackDevMiddleware(compiler, {
 			stats: {
 				colors: true,
@@ -42,7 +44,7 @@ app.enable('trust proxy');
 app.disable('x-powered-by');
 app.use(bodyParser.json({limit: '1mb'}));
 
-app.use(express.static(__dirname + '/../../../build/public'));
+app.use(express.static(__dirname + '/../../../../build/public'));
 
 let passport = new Passport();
 let tokenHandler = new TokenHandler({passport, secret: process.env.SECRET});

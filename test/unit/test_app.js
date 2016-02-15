@@ -1,4 +1,4 @@
-require('../../src/bootstrap');
+require('../../src/server/bootstrap');
 var chai = require('chai');
 var sinon = require('sinon');
 var supertest = require('supertest');
@@ -11,7 +11,7 @@ var Promise = require('bluebird');
 var util = require('util');
 var zlib = require('zlib');
 
-var log = require('../../src/log');
+var log = require('../../src/server/log');
 //var app = require('../../src/app').app;
 
 describe('Web', function() {

@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import EventEmitter from 'events';
-import {WhitelistReceiver} from '../../ozora';
+import {WhitelistReceiver} from '../../server/ozora';
 import WebRTC from 'webrtc-adapter-test';
 import IceGatherer from './ice_gatherer';
 import uuid from 'node-uuid';

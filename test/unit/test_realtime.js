@@ -1,4 +1,4 @@
-require('../../src/bootstrap');
+require('../../src/server/bootstrap');
 var chai = require('chai');
 var sinon = require('sinon');
 var supertest = require('supertest');
@@ -12,9 +12,9 @@ var util = require('util');
 var zlib = require('zlib');
 var io = require('socket.io-client');
 
-var log = require('../../src/log');
+var log = require('../../src/server/log');
 
-import Realtime from '../../src/realtime';
+import Realtime from '../../src/server/realtime';
 import convict from 'convict';
 
 describe('Realtime', function() {
