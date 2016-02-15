@@ -1,5 +1,8 @@
 module.exports = function(grunt) {
 
+	var env = loadEnv();
+	require('load-grunt-tasks')(grunt);
+
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 
@@ -115,6 +118,17 @@ module.exports = function(grunt) {
 			}
 		},
 
+		express: {
+			options: {
+				// Override defaults here
+			},
+			dev: {
+				options: {
+					script: 'app.js'
+				}
+			},
+		},
+
 		cssmin: {
 			lib: {
 				options: {
@@ -167,9 +181,10 @@ module.exports = function(grunt) {
 		watch: {
 			src: {
 				files: ['src/**/*.js', 'test/**/*.js'],
-				tasks: ['src'],
+				tasks: ['src', 'server'],
 				options: {
-					atBegin: true
+					atBegin: true,
+					spawn: false,
 				}
 			},
 			public: {
@@ -292,8 +307,33 @@ module.exports = function(grunt) {
 	grunt.registerTask('lib', libTasks);
 	grunt.registerTask('css', ['cssmin:lib', 'cssmin:ui']);
 
+	grunt.registerTask('server', ['loadEnv', 'express:dev']);
 
 	grunt.registerTask('check', ['jscs', 'eslint', 'babel', 'mochaTest:unit']);
 	grunt.registerTask('test', ['mochaTest']);
 	grunt.registerTask('cover', ['exec:cover', 'remapIstanbul:build']);
+
+	function loadEnv() {
+		var result = {};
+		try {
+			require('fs').readFileSync('.env').toString().split('\n').forEach(function(line) {
+				if (line[0] === '#') {
+					return;
+				}
+				var i = line.indexOf('=');
+				result[line.substring(0, i)] = line.substring(i + 1);
+			});
+		} catch (err) {
+			if (err.code !== 'ENOENT') { throw err; }
+		}
+		return result;
+	}
+
+	grunt.registerTask('loadEnv', function() {
+		var env = loadEnv();
+		Object.keys(env).forEach(function(key) {
+			process.env[key] = env[key];
+		});
+	});
+
 };
