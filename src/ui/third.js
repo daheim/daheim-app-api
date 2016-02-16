@@ -9,13 +9,13 @@ let debug = createDebug('dhm:third');
 
 let app = window.angular.module('dhm');
 
-app.config(function($routeProvider) {
-	$routeProvider
-		.when('/third', {
-			templateUrl: 'partials/third.html',
-			controller: 'ThirdCtrl'
-		});
-});
+// app.config(function($routeProvider) {
+// 	$routeProvider
+// 		.when('/third', {
+// 			templateUrl: 'partials/third.html',
+// 			controller: 'ThirdCtrl'
+// 		});
+// });
 
 app.config(function($mdThemingProvider) {
 	$mdThemingProvider

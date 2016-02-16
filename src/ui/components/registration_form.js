@@ -3,18 +3,13 @@ import TextField from 'material-ui/lib/text-field';
 import RaisedButton from 'material-ui/lib/raised-button';
 import Checkbox from 'material-ui/lib/checkbox';
 import CircularProgress from 'material-ui/lib/circular-progress';
-import muiTheme from '../theme';
 import LinkedStateMixin from 'react-addons-linked-state-mixin';
 import reactMixin from 'react-mixin';
+import {Link} from 'react-router';
+
+import interop from '../interop';
 
 export class RegistrationForm extends React.Component {
-	static childContextTypes = {
-		muiTheme: React.PropTypes.object,
-	};
-
-	getChildContext() {
-		return {muiTheme};
-	}
 
 	state = {
 		email: '',
@@ -57,7 +52,7 @@ export class RegistrationForm extends React.Component {
 					password: this.state.password,
 					newsletter: this.state.newsletter,
 				}),
-				headers: {Authorization: this.props.ng.auth.authHeader()},
+				headers: {Authorization: interop.auth.authHeader()},
 			});
 
 			// TODO: process auth token
@@ -112,6 +107,10 @@ export class RegistrationForm extends React.Component {
 		return !valid.hasErrors;
 	}
 
+	componentDidMount() {
+		this.refs.email.focus();
+	}
+
 	render() {
 		let error;
 		if (this.state.error === 'user_already_exists') {
@@ -140,14 +139,14 @@ export class RegistrationForm extends React.Component {
 		return (
 			<form onSubmit={this.handleRegisterClick} style={{position: 'relative'}}>
 				{loading}
-				<h1>Jetzt kostenlos Mitglied werden!</h1>
+				<h1 style={{fontSize: 22}}>Jetzt kostenlos Mitglied werden!</h1>
 				{error}
-				<TextField fullWidth={true} floatingLabelText="E-Mail Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
+				<TextField ref="email" fullWidth={true} floatingLabelText="E-Mail Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
 				<TextField style={{marginTop: -10}} type="password" fullWidth={true} errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
 				<Checkbox style={{marginTop: 20}} label="Ja, ich möchte zum Newsletter anmelden" checked={this.state.newsletter} onCheck={this.handleNewsletterChange} />
-				<Checkbox style={{marginTop: 10}} label="Ja, ich akzeptiere die Allgemeinen Geschäftsbedingungen" checked={this.state.agree} onCheck={this.handleAgreeChange} />
+				<Checkbox style={{marginTop: 10}} label="Ja, ich akzeptiere die AGB" checked={this.state.agree} onCheck={this.handleAgreeChange} />
 				<RaisedButton disabled={!this.state.agree} type="submit" style={{marginTop: 20}} fullWidth={true} primary={true} label="Jetzt registrieren" />
-				<p style={{fontSize: 14, marginTop: 20}}>Klicken Sie hier, um <a href="#">sich anzumelden</a>. <a href="#">Allgemeinen Geschäftsbedingungen</a> und <a href="#">Datenschutzrichtlinien</a></p>
+				<p style={{fontSize: 14, marginTop: 20}}>Klicken Sie hier, um <Link to="/auth">sich anzumelden</Link>. <a href="#">Allgemeinen Geschäftsbedingungen</a> und <a href="#">Datenschutzrichtlinien</a></p>
 			</form>
 		);
 	}

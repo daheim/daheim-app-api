@@ -61,14 +61,14 @@ app.factory('$exceptionHandler', function() {
 });
 
 
-app.config($routeProvider => {
-	$routeProvider.when('/', {templateUrl: 'partials/home.html', controller: 'HomeCtrl'});
-	$routeProvider.when('/login', {templateUrl: 'partials/login.html', controller: 'LoginCtrl'});
-	$routeProvider.when('/register/profile', {templateUrl: 'partials/register_profile.html', controller: 'RegisterProfileCtrl'});
-	$routeProvider.when('/register/picture', {templateUrl: 'partials/register_picture.html', controller: 'RegisterPictureCtrl'});
-	$routeProvider.when('/login/token/:token', {templateUrl: 'partials/login_token.html', controller: 'LoginTokenCtrl'});
-	$routeProvider.when('/ready', {templateUrl: 'partials/ready.html', controller: 'ReadyCtrl'});
-});
+// app.config($routeProvider => {
+// 	$routeProvider.when('/', {templateUrl: 'partials/home.html', controller: 'HomeCtrl'});
+// 	$routeProvider.when('/login', {templateUrl: 'partials/login.html', controller: 'LoginCtrl'});
+// 	$routeProvider.when('/register/profile', {templateUrl: 'partials/register_profile.html', controller: 'RegisterProfileCtrl'});
+// 	$routeProvider.when('/register/picture', {templateUrl: 'partials/register_picture.html', controller: 'RegisterPictureCtrl'});
+// 	$routeProvider.when('/login/token/:token', {templateUrl: 'partials/login_token.html', controller: 'LoginTokenCtrl'});
+// 	$routeProvider.when('/ready', {templateUrl: 'partials/ready.html', controller: 'ReadyCtrl'});
+// });
 
 app.run(($rootScope, $mdDialog) => {
 	$rootScope.$on('$routeChangeError', (e, current, previous, err) => {

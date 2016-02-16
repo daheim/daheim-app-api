@@ -8,38 +8,38 @@ import DhmProfileCamera from './dhm_profile_camera';
 
 	var angular = window.angular;
 
-	angular.module('dhm', ['ngRoute', 'ngMaterial', 'ngResource', 'angulartics', 'angulartics.google.analytics', DhmProfileCamera.name, 'react'])
+	angular.module('dhm', ['ngMaterial', 'ngResource', 'angulartics', 'angulartics.google.analytics', DhmProfileCamera.name, 'react'])
 
-	.config(function($routeProvider) {
-		$routeProvider
-			.when('/', {
-				templateUrl: 'partials/ready.html',
-				controller: 'ReadyCtrl'
-			})
-			.when('/second', {
-				templateUrl: 'partials/second.html',
-				controller: 'SecondCtrl'
-			})
-			.when('/auctions', {
-				templateUrl: 'auctions.html',
-				controller: 'AuctionsCtrl'
-			})
-			.when('/realmStatus', {
-				templateUrl: 'realmStatus.html',
-				controller: 'RealmStatusCtrl'
-			})
-			.when('/settings', {
-				templateUrl: 'partials/settings.html',
-				controller: 'SettingsCtrl'
-			})
-			.otherwise({
-				redirectTo: '/'
-			});
-	})
+	// .config(function($routeProvider) {
+	// 	$routeProvider
+	// 		.when('/', {
+	// 			templateUrl: 'partials/ready.html',
+	// 			controller: 'ReadyCtrl'
+	// 		})
+	// 		.when('/second', {
+	// 			templateUrl: 'partials/second.html',
+	// 			controller: 'SecondCtrl'
+	// 		})
+	// 		.when('/auctions', {
+	// 			templateUrl: 'auctions.html',
+	// 			controller: 'AuctionsCtrl'
+	// 		})
+	// 		.when('/realmStatus', {
+	// 			templateUrl: 'realmStatus.html',
+	// 			controller: 'RealmStatusCtrl'
+	// 		})
+	// 		.when('/settings', {
+	// 			templateUrl: 'partials/settings.html',
+	// 			controller: 'SettingsCtrl'
+	// 		})
+	// 		// .otherwise({
+	// 		// 	redirectTo: '/'
+	// 		// });
+	// })
 
-	.config(function($locationProvider) {
-		$locationProvider.hashPrefix('!');
-	})
+	// .config(function($locationProvider) {
+	// 	$locationProvider.hashPrefix('!');
+	// })
 
 	.run(($rootScope, config) => {
 		$rootScope.config = config;

@@ -1,8 +1,14 @@
 body {
 	width: 100%;
 	background: #f2f2f2;
+	margin: 0;
+	padding: 0;
+	position: static;
 }
 
 html {
 	background: #f2f2f2;
+	margin: 0;
+	padding: 0;
+	position: static;
 }
