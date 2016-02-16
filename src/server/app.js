@@ -1,16 +1,17 @@
 import './optional_newrelic';
 import './bootstrap';
 
-import {Passport} from 'passport';
+import passport from 'passport';
 import express from 'express';
 import Azure from './azure';
 import User from './user';
 import UserStore from './user_store';
-import TokenHandler from './token_handler';
+import tokenHandler from './token_handler';
 import Realtime from './realtime';
 import config from './config';
 import bodyParser from 'body-parser';
 import log from './log';
+import api from './api';
 //import {User as ModelUser} from './model';
 
 
@@ -46,8 +47,6 @@ app.use(bodyParser.json({limit: '1mb'}));
 
 app.use(express.static(__dirname + '/../../../../build/public'));
 
-let passport = new Passport();
-let tokenHandler = new TokenHandler({passport, secret: process.env.SECRET});
 let userStore = new UserStore({azure});
 let user = new User({userStore, tokenHandler, passport});
 
@@ -56,6 +55,7 @@ realtime.listen(server);
 
 app.use(passport.initialize());
 app.use('/users', user.router);
+app.use('/api', api.router);
 
 app.get('/', function(req, res) {
 	res.send('Hello World!');

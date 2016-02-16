@@ -6,7 +6,7 @@ const SALT_WORK_FACTOR = 10;
 const MAX_LOGIN_ATTEMPTS = 10;
 const LOCK_TIME = 3 * 60 * 1000;
 
-class AuthError extends BaseError {
+export class AuthError extends BaseError {
 	constructor(m) { super(m); }
 }
 

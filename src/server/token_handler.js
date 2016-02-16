@@ -1,5 +1,6 @@
 import {Strategy as JwtStrategy} from 'passport-jwt';
 import jwt from 'jsonwebtoken';
+import passport from 'passport';
 
 import createDebug from 'debug';
 let debug = createDebug('dhm:token'); // eslint-disable-line no-unused-vars
@@ -7,7 +8,7 @@ let debug = createDebug('dhm:token'); // eslint-disable-line no-unused-vars
 const SECRETS = new WeakMap();
 const $passport = Symbol('passport');
 
-export default class TokenHandler {
+export class TokenHandler {
 
 	constructor({secret, passport}) {
 		if (!secret) { throw new Error('secret must be defined'); }
@@ -46,5 +47,6 @@ export default class TokenHandler {
 		let decoded = jwt.verify(accessToken, SECRETS[this], {audience: 'access'});
 		return decoded.sub;
 	}
-
 }
+
+export default new TokenHandler({passport, secret: process.env.SECRET});
