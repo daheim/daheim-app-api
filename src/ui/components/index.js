@@ -1,4 +1,6 @@
 
+export * from './history';
+
 export * from './registration_form';
 export * from './registration_page';
 

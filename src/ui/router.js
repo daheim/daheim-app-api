@@ -1,14 +1,15 @@
-import {Router, Route, IndexRoute, hashHistory} from 'react-router';
+import {Router, Route, IndexRoute} from 'react-router';
 import React from 'react';
 import {render} from 'react-dom';
 
 import interop from './interop';
 import muiTheme from './theme';
-import {RegistrationPage, DefaultLayout, LoginLayout} from './components';
+import {NotFoundPage, ReadyPage, VideoPage} from './components';
+import {RegistrationPage, DefaultLayout, LoginLayout, history} from './components';
 
 
 let routes = (
-	<Router history={hashHistory}>
+	<Router history={history}>
 		<Route path="/auth" component={LoginLayout}>
 			<IndexRoute component={RegistrationPage} />
 			<Route path="register" component={RegistrationPage} />
