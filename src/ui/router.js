@@ -14,7 +14,7 @@ let routes = (
 			<IndexRoute component={RegistrationPage} />
 			<Route path="register" component={RegistrationPage} />
 		</Route>
-		<Route path="*" component={DefaultLayout} />
+		<Route path="*" component={NotFoundPage} />
 	</Router>
 );
 
