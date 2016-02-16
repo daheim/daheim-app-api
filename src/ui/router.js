@@ -12,6 +12,7 @@ let routes = (
 	<Router history={history}>
 		<Route path="/" component={DefaultLayout}>
 			<IndexRoute component={ReadyPage} />
+			<Route path="video" component={VideoPage} />
 		</Route>
 		<Route path="/auth" component={LoginLayout}>
 			<IndexRoute component={RegistrationPage} />
