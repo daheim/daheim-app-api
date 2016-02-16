@@ -10,6 +10,9 @@ import {RegistrationPage, DefaultLayout, LoginLayout, history} from './component
 
 let routes = (
 	<Router history={history}>
+		<Route path="/" component={DefaultLayout}>
+			<IndexRoute component={ReadyPage} />
+		</Route>
 		<Route path="/auth" component={LoginLayout}>
 			<IndexRoute component={RegistrationPage} />
 			<Route path="register" component={RegistrationPage} />
