@@ -43,7 +43,7 @@ export class RegistrationForm extends React.Component {
 
 	async apiLogin() {
 		try {
-			let resultIgnored = await $.ajax({
+			let result = await $.ajax({
 				method: 'post',
 				url: '/api/register',
 				contentType: 'application/json',
@@ -55,7 +55,8 @@ export class RegistrationForm extends React.Component {
 				headers: {Authorization: interop.auth.authHeader()},
 			});
 
-			// TODO: process auth token
+			interop.auth.accessToken = result.accessToken;
+
 			this.setState({error: null});
 			return true;
 
