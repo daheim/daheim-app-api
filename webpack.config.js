@@ -37,6 +37,7 @@ module.exports = {
 			{test: /\.jsx?$/, exclude: /(node_modules|bower_components)/, loader: 'ng-annotate!babel?cacheDirectory'},
 			{test: /\.json$/, loader: 'json'},
 			{test: /\.css$/, loader: ExtractTextPlugin.extract('style', 'css')},
+			{test: /\.html$/, loader: 'html'},
 		],
 	},
 	node: {

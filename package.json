@@ -85,6 +85,7 @@
     "grunt-jscs": "^2.1.0",
     "grunt-mocha-test": "^0.12.7",
     "grunt-webpack": "^1.0.11",
+    "html-loader": "^0.4.3",
     "html-webpack-plugin": "^2.8.1",
     "istanbul": "^0.3.17",
     "json-loader": "^0.5.4",

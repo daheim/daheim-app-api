@@ -46,6 +46,7 @@ app.disable('x-powered-by');
 app.use(bodyParser.json({limit: '1mb'}));
 
 app.use(express.static(__dirname + '/../../../../build/public'));
+app.use(express.static(__dirname + '/../../../../public'));
 
 let userStore = new UserStore({azure});
 let user = new User({userStore, tokenHandler, passport});

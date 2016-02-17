@@ -1,12 +1,13 @@
 import React from 'react';
 
 import {AngularDirective} from './angular_directive';
+import thirdTemplate from '../../../public/partials/third.html';
 
 let app = angular.module('dhm');
 app.directive('dhmThird', () => {
 	return {
 		restrict: 'E',
-		templateUrl: '/partials/third.html',
+		template: thirdTemplate,
 		controller: 'ThirdCtrl',
 	};
 });

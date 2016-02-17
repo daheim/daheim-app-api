@@ -77,13 +77,11 @@ module.exports = function(grunt) {
 					script: 'app.js'
 				}
 			},
-		},
-
-		copy: {
-			public: {
-				expand: true,
-				src: 'public/**',
-				dest: 'build/'
+			server: {
+				options: {
+					script: 'app.js',
+					background: false,
+				}
 			}
 		},
 
@@ -117,13 +115,6 @@ module.exports = function(grunt) {
 					spawn: false,
 				}
 			},
-			public: {
-				files: ['public/**'],
-				tasks: ['public'],
-				options: {
-					atBegin: true
-				}
-			},
 		},
 
 		esdoc : {
@@ -143,13 +134,12 @@ module.exports = function(grunt) {
 		},
 	});
 
-	grunt.registerTask('default', ['clean', 'public', 'src', 'webpack']);
+	grunt.registerTask('default', ['clean', 'src', 'webpack']);
 
 	grunt.registerTask('doc', ['esdoc']);
 	grunt.registerTask('src', ['babel:src']);
-	grunt.registerTask('public', ['copy:public']);
 
-	grunt.registerTask('server', ['loadEnv', 'express:dev']);
+	grunt.registerTask('server', ['loadEnv', 'express:server']);
 
 	grunt.registerTask('check', ['jscs', 'eslint', 'babel', 'mochaTest:unit']);
 	grunt.registerTask('test', ['babel:src', 'mochaTest']);
