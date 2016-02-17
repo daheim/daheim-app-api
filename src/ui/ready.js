@@ -90,6 +90,11 @@ app.run(($rootScope, auth) => {
 	$rootScope.auth = auth;
 });
 
+// disable Angular navigation
+app.run($location => {
+	$location.path = function() {};
+});
+
 
 app.controller('LoginTokenCtrl', ($scope, $routeParams, $location, User, auth) => {
 	$scope.retry = () => {
