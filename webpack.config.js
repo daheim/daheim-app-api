@@ -8,7 +8,6 @@ module.exports = {
 		lib: './vendor.js',
 		ui: [
 			path.join(__dirname, 'src/ui/index.js'),
-			'ngReact/ngReact.js',
 
 			'./style/default.css',
 			'./style/effects.css',

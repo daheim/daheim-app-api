@@ -44,7 +44,6 @@
     "material-ui": "^0.14.4",
     "mongoose": "^4.4.3",
     "newrelic": "^1.22.0",
-    "ngreact": "^0.2.0",
     "node-uuid": "^1.4.3",
     "passport": "^0.3.0",
     "passport-jwt": "^1.2.1",
