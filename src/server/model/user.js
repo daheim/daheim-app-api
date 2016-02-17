@@ -15,6 +15,7 @@ let ProfileSchema = new Schema({
 	languages: [{
 		language: String,
 		level: String,
+		_id: false,
 	}],
 	topics: [String],
 }, {
