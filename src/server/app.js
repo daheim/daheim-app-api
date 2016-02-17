@@ -1,6 +1,7 @@
 import './optional_newrelic';
 import './bootstrap';
 
+import path from 'path';
 import passport from 'passport';
 import express from 'express';
 import Azure from './azure';
@@ -24,29 +25,10 @@ var server = require('http').Server(app);
 
 let azure = Azure.createFromEnv();
 
-if (process.env.NODE_ENV === 'development') {
-	(function() {
-		var webpackDevMiddleware = require('webpack-dev-middleware');
-		var webpack = require('webpack');
-
-		var compiler = webpack(require('../../../../webpack.config.js'));
-		app.use(webpackDevMiddleware(compiler, {
-			stats: {
-				colors: true,
-			},
-		}));
-	})();
-}
-
-
-
 app.use(log.requestLogger());
 app.enable('trust proxy');
 app.disable('x-powered-by');
 app.use(bodyParser.json({limit: '1mb'}));
-
-app.use(express.static(__dirname + '/../../../../build/public'));
-app.use(express.static(__dirname + '/../../../../public'));
 
 let userStore = new UserStore({azure});
 let user = new User({userStore, tokenHandler, passport});
@@ -58,16 +40,38 @@ app.use(passport.initialize());
 app.use('/users', user.router);
 app.use('/api', api.router);
 
-app.get('/', function(req, res) {
-	res.send('Hello World!');
-});
-
 app.get('/js/config.js', function(req, res) {
 	var cfg = {
 		socketIoUrl: 'http://localhost:3000',
 		storageAccount: azure.blobs.storageAccount
 	};
 	res.send('angular.module("dhm").constant("config", ' + JSON.stringify(cfg) + ');');
+});
+
+
+if (process.env.NODE_ENV === 'development') {
+	let webpackDevMiddleware = require('webpack-dev-middleware');
+	let webpack = require('webpack');
+
+	let compiler = webpack(require('../../../../webpack.config.js'));
+	let webpackmw = webpackDevMiddleware(compiler, {
+		stats: {
+			colors: true,
+		},
+	});
+
+	app.use(webpackmw);
+	app.get('*', function(req, res, next) {
+		req.url = '/';
+		webpackmw(req, res, next);
+	});
+}
+
+app.use(express.static(__dirname + '/../../../../build/public'));
+app.use(express.static(__dirname + '/../../../../public'));
+app.get('*', function(req, res) {
+	req.url = '/';
+	res.sendFile(path.resolve(__dirname + '/../../../../build/public/index.html'));
 });
 
 // log errors
