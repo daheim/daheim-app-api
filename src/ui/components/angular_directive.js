@@ -27,6 +27,6 @@ export class AngularDirective extends React.Component {
 	}
 
 	render() {
-		return <div ref="content" />;
+		return <div style={this.props.style} ref="content" />;
 	}
 }
