@@ -96,6 +96,13 @@ app.run(($rootScope, auth) => {
 app.run($location => {
 	$location.path = path => history.push(path);
 });
+app.config(function($provide) {
+	$provide.decorator('$browser', function($delegate) {
+		$delegate.onUrlChange = () => undefined;
+		$delegate.url = () => '';
+		return $delegate;
+	});
+});
 
 
 app.controller('LoginTokenCtrl', ($scope, $routeParams, $location, User, auth) => {
