@@ -1,9 +1,8 @@
 import React from 'react';
 
-import interop from '../interop';
+import {AngularDirective} from './angular_directive';
 
 let app = angular.module('dhm');
-
 app.directive('dhmThird', () => {
 	return {
 		restrict: 'E',
@@ -14,14 +13,10 @@ app.directive('dhmThird', () => {
 
 export class VideoPage extends React.Component {
 
-	componentDidMount() {
-		angular.element(this.refs.content).append(interop.$compile('<dhm-third />')(interop.$rootScope));
-	}
-
 	render() {
 		return (
 			<div>
-				<div ref="content" />
+				<AngularDirective><dhm-third /></AngularDirective>
 			</div>
 		);
 	}
