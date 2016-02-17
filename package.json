@@ -17,7 +17,6 @@
     "angular-aria": "^1.4.6",
     "angular-material": "^0.11.0",
     "angular-resource": "^1.4.6",
-    "angular-route": "^1.4.6",
     "angulartics": "^1.0.2",
     "angulartics-google-analytics": "^0.1.4",
     "azure-common": "^0.9.16",
