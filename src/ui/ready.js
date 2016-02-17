@@ -1,6 +1,8 @@
 import createDebug from 'debug';
 let debug = createDebug('dhm:ready');
 
+import {history} from './components';
+
 let app = window.angular.module('dhm');
 
 class UserService {
@@ -90,9 +92,9 @@ app.run(($rootScope, auth) => {
 	$rootScope.auth = auth;
 });
 
-// disable Angular navigation
+// integrate Angular navigation
 app.run($location => {
-	$location.path = function() {};
+	$location.path = path => history.push(path);
 });
 
 
