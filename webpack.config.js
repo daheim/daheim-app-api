@@ -5,9 +5,10 @@ var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
 	entry: {
-		lib: './vendor.js',
 		ui: [
-			path.join(__dirname, 'src/ui/index.js'),
+			'./vendor.js',
+
+			'./src/ui/index.js',
 
 			'./style/default.css',
 			'./style/effects.css',
