@@ -1,1 +1,1 @@
-export {hashHistory as history}  from 'react-router';
+export {browserHistory as history}  from 'react-router';
