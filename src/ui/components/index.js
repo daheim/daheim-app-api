@@ -3,6 +3,8 @@ export * from './history';
 
 export * from './registration_form';
 export * from './registration_page';
+export * from './login_form';
+export * from './login_page';
 export * from './logo';
 export * from './loading_panel';
 export * from './not_found_page';
