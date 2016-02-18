@@ -172,10 +172,6 @@ app.controller('RegisterProfileCtrl', ($scope, $location, User, $timeout) => {
 		});
 	};
 
-	$scope.next = () => {
-		$location.path('/register/picture');
-	};
-
 	$scope.loading = true;
 	User.getProfile(profile => {
 		$scope.loading = false;
@@ -248,10 +244,6 @@ app.controller('RegisterProfileCtrl', ($scope, $location, User, $timeout) => {
 
 app.controller('RegisterPictureCtrl', ($scope, $location, $mdDialog, User) => {
 
-	$scope.skip = () => {
-		$location.path('/ready');
-	};
-
 	$scope.upload = () => {
 		if ($scope.uploading) { return; }
 		$scope.uploading = true;
@@ -259,7 +251,7 @@ app.controller('RegisterPictureCtrl', ($scope, $location, $mdDialog, User) => {
 		User.saveProfilePicture({
 			data: $scope.imageData
 		}).$promise.then(() => {
-			$location.path('/ready');
+
 		}).catch(err => {
 
 			debug('', err);
@@ -282,10 +274,6 @@ app.controller('RegisterPictureCtrl', ($scope, $location, $mdDialog, User) => {
 	$scope.photoActive = () => {
 		$scope.cameraActive = !$scope.cameraActive;
 	};
-
-	$scope.$watch('imageData', value => {
-		debug('image data %s', value);
-	});
 
 });
 

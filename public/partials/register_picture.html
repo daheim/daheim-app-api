@@ -20,7 +20,6 @@
 		</div>
 
 		<div layout="row" layout-align="end center" layout-padding style="background: rgba(0,0,0,0.1)">
-			<md-button ng-show="!imageData" ng-click="skip()">Skip</md-button>
 			<md-button ng-hide="cameraActive" ng-click="photoActive()" class="md-primary">Turn on Camera</md-button>
 			<md-button ng-hide="imageData || !cameraActive" ng-click="takePhoto()" class="md-primary">Snap</md-button>
 			<md-button ng-show="imageData" ng-click="takePhoto()">Retry</md-button>
