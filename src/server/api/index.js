@@ -1,6 +1,7 @@
 import {Router} from 'express';
 import Promise from 'bluebird';
 import createSendgrid from 'sendgrid';
+import passport from 'passport';
 
 import {User} from '../model';
 import tokenHandler from '../token_handler';
@@ -15,6 +16,7 @@ export class Api {
 		this.router.post('/register', this.handler(this.register));
 		this.router.post('/login', this.handler(this.login));
 		this.router.post('/forgot', this.handler(this.forgot));
+		this.router.post('/reset', passport.authenticate('reset', {session: false}), this.handler(this.reset));
 	}
 
 	async register({body: {email, password}}, res) {
@@ -80,6 +82,15 @@ export class Api {
 			html: `Please click <a href="${process.env.URL}/auth/reset?token=${encodeURIComponent(token)}">here reset your password.</a>.`
 		});
 		await sendgrid.sendAsync(sg);
+	}
+
+	async reset({body: {password}, user}) {
+		user.password = password;
+		await user.save();
+
+		return {
+			accessToken: tokenHandler.issueForUser(user.id)
+		};
 	}
 
 

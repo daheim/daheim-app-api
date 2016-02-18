@@ -5,6 +5,8 @@ import passport from 'passport';
 import createDebug from 'debug';
 let debug = createDebug('dhm:token'); // eslint-disable-line no-unused-vars
 
+import {User} from './model';
+
 const SECRETS = new WeakMap();
 const $passport = Symbol('passport');
 
@@ -24,6 +26,19 @@ export class TokenHandler {
 					id: jwt.sub
 				};
 				return done(null, user);
+			}));
+
+			passport.use('reset', new JwtStrategy({
+				secretOrKey: SECRETS[this],
+				authScheme: 'Bearer',
+				audience: 'reset',
+			}, async function(jwt, done) {
+				try {
+					let user = await User.findById(jwt.sub);
+					done(null, user || false);
+				} catch (err) {
+					done(err);
+				}
 			}));
 		}
 	}
