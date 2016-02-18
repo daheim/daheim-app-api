@@ -14,3 +14,12 @@ html {
 	padding: 0;
 	position: static;
 }
+
+a {
+	text-decoration: none;
+	color: #3F51B5;
+}
+
+a:visited {
+	color: #3F51B5;
+}
