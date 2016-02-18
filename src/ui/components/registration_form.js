@@ -11,8 +11,12 @@ import interop from '../interop';
 
 export class RegistrationForm extends React.Component {
 
+	static propTypes = {
+		defaultUsername: React.PropTypes.string,
+	};
+
 	state = {
-		email: '',
+		email: this.props.defaultUsername || '',
 		password: '',
 		newsletter: false,
 		agree: false,
@@ -108,7 +112,7 @@ export class RegistrationForm extends React.Component {
 	}
 
 	componentDidMount() {
-		this.refs.email.focus();
+		(this.state.email ? this.refs.password : this.refs.email).focus();
 	}
 
 	render() {
@@ -116,7 +120,7 @@ export class RegistrationForm extends React.Component {
 		if (this.state.error === 'user_already_exists') {
 			error = (
 				<div style={{padding: '15px 30px 15px 15px', margin: '20px 0', backgroundColor: 'rgba(204,122,111,0.1)', borderLeft: '5px solid rgba(191,87,73,0.2)'}}>
-					Mitglied gefunden. Klicken Sie hier, um <a href="#">sich anzumelden</a>.
+					Mitglied gefunden. Klicken Sie hier, um <Link to={`/auth?username=${encodeURIComponent(this.state.email)}`}>sich anzumelden</Link>.
 				</div>
 			);
 		} else if (this.state.error) {
