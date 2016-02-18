@@ -6,7 +6,7 @@ import interop from './interop';
 import muiTheme from './theme';
 import {NotFoundPage, ReadyPage, VideoPage} from './components';
 import {RegistrationPage, DefaultLayout, LoginLayout, history} from './components';
-import {LoginPage} from './components';
+import {LoginPage, ForgotPasswordPage} from './components';
 
 let routes = (
 	<Router history={history}>
@@ -17,6 +17,7 @@ let routes = (
 		<Route path="/auth" component={LoginLayout}>
 			<IndexRoute component={LoginPage} />
 			<Route path="register" component={RegistrationPage} />
+			<Route path="forgot" component={ForgotPasswordPage} />
 		</Route>
 		<Route path="*" component={NotFoundPage} />
 	</Router>
