@@ -86,6 +86,8 @@ export class Api {
 
 	async reset({body: {password}, user}) {
 		user.password = password;
+		user.loginAttempts = 0;
+		user.lockUntil = null;
 		await user.save();
 
 		return {
