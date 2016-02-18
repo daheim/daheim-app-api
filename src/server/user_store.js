@@ -22,8 +22,17 @@ export default class UserStore {
 	}
 
 	async updateProfile(id, {name, languages, topics}) {
-		let result = await User.update({_id: id}, {profile: {name, languages, topics}});
-		debug('user %s profile updated: %s', id, result);
+		let user = await User.findById(id);
+		if (!user) {
+			throw new Error('user not found');
+		}
+
+		if (name !== undefined) { user.profile.name = name; }
+		if (languages !== undefined) { user.profile.languages = languages; }
+		if (topics !== undefined) { user.profile.topics = topics; }
+
+		await user.save();
+		debug('user %o profile updated', id);
 	}
 
 	async loadUserWithEmail(emailIgnored) {

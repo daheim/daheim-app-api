@@ -10,20 +10,25 @@ export class AuthError extends BaseError {
 	constructor(m) { super(m); }
 }
 
-let ProfileSchema = new Schema({
-	name: String,
-	languages: [{
-		language: String,
-		level: String,
-		_id: false,
-	}],
-	topics: [String],
-}, {
-	id: false,
-	_id: false,
+let UserSchema = new Schema({
+	username: {type: String, required: true, index: {unique: true}},
+	password: {type: String, required: true},
+
+	loginAttempts: {type: Number, required: true, default: 0},
+	lockUntil: {type: Date},
+
+	profile: {
+		name: String,
+		languages: [{
+			language: String,
+			level: String,
+			_id: false,
+		}],
+		topics: [String],
+	},
 });
 
-ProfileSchema.pre('save', function(next) {
+UserSchema.pre('save', function(next) {
 	const LEVELS = {
 		none: 1,
 		beginner: 1,
@@ -32,14 +37,18 @@ ProfileSchema.pre('save', function(next) {
 		native: 1
 	};
 
-	let {name, languages, topics} = this;
+	if (!this.isModified('profile')) {
+		return next();
+	}
+
+	let {name, languages, topics} = this.profile;
 
 	let error;
 	try {
-		if (this.isModified('name') && name !== undefined) {
+		if (this.isModified('profile.name') && name !== undefined) {
 			if (name.length < 2 || name.length > 128) { throw new Error('name length must be between 2 and 128'); }
 		}
-		if (this.isModified('languages') && languages.length > 0) {
+		if (this.isModified('profile.languages') && languages.length > 0) {
 			if (languages.length < 2 || languages.length > 10) { throw new Error('number of language must be between 2 and 10'); }
 			languages.forEach(({language, level}) => {
 				if (language.length < 2 || language.length > 128) { throw new Error('length of language must be between 2 and 128'); }
@@ -47,24 +56,14 @@ ProfileSchema.pre('save', function(next) {
 				return {language, level};
 			});
 		}
-		if (this.isModified('topics') && topics.length > 0) {
-			if (topics.length > 20) { throw new Error('number of topcs must be at most 20'); }
+		if (this.isModified('profile.topics') && topics.length > 0) {
+			if (topics.length > 20) { throw new Error('number of topics must be at most 20'); }
 		}
 	} catch (err) {
 		error = err;
 	} finally {
 		next(error);
 	}
-});
-
-let UserSchema = new Schema({
-	username: {type: String, required: true, index: {unique: true}},
-	password: {type: String, required: true},
-
-	loginAttempts: {type: Number, required: true, default: 0},
-	lockUntil: {type: Date},
-
-	profile: {type: ProfileSchema, default: {}},
 });
 
 UserSchema.virtual('isLocked').get(function() {
