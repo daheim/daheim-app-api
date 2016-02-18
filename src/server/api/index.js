@@ -8,6 +8,7 @@ export class Api {
 	constructor() {
 		this.router = Router();
 		this.router.post('/register', this.handler(this.register));
+		this.router.post('/login', this.handler(this.login));
 	}
 
 	async register({body: {email, password}}, res) {
@@ -38,6 +39,22 @@ export class Api {
 			result: 'new',
 			accessToken: tokenHandler.issueForUser(user.id)
 		};
+	}
+
+	async login({body: {email, password}}, res) {
+		try {
+			let user = await User.getAuthenticated(email, password);
+			return {
+				result: 'login',
+				accessToken: tokenHandler.issueForUser(user.id)
+			};
+		} catch (err) {
+			if (err.name !== 'AuthError') {
+				throw err;
+			}
+
+			res.status(401).send('Unauthorized');
+		}
 	}
 
 
