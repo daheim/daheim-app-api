@@ -52,7 +52,6 @@ export class RegistrationForm extends React.Component {
 					password: this.state.password,
 					newsletter: this.state.newsletter,
 				}),
-				headers: {Authorization: interop.auth.authHeader()},
 			});
 
 			interop.auth.accessToken = result.accessToken;
