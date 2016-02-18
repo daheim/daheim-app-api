@@ -1,7 +1,12 @@
 import {Router} from 'express';
+import Promise from 'bluebird';
+import createSendgrid from 'sendgrid';
 
 import {User} from '../model';
 import tokenHandler from '../token_handler';
+
+let sendgrid = createSendgrid(process.env.SENDGRID_KEY);
+Promise.promisifyAll(sendgrid);
 
 export class Api {
 
@@ -9,6 +14,7 @@ export class Api {
 		this.router = Router();
 		this.router.post('/register', this.handler(this.register));
 		this.router.post('/login', this.handler(this.login));
+		this.router.post('/forgot', this.handler(this.forgot));
 	}
 
 	async register({body: {email, password}}, res) {
@@ -55,6 +61,25 @@ export class Api {
 
 			res.status(401).send('Unauthorized');
 		}
+	}
+
+	async forgot({body: {email}}, res) {
+		let user = await User.findOne({username: email});
+		if (!user) {
+			res.status(400).send({error: 'user_not_found'});
+			return;
+		}
+
+		let token = tokenHandler.issuePasswordResetToken(user.id);
+		let address = user.username;
+		let sg = new sendgrid.Email({
+			to: address,
+			from: 'daheim@mesellyounot.com',
+			fromname: 'Daheim',
+			subject: 'Daheim Password Reset',
+			html: `Please click <a href="${process.env.URL}/auth/reset?token=${encodeURIComponent(token)}">here reset your password.</a>.`
+		});
+		await sendgrid.sendAsync(sg);
 	}
 
 

@@ -43,6 +43,10 @@ export class TokenHandler {
 		return jwt.sign({}, SECRETS[this], {subject: userId, audience: 'login', expiresIn: '15m'});
 	}
 
+	issuePasswordResetToken(userId) {
+		return jwt.sign({}, SECRETS[this], {subject: userId, audience: 'reset', expiresIn: '15m'});
+	}
+
 	verifyAccessToken(accessToken) {
 		let decoded = jwt.verify(accessToken, SECRETS[this], {audience: 'access'});
 		return decoded.sub;
