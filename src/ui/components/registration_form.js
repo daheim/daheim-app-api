@@ -120,7 +120,7 @@ export class RegistrationForm extends React.Component {
 		if (this.state.error === 'user_already_exists') {
 			error = (
 				<div style={{padding: '15px 30px 15px 15px', margin: '20px 0', backgroundColor: 'rgba(204,122,111,0.1)', borderLeft: '5px solid rgba(191,87,73,0.2)'}}>
-					Mitglied gefunden. Klicken Sie hier, um <Link to={`/auth?username=${encodeURIComponent(this.state.email)}`}>sich anzumelden</Link>.
+					Mitglied gefunden. Klicken Sie hier, um <Link to={{pathname: '/auth', query: {username: this.state.email || undefined}}}>sich anzumelden</Link>.
 				</div>
 			);
 		} else if (this.state.error) {
@@ -141,7 +141,7 @@ export class RegistrationForm extends React.Component {
 					<Checkbox style={{marginTop: 20}} label="Ja, ich möchte zum Newsletter anmelden" checked={this.state.newsletter} onCheck={this.handleNewsletterChange} />
 					<Checkbox style={{marginTop: 10}} label="Ja, ich akzeptiere die AGB" checked={this.state.agree} onCheck={this.handleAgreeChange} />
 					<RaisedButton disabled={!this.state.agree} type="submit" style={{marginTop: 20}} fullWidth={true} secondary={true} label="Jetzt registrieren" />
-					<p style={{fontSize: 14, marginTop: 20}}>Klicken Sie hier, um <Link to={`/auth?username=${encodeURIComponent(this.state.email)}`}>sich anzumelden</Link>. <a href="#">Allgemeinen Geschäftsbedingungen</a> und <a href="#">Datenschutzrichtlinien</a></p>
+					<p style={{fontSize: 14, marginTop: 20, lineHeight: '150%'}}>Klicken Sie hier, um <Link to={{pathname: '/auth', query: {username: this.state.email || undefined}}}>sich anzumelden</Link>. <a href="#">Allgemeinen Geschäftsbedingungen</a> und <a href="#">Datenschutzrichtlinien</a></p>
 				</form>
 			</LoadingPanel>
 		);

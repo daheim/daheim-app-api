@@ -130,7 +130,7 @@ export class LoginForm extends React.Component {
 					<TextField ref="password" style={{marginTop: -10}} type="password" fullWidth={true} errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
 					<RaisedButton type="submit" style={{marginTop: 20}} fullWidth={true} secondary={true} label="Einloggen" />
 					<div style={{fontSize: 14, textAlign: 'center', paddingTop: 20}}>
-						<Link to={`/auth/forgot?username=${encodeURIComponent(this.state.email)}`}>Password vergessen?</Link> oder <Link to={`/auth/register?username=${encodeURIComponent(this.state.email)}`}>Neu anmelden</Link>
+						<Link to={{pathname: '/auth/forgot', query: {username: this.state.email || undefined}}}>Password vergessen?</Link> oder <Link to={{pathname: '/auth/register', query: {username: this.state.email || undefined}}}>Neu anmelden</Link>
 					</div>
 				</form>
 			</LoadingPanel>
