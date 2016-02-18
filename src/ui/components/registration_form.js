@@ -145,7 +145,7 @@ export class RegistrationForm extends React.Component {
 				<TextField style={{marginTop: -10}} type="password" fullWidth={true} errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
 				<Checkbox style={{marginTop: 20}} label="Ja, ich möchte zum Newsletter anmelden" checked={this.state.newsletter} onCheck={this.handleNewsletterChange} />
 				<Checkbox style={{marginTop: 10}} label="Ja, ich akzeptiere die AGB" checked={this.state.agree} onCheck={this.handleAgreeChange} />
-				<RaisedButton disabled={!this.state.agree} type="submit" style={{marginTop: 20}} fullWidth={true} primary={true} label="Jetzt registrieren" />
+				<RaisedButton disabled={!this.state.agree} type="submit" style={{marginTop: 20}} fullWidth={true} secondary={true} label="Jetzt registrieren" />
 				<p style={{fontSize: 14, marginTop: 20}}>Klicken Sie hier, um <Link to="/auth">sich anzumelden</Link>. <a href="#">Allgemeinen Geschäftsbedingungen</a> und <a href="#">Datenschutzrichtlinien</a></p>
 			</form>
 		);
