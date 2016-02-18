@@ -36,10 +36,10 @@ ProfileSchema.pre('save', function(next) {
 
 	let error;
 	try {
-		if (name !== undefined) {
+		if (this.isModified('name') && name !== undefined) {
 			if (name.length < 2 || name.length > 128) { throw new Error('name length must be between 2 and 128'); }
 		}
-		if (languages.length > 0) {
+		if (this.isModified('languages') && languages.length > 0) {
 			if (languages.length < 2 || languages.length > 10) { throw new Error('number of language must be between 2 and 10'); }
 			languages.forEach(({language, level}) => {
 				if (language.length < 2 || language.length > 128) { throw new Error('length of language must be between 2 and 128'); }
@@ -47,7 +47,7 @@ ProfileSchema.pre('save', function(next) {
 				return {language, level};
 			});
 		}
-		if (topics.length > 0) {
+		if (this.isModified('topics') && topics.length > 0) {
 			if (topics.length > 20) { throw new Error('number of topcs must be at most 20'); }
 		}
 	} catch (err) {
