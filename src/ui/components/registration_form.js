@@ -96,10 +96,10 @@ export class RegistrationForm extends React.Component {
 
 		if (!this.state.email) {
 			valid.hasErrors = true;
-			valid.errorEmail = valid.error = 'Bitte E-Mail Addresse eingeben';
+			valid.errorEmail = valid.error = 'Bitte E-Mail-Addresse eingeben';
 		} else if (this.state.email.indexOf('@') === -1) {
 			valid.hasErrors = true;
-			valid.errorEmail = valid.error = 'E-Mail Addresse ist nicht gültig';
+			valid.errorEmail = valid.error = 'E-Mail-Addresse ist nicht gültig';
 		}
 
 		this.setState(valid);
@@ -141,7 +141,7 @@ export class RegistrationForm extends React.Component {
 				{loading}
 				<h1 style={{fontSize: 22}}>Jetzt kostenlos Mitglied werden!</h1>
 				{error}
-				<TextField ref="email" fullWidth={true} floatingLabelText="E-Mail Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
+				<TextField ref="email" fullWidth={true} floatingLabelText="E-Mail-Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
 				<TextField style={{marginTop: -10}} type="password" fullWidth={true} errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
 				<Checkbox style={{marginTop: 20}} label="Ja, ich möchte zum Newsletter anmelden" checked={this.state.newsletter} onCheck={this.handleNewsletterChange} />
 				<Checkbox style={{marginTop: 10}} label="Ja, ich akzeptiere die AGB" checked={this.state.agree} onCheck={this.handleAgreeChange} />
