@@ -2,10 +2,10 @@ import React from 'react';
 import TextField from 'material-ui/lib/text-field';
 import RaisedButton from 'material-ui/lib/raised-button';
 import Checkbox from 'material-ui/lib/checkbox';
-import CircularProgress from 'material-ui/lib/circular-progress';
 import LinkedStateMixin from 'react-addons-linked-state-mixin';
 import reactMixin from 'react-mixin';
 import {Link} from 'react-router';
+import {LoadingPanel} from './loading_panel';
 
 import interop from '../interop';
 
@@ -127,27 +127,19 @@ export class RegistrationForm extends React.Component {
 			);
 		}
 
-		let loading;
-		if (this.state.loading) {
-			loading = (
-				<div style={{position: 'absolute', width: '100%', height: '100%', background: 'rgba(255,255,255,0.7)', zIndex: 100, display: 'flex', alignItems: 'center'}}>
-					<CircularProgress style={{margin: '0 auto'}} />
-				</div>
-			);
-		}
-
 		return (
-			<form onSubmit={this.handleRegisterClick} style={{position: 'relative'}}>
-				{loading}
-				<h1 style={{fontSize: 22}}>Jetzt kostenlos Mitglied werden!</h1>
-				{error}
-				<TextField ref="email" fullWidth={true} floatingLabelText="E-Mail-Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
-				<TextField style={{marginTop: -10}} type="password" fullWidth={true} errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
-				<Checkbox style={{marginTop: 20}} label="Ja, ich möchte zum Newsletter anmelden" checked={this.state.newsletter} onCheck={this.handleNewsletterChange} />
-				<Checkbox style={{marginTop: 10}} label="Ja, ich akzeptiere die AGB" checked={this.state.agree} onCheck={this.handleAgreeChange} />
-				<RaisedButton disabled={!this.state.agree} type="submit" style={{marginTop: 20}} fullWidth={true} secondary={true} label="Jetzt registrieren" />
-				<p style={{fontSize: 14, marginTop: 20}}>Klicken Sie hier, um <Link to="/auth">sich anzumelden</Link>. <a href="#">Allgemeinen Geschäftsbedingungen</a> und <a href="#">Datenschutzrichtlinien</a></p>
-			</form>
+			<LoadingPanel loading={this.state.loading}>
+				<form onSubmit={this.handleRegisterClick}>
+					<h1 style={{fontSize: 22}}>Jetzt kostenlos Mitglied werden!</h1>
+					{error}
+					<TextField ref="email" fullWidth={true} floatingLabelText="E-Mail-Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
+					<TextField ref="password" style={{marginTop: -10}} type="password" fullWidth={true} errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
+					<Checkbox style={{marginTop: 20}} label="Ja, ich möchte zum Newsletter anmelden" checked={this.state.newsletter} onCheck={this.handleNewsletterChange} />
+					<Checkbox style={{marginTop: 10}} label="Ja, ich akzeptiere die AGB" checked={this.state.agree} onCheck={this.handleAgreeChange} />
+					<RaisedButton disabled={!this.state.agree} type="submit" style={{marginTop: 20}} fullWidth={true} secondary={true} label="Jetzt registrieren" />
+					<p style={{fontSize: 14, marginTop: 20}}>Klicken Sie hier, um <Link to={`/auth?username=${encodeURIComponent(this.state.email)}`}>sich anzumelden</Link>. <a href="#">Allgemeinen Geschäftsbedingungen</a> und <a href="#">Datenschutzrichtlinien</a></p>
+				</form>
+			</LoadingPanel>
 		);
 	}
 }
