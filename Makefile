@@ -1,10 +1,11 @@
+IMAGE ?= egergo/daheim:latest
 
 all: push
 
 image:
-	docker build -t egergo/daheim:latest .
+	docker build -t $(IMAGE) .
 
 push: image
-	docker push egergo/daheim:latest
+	docker push $(IMAGE)
 
 .PHONY: all image
