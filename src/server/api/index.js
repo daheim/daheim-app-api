@@ -5,6 +5,7 @@ import passport from 'passport';
 
 import {User} from '../model';
 import tokenHandler from '../token_handler';
+import encounterApi from './encounter';
 
 let sendgrid = createSendgrid(process.env.SENDGRID_KEY);
 Promise.promisifyAll(sendgrid);
@@ -17,6 +18,8 @@ export class Api {
 		this.router.post('/login', this.handler(this.login));
 		this.router.post('/forgot', this.handler(this.forgot));
 		this.router.post('/reset', passport.authenticate('reset', {session: false}), this.handler(this.reset));
+
+		this.router.use('/encounters', encounterApi.router);
 	}
 
 	async register({body: {email, password}}, res) {
@@ -95,11 +98,11 @@ export class Api {
 		};
 	}
 
-
 	handler(fn) {
+		let self = this;
 		return async function(reqIgnored, res, next) {
 			try {
-				let result = await fn.apply(this, arguments);
+				let result = await fn.apply(self, arguments);
 				res.send(result);
 			} catch (err) {
 				next(err);
