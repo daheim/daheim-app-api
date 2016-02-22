@@ -4,6 +4,7 @@ import RaisedButton from 'material-ui/lib/raised-button';
 
 import {history} from './history';
 import {AngularDirective} from './angular_directive';
+import {ReviewList} from './review_list';
 
 import registerPictureTemplate from '../../../public/partials/register_picture.html';
 import registerProfileTemplate from '../../../public/partials/register_profile.html';
@@ -38,6 +39,9 @@ export class ReadyPage extends React.Component {
 					<div style={{display: 'inline-block', margin: '20px auto'}}>
 						<RaisedButton primary={true} label="Start a Lesson" onClick={this.handleReadyClick}/>
 					</div>
+				</div>
+				<div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center', maxWidth: 1000, width: '100%', margin: '0 auto'}}>
+					<ReviewList style={{flex: '0 1 600px'}} />
 				</div>
 				<div style={{display: 'flex', flexWrap: 'wrap', maxWidth: 1000, width: '100%', margin: '0 auto'}}>
 					<AngularDirective style={{flex: '1 1 600px'}}><dhm-interop-register-profile /></AngularDirective>

@@ -13,5 +13,7 @@ export * from './not_found_page';
 export * from './ready_page';
 export * from './video_page';
 
+export * from './review_list';
+
 export * from './default_layout';
 export * from './login_layout';
