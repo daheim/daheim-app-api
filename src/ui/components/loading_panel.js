@@ -26,7 +26,7 @@ export class LoadingPanel extends React.Component {
 		}
 
 		return (
-			<div style={Object.assign({position: 'relative'}, style)} {...props}>
+			<div style={Object.assign({position: 'relative', width: '100%'}, style)} {...props}>
 				{loadingDiv}
 				<div style={loadingStyle}>
 					{this.props.children}
