@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import log from '../log';
 
 export {User} from './user';
+export * from './encounter';
 
 let mongooseUrl = 'mongodb://localhost/first';
 if (process.env.MONGODB_URL) {

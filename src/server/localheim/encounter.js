@@ -2,6 +2,8 @@ import uuid from 'node-uuid';
 import {default as Registry} from './registry';
 import createDebug from 'debug';
 
+import {Encounter as EncounterModel} from '../model';
+
 let debug = createDebug('dhm:localheim:encounter');
 
 const $id = Symbol('id');
@@ -133,11 +135,33 @@ export default class Encounter {
 
 			this[$state] = StateNegotiate;
 			setImmediate(async () => {
+				if (this[$state] !== StateNegotiate) { return; }
+
+				let now = new Date();
+				this.acceptTime = now;
+
+				// store encounter in database for review
+				let encounterModel = new EncounterModel({
+					participants: Object.values(this[$members]).map(member => {
+						return {userId: member.member.userId};
+					}),
+					date: now,
+					ping: now,
+				});
+				await encounterModel.save();
+				debug('stored encounter: %s', encounterModel.id);
+				this.encounterModelId = encounterModel.id;
+				this.encounterModelTimeout = setInterval(() => {
+					debug('pinging encounter: %s', this.encounterModelId);
+					EncounterModel.update({_id: this.encounterModelId}, {ping: new Date()});
+				}, 60 * 1000);
+
+				// ask everyone to start negotiation
 				let iceServers = await this[$iceServerProvider].get();
 				for (let desc of Object.values(this[$members])) {
 					(async () => {
 						try {
-							await desc.member.callback.invoke('onNegotiate', {iceServers});
+							await desc.member.callback.invoke('onNegotiate', {iceServers, reviewId: this.encounterModelId});
 						} catch (err) {
 							desc.member.close({reason: Registry.ReasonProtocolError});
 						}
@@ -169,10 +193,25 @@ export default class Encounter {
 		this[$close]({reason});
 	}
 
-	[$close]({reason}) {
+	[$close]({reason, me}) {
 		if (this[$state] === StateClosed) { return; }
 		let success = this[$state] === StateNegotiate;
 		this[$state] = StateClosed;
+
+		if (this.encounterModelTimeout) {
+			clearTimeout(this.encounterModelTimeout);
+		}
+
+		if (this.encounterModelId) {
+			(async () => {
+				let length = Date.now() - this.acceptTime;
+				await EncounterModel.update({_id: this.encounterModelId}, {
+					result: 'end',
+					length,
+				});
+				debug('finishing encounter: %s, length: %s', this.encounterModelId, length);
+			})();
+		}
 
 		this[$log].event('encounter_result', {
 			userId: Object.keys(this[$members]),
