@@ -21,11 +21,13 @@ export class TokenHandler {
 			passport.use('jwt', new JwtStrategy({
 				secretOrKey: SECRETS[this],
 				authScheme: 'Bearer'
-			}, function(jwt, done) {
-				let user = {
-					id: jwt.sub
-				};
-				return done(null, user);
+			}, async function(jwt, done) {
+				try {
+					let user = await User.findById(jwt.sub);
+					done(null, user);
+				} catch (err) {
+					done(err);
+				}
 			}));
 
 			passport.use('reset', new JwtStrategy({
