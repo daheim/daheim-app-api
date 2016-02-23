@@ -12,17 +12,29 @@ export class ReviewList extends React.Component {
 
 	state = {
 		loading: true,
-		data: undefined,
+		data: null,
+		error: null,
 	};
 
 	async componentDidMount() {
-		let data = await $.ajax({
-			method: 'get',
-			url: '/api/encounters',
-			headers: {Authorization: interop.auth.authHeader()},
-		});
+		let state = {
+			loading: false,
+			data: null,
+			error: null,
+		};
 
-		this.setState({loading: false, data});
+		try {
+			state.data = await $.ajax({
+				method: 'get',
+				url: '/api/encounters',
+				headers: {Authorization: interop.auth.authHeader()},
+			});
+		} catch (err) {
+			state.error = err;
+		} finally {
+			console.log(state);
+			this.setState(state);
+		}
 	}
 
 	msToString(ms) {
@@ -34,36 +46,54 @@ export class ReviewList extends React.Component {
 		return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
 	}
 
+	errorToText(error) {
+		if (!error.status) {
+			return 'No network';
+		} else {
+			let text = error.statusText;
+			try {
+				text = JSON.parse(error.responseText).error;
+			} catch (errIgnored) {
+				// ignored
+			}
+			return `${error.status}: ${text}`;
+		}
+	}
+
 	render() {
 		return (
 			<div style={Object.assign({background: 'rgba(255,255,255,0.9)', borderRadius: 10, padding: 20, paddingTop: 12}, this.props.style)}>
 				<h1 className="md-headline">Recent Lessons</h1>
 				<LoadingPanel loading={this.state.loading}>
-					{this.state.data ? (
-						<table style={{width: '100%'}}>
-							<thead>
-								<tr>
-									<th style={{textAlign: 'left'}}>Date</th>
-									<th style={{textAlign: 'left'}}>Partner</th>
-									<th style={{textAlign: 'left'}}>Length</th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								{this.state.data.map(encounter => {
-									return (
-										<tr key={encounter.id}>
-											<td><Link to={'/reviews/' + encounter.id}>{moment(encounter.date).format('lll')}</Link></td>
-											<td>{encounter.partnerName || '[kein Name]'}</td>
-											<td>{this.msToString(encounter.length)}</td>
-											<td style={{textAlign: 'right'}}>{this.myReview ? 'reviewed' : 'needs review'}</td>
-										</tr>
-									);
-								})}
-							</tbody>
-						</table>
+					{this.state.error ? (
+						<p style={{textAlign: 'center', color: 'red'}}>{this.errorToText(this.state.error)}</p>
 					) : (
-						<p>No data</p>
+						this.state.data && this.state.data.length ? (
+							<table style={{width: '100%'}}>
+								<thead>
+									<tr>
+										<th style={{textAlign: 'left'}}>Date</th>
+										<th style={{textAlign: 'left'}}>Partner</th>
+										<th style={{textAlign: 'left'}}>Length</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+									{this.state.data.map(encounter => {
+										return (
+											<tr key={encounter.id}>
+												<td><Link to={'/reviews/' + encounter.id}>{moment(encounter.date).format('lll')}</Link></td>
+												<td>{encounter.partnerName || '[kein Name]'}</td>
+												<td>{this.msToString(encounter.length)}</td>
+												<td style={{textAlign: 'right'}}>{this.myReview ? 'reviewed' : 'needs review'}</td>
+											</tr>
+										);
+									})}
+								</tbody>
+							</table>
+						) : (
+							<p style={{textAlign: 'center'}}>Haven't yet had any lessons. <Link to="/video">Start one now.</Link></p>
+						)
 					)}
 				</LoadingPanel>
 			</div>
