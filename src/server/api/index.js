@@ -20,6 +20,8 @@ export class Api {
 		this.router.post('/reset', passport.authenticate('reset', {session: false}), this.handler(this.reset));
 
 		this.router.use('/encounters', encounterApi.router);
+
+		this.router.get('*', (req, res, next) => {res.status(404).send({error: 'not_found'})});
 	}
 
 	async register({body: {email, password}}, res) {
