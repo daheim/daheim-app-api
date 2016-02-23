@@ -20,7 +20,9 @@ let routes = (
 			<Route path="forgot" component={ForgotPasswordPage} />
 			<Route path="reset" component={ResetPasswordPage} />
 		</Route>
-		<Route path="*" component={NotFoundPage} />
+		<Route path="*" component={LoginLayout}>
+			<IndexRoute component={NotFoundPage} />
+		</Route>
 	</Router>
 );
 
