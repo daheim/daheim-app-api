@@ -10,3 +10,5 @@ require('angular-resource/angular-resource.js');
 require('angulartics/src/angulartics.js');
 require('angulartics-google-analytics/lib/angulartics-google-analytics.js');
 require('angular-material/angular-material.css');
+
+require('react-star-rating/dist/css/react-star-rating.css');

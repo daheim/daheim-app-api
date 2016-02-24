@@ -14,6 +14,7 @@ export * from './ready_page';
 export * from './video_page';
 
 export * from './review_list';
+export * from './review_page';
 
 export * from './default_layout';
 export * from './login_layout';

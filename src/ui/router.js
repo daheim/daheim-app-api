@@ -7,12 +7,14 @@ import muiTheme from './theme';
 import {NotFoundPage, ReadyPage, VideoPage} from './components';
 import {RegistrationPage, DefaultLayout, LoginLayout, history} from './components';
 import {LoginPage, ForgotPasswordPage, ResetPasswordPage} from './components';
+import {ReviewPage} from './components';
 
 let routes = (
 	<Router history={history}>
 		<Route path="/" component={DefaultLayout}>
 			<IndexRoute component={ReadyPage} />
 			<Route path="video" component={VideoPage} />
+			<Route path="reviews/:reviewId" component={ReviewPage} />
 		</Route>
 		<Route path="/auth" component={LoginLayout}>
 			<IndexRoute component={LoginPage} />
