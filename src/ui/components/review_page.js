@@ -258,7 +258,6 @@ export class ReviewPage extends React.Component {
 	render() {
 		return (
 			<div style={Object.assign({background: 'rgba(255,255,255,0.9)', borderRadius: 10, padding: 20, paddingTop: 12, maxWidth: 1000, margin: '0 auto'}, this.props.style)}>
-				<h1 className="md-headline">Review Lesson</h1>
 				<LoadingPanel loading={this.state.loading}>
 					{this.state.error ? (
 						<p style={{textAlign: 'center', color: 'red'}}>{this.errorToText(this.state.error)}</p>
