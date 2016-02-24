@@ -6,9 +6,42 @@ import RaisedButton from 'material-ui/lib/raised-button';
 import FlatButton from 'material-ui/lib/flat-button';
 import TextField from 'material-ui/lib/text-field';
 import StarRating from 'react-star-rating'
+import RadioButton from 'material-ui/lib/radio-button';
+import RadioButtonGroup from 'material-ui/lib/radio-button-group';
 
 import interop from '../interop';
 import {history} from './history';
+
+export class ProficiencyRating extends React.Component {
+
+	static defaultProps = {
+		values: {
+			1: 'Einige Wörter',
+			2: 'Einige Sätze',
+			3: 'Fähig, ein fließendes Gespräch über einfach Themen zu führen',
+			4: 'Fähig, ein Gespräch über komplexe Themen zu führen',
+			5: 'Deutsch-Profi',
+		},
+	};
+
+	handleChange = e => {
+		if (this.props.onChange) { this.props.onChange(e); }
+	};
+
+	render() {
+		if (this.props.readOnly) {
+			return <div style={this.props.itemStyle}>{this.props.values[this.props.value] || 'N/A'}</div>;
+		}
+
+		return (
+			<RadioButtonGroup style={this.props.style} name="shipSpeed" valueSelected={this.props.value} onChange={this.handleChange}>
+				{Object.keys(this.props.values).map(key =>
+					<RadioButton key={key} style={this.props.itemStyle} value={key} label={this.props.values[key]} />
+				)}
+			</RadioButtonGroup>
+		);
+	}
+}
 
 export class PersonalRating extends React.Component {
 
@@ -18,9 +51,9 @@ export class PersonalRating extends React.Component {
 		}
 	};
 
-	handleLanguageChange = (eIgnored, {rating}) => {
+	handleLanguageChange = e => {
 		if (this.props.onChange) {
-			this.props.onChange(Object.assign({}, this.props.data, {language: rating}));
+			this.props.onChange(Object.assign({}, this.props.data, {language: parseInt(e.target.value)}));
 		}
 	};
 
@@ -39,10 +72,10 @@ export class PersonalRating extends React.Component {
 						<StarRating name="overall" totalStars={5} disabled={this.props.readOnly} rating={data.overall} onRatingClick={this.handleOverallChange} />
 					</div>
 				</div>
-				<div>
+				<div style={{paddingTop: 10}}>
 					Language Proficiency:
 					<div>
-						<StarRating name="language" disabled={this.props.readOnly} rating={data.language} onRatingClick={this.handleLanguageChange} />
+						<ProficiencyRating itemStyle={{paddingTop: 6}}  readOnly={this.props.readOnly} value={String(data.language)} onChange={this.handleLanguageChange} />
 					</div>
 				</div>
 			</div>
