@@ -85,7 +85,7 @@ export class ReviewList extends React.Component {
 												<td><Link to={'/reviews/' + encounter.id}>{moment(encounter.date).format('lll')}</Link></td>
 												<td>{encounter.partnerName || '[kein Name]'}</td>
 												<td>{this.msToString(encounter.length)}</td>
-												<td style={{textAlign: 'right'}}>{this.myReview ? 'reviewed' : 'needs review'}</td>
+												<td style={{textAlign: 'right'}}>{encounter.myReview ? 'reviewed' : 'needs review'}</td>
 											</tr>
 										);
 									})}
