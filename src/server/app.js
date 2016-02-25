@@ -113,7 +113,10 @@ function start() {
 	var port = process.env.PORT || 3000;
 
 	server.listen(port, function(err) {
-		if (err) { return log.error({err: err}, 'listen error'); }
+		if (err) {
+			log.error({err: err}, 'listen error');
+			process.exit(1);
+		}
 		log.info({port: port}, 'listening on %s', port);
 	});
 	server.on('error', function(err) {
