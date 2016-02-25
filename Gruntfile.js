@@ -145,7 +145,7 @@ module.exports = function(grunt) {
 	grunt.registerTask('server', ['loadEnv', 'express:server']);
 
 	grunt.registerTask('check', ['jscs', 'eslint', 'babel', 'mochaTest:unit']);
-	grunt.registerTask('test', ['babel:src', 'mochaTest']);
+	grunt.registerTask('test', ['babel:src', 'mochaTest:unit', 'loadEnv', 'mochaTest:integration']);
 	grunt.registerTask('cover', ['exec:cover', 'remapIstanbul:build']);
 
 	function loadEnv() {

@@ -1,4 +1,4 @@
-import '../../src/server/bootstrap';
+import './bootstrap';
 import sio from 'socket.io';
 import Promise from 'bluebird';
 import {default as EncounterRegistry, OzoraUserEncounterInterface} from '../../src/server/localheim';
@@ -16,7 +16,6 @@ let debug = createDebug('dhm:test:localheim');
 chai.use(chaiAsPromised);
 let expect = chai.expect;
 chai.should();
-
 
 describe('Localheim Integration', () => {
 
