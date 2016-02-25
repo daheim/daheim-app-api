@@ -34,7 +34,7 @@ BunyanStream.prototype._write = function(log, enc, cb) {
 
 var bunyanStream;
 
-if (process.env.LOG_LE_TOKEN) {
+if (process.env.LOG_LE_TOKEN && process.env.LOG_LE_TOKEN !== '**ChangeMe**') {
 	bunyanStream = new BunyanStream({
 		token: process.env.LOG_LE_TOKEN,
 		withLevel: false,

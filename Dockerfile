@@ -18,5 +18,6 @@ RUN cd /app \
   && npm install grunt-cli -g \
   && npm install \
   && grunt \
+  && grunt check \
   && npm prune --production \
   && rm -rf ~/.npm
