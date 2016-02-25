@@ -1,14 +1,22 @@
-FROM node:0.12
+FROM node:5
+
+ENV LOG_LE_TOKEN=**ChangeMe** \
+    NEW_RELIC_APP_NAME=daheim \
+    NEW_RELIC_LICENSE_KEY=**ChangeMe** \
+    NEW_RELIC_LOG=stdout \
+    AZURE_STORAGE_CONNECTION_STRING=**ChangeMe** \
+    SECRET=**ChangeMe** \
+    SENDGRID_KEY=**ChangeMe** \
+    URL=**ChangeMe** \
+    HEAPDUMP=**ChangeMe**
 
 EXPOSE 3000
-CMD node /usr/local/daheim/app.js
+CMD node /app
 
-ADD package.json /usr/local/daheim/package.json
-RUN cd /usr/local/daheim \
-  && npm install npm -g \
+ADD . /app
+RUN cd /app \
   && npm install grunt-cli -g \
   && npm install \
+  && grunt \
+  && npm prune --production \
   && rm -rf ~/.npm
-
-ADD . /usr/local/daheim
-RUN cd /usr/local/daheim && grunt
