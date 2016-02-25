@@ -88,7 +88,7 @@ export default class User {
 				from: 'daheim@mesellyounot.com',
 				fromname: 'Daheim',
 				subject: 'Daheim Login',
-				html: `Please click <a href="${process.env.URL}/#!/login/token/${token}">here to log in</a>.`
+				html: `Please click <a href="${process.env.URL}/#!/login/token/${token}">here to log in</a>.`,
 			});
 			await sendgrid.sendAsync(email);
 

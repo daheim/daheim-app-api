@@ -320,7 +320,7 @@ describe('Localheim Integration', () => {
 	function createClient() {
 		return io.connect(url, {
 			'force new connection': true,
-			reconnectionDelayMax: 1
+			reconnectionDelayMax: 1,
 		});
 	}
 
@@ -347,7 +347,7 @@ class OzoraSocket extends SimpleReceiver {
 		this[$socket] = socket;
 		this[$ozora] = new Ozora({
 			channel: new SioChannel({socket}),
-			zero: this
+			zero: this,
 		});
 		this[$registry] = registry;
 	}
@@ -359,8 +359,8 @@ class OzoraSocket extends SimpleReceiver {
 			profile: {
 				name: userId,
 				languages: [],
-				topics: []
-			}
+				topics: [],
+			},
 		};
 	}
 

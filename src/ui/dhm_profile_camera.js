@@ -18,7 +18,7 @@ app.directive('dhmProfileCamera', () => {
 			snap: '&',
 			imageData: '=',
 			pictureWidth: '@',
-			pictureHeight: '@'
+			pictureHeight: '@',
 		},
 		link: ($scope, element) => {
 
@@ -89,6 +89,6 @@ app.directive('dhmProfileCamera', () => {
 					delete $scope.msr;
 				}
 			}
-		}
+		},
 	};
 });

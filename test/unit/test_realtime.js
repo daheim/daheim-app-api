@@ -55,7 +55,7 @@ describe('Realtime', function() {
 
 	function createClient() {
 		return io.connect(url, {
-			'force new connection': true
+			'force new connection': true,
 		});
 	}
 });

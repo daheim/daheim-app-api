@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
 
-	var env = loadEnv();
+	var env = loadEnv(); // eslint-disable-line no-unused-vars
 	require('load-grunt-tasks')(grunt);
 
 	grunt.initConfig({
@@ -11,7 +11,7 @@ module.exports = function(grunt) {
 				options: {
 					reporter: process.env.TEST_REPORT_JUNIT === '1' ? 'mocha-junit-reporter' : 'spec',
 					reporterOptions: {
-						mochaFile: './build/test-results.xml'
+						mochaFile: './build/test-results.xml',
 					},
 				},
 				src: ['build/dist/test/unit/**/*.js'],
@@ -21,18 +21,18 @@ module.exports = function(grunt) {
 				options: {
 					reporter: process.env.TEST_REPORT_JUNIT === '1' ? 'mocha-junit-reporter' : 'spec',
 					reporterOptions: {
-						mochaFile: './build/test-results-integration.xml'
+						mochaFile: './build/test-results-integration.xml',
 					},
 				},
 				src: ['build/dist/test/integration/**/*.js'],
-			}
+			},
 		},
 
 		exec: {
 			cover: {
 				cmd: './node_modules/.bin/istanbul cover grunt --root build/dist/src --include-all-sources --dir ./build/coverage --print both -- test',
-				stdout: false
-			}
+				stdout: false,
+			},
 		},
 
 		remapIstanbul: {
@@ -41,16 +41,16 @@ module.exports = function(grunt) {
 				options: {
 					reports: {
 						'html': 'build/coverage/report-babel',
-						'json': 'build/coverage/coverage-babel.json'
-					}
-				}
-			}
+						'json': 'build/coverage/coverage-babel.json',
+					},
+				},
+			},
 		},
 
 		clean: {
 			all: {
-				src: ['build']
-			}
+				src: ['build'],
+			},
 		},
 
 		jscs: {
@@ -58,36 +58,39 @@ module.exports = function(grunt) {
 				src: ['src/**/*.js', 'test/**/*.js', 'public/js/**/*.js'],
 				options: {
 					config: true,
-					verbose: true
-				}
-			}
+					verbose: true,
+				},
+			},
 		},
 
 		eslint: {
-			node: [
-				'src',
-				'test',
-				'public/js'
-			]
+			node: {
+				src: [
+					'src',
+					'test',
+					'public/js',
+					'Gruntfile.js',
+				],
+			},
 		},
 
 		express: {
 			dev: {
 				options: {
-					script: 'app.js'
-				}
+					script: 'app.js',
+				},
 			},
 			server: {
 				options: {
 					script: 'app.js',
 					background: false,
-				}
-			}
+				},
+			},
 		},
 
 		babel: {
 			options: {
-				sourceMap: 'inline'
+				sourceMap: 'inline',
 			},
 			src: {
 				files: [{
@@ -95,15 +98,15 @@ module.exports = function(grunt) {
 					cwd: 'src/',
 					src: ['**/*.js'],
 					dest: 'build/dist/src',
-					ext: '.js'
+					ext: '.js',
 				}, {
 					expand: true,
 					cwd: 'test/',
 					src: ['**/*.js'],
 					dest: 'build/dist/test',
-					ext: '.js'
-				}]
-			}
+					ext: '.js',
+				}],
+			},
 		},
 
 		watch: {
@@ -113,7 +116,7 @@ module.exports = function(grunt) {
 				options: {
 					atBegin: true,
 					spawn: false,
-				}
+				},
 			},
 		},
 
@@ -123,10 +126,10 @@ module.exports = function(grunt) {
 					source: 'src',
 					destination: 'build/doc',
 					plugins: [
-						{name: 'esdoc-es7-plugin'}
-					]
-				}
-			}
+						{name: 'esdoc-es7-plugin'},
+					],
+				},
+			},
 		},
 
 		webpack: {

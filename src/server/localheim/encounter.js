@@ -62,7 +62,7 @@ export default class Encounter {
 					id,
 					self: id === selfId,
 					userId: member.userId,
-					profile: member.profile
+					profile: member.profile,
 				};
 			});
 
@@ -94,7 +94,7 @@ export default class Encounter {
 				id,
 				self: member === me,
 				userId: member.userId,
-				profile: member.profile
+				profile: member.profile,
 			};
 		});
 
@@ -217,7 +217,7 @@ export default class Encounter {
 			userId: Object.keys(this[$members]),
 			encounterTime: new Date() - this[$startTime],
 			result: success ? 'success' : 'rejected',
-			reason
+			reason,
 		});
 
 		if (reason !== Registry.ReasonBye) {

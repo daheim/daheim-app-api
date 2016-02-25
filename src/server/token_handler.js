@@ -20,7 +20,7 @@ export class TokenHandler {
 			this[$passport] = passport;
 			passport.use('jwt', new JwtStrategy({
 				secretOrKey: SECRETS[this],
-				authScheme: 'Bearer'
+				authScheme: 'Bearer',
 			}, async function(jwt, done) {
 				try {
 					let user = await User.findById(jwt.sub);

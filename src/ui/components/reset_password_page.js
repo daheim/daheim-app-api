@@ -51,7 +51,7 @@ export class ResetPasswordForm extends React.Component {
 				}),
 				headers: {
 					Authorization: `Bearer ${this.props.token}`,
-				}
+				},
 			});
 
 			interop.auth.accessToken = result.accessToken;

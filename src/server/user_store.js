@@ -43,7 +43,7 @@ export default class UserStore {
 		if (typeof userId !== 'string') { throw new Error('userId must be defined'); }
 		if (!(buffer instanceof Buffer)) { throw new Error('buffer must be defined'); }
 		return this[$azure].blobs.createBlockBlobFromTextAsync('public', `users/${encodeURIComponent(userId)}/picture.png`, buffer, {
-			contentType: 'image/png'
+			contentType: 'image/png',
 		});
 	}
 }

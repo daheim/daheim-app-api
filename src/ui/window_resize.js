@@ -11,7 +11,7 @@ function ResizeDirective($window) {
 			$scope.getWindowDimensions = () => {
 				return {
 					'h': w.height(),
-					'w': w.width()
+					'w': w.width(),
 				};
 			};
 
@@ -27,7 +27,7 @@ function ResizeDirective($window) {
 			$scope.$on('$destroy', () => {
 				w.off('resize', handler);
 			});
-		}
+		},
 	};
 }
 

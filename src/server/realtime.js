@@ -46,7 +46,7 @@ class Realtime {
 			registry: this[$registry],
 			tokenHandler: this[$tokenHandler],
 			userStore: this[$userStore],
-			log: this[$log]
+			log: this[$log],
 		});
 		ozora.register(zero);
 

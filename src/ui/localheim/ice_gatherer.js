@@ -47,7 +47,7 @@ export default class IceGatherer extends EventEmitter {
 		this[$gathered] = [];
 		this.emit('send', {
 			iceCandidates: gathered,
-			iceComplete: this[$done]
+			iceComplete: this[$done],
 		});
 	}
 }

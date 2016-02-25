@@ -6,8 +6,8 @@ exports.config = {
 		chromeOptions: {
 			args: [
 				'use-fake-ui-for-media-stream',
-				'disable-web-security'
-			]
-		}
-	}
+				'disable-web-security',
+			],
+		},
+	},
 };

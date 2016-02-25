@@ -86,7 +86,7 @@ export default class LocalheimManager extends EventEmitter {
 
 			this[$localheimClient] = LocalheimClient.createAndStart({
 				ozora: this[$ozora],
-				streamGuard: this[$streamGuard]
+				streamGuard: this[$streamGuard],
 			});
 			this[$localheimClient].on('stateUpdate', () => this.emit('stateUpdate'));
 			this[$localheimClient].on('remoteStream', stream => this.emit('remoteStream', stream));

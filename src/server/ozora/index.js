@@ -165,7 +165,7 @@ export default class Ozora extends EventEmitter {
 			debug('local success:', data, '->', result);
 			let res = {
 				ack: data.id,
-				result
+				result,
 			};
 			this[$channel].send(res);
 		} catch (err) {
@@ -175,8 +175,8 @@ export default class Ozora extends EventEmitter {
 				ack: data.id,
 				error: {
 					name: err2.name,
-					message: err2.message
-				}
+					message: err2.message,
+				},
 			};
 			this[$channel].send(res);
 		}

@@ -48,7 +48,7 @@ app.factory('User', function($resource, auth) {
 		requestLoginLink: {method: 'post', params: {method: 'loginLink'}},
 		saveProfile: {method: 'post', params: {method: 'profile'}, headers: auth.headers},
 		getProfile: {params: {method: 'profile'}, headers: auth.headers},
-		saveProfilePicture: {method: 'post', params: {method: 'profile', method2: 'picture'}, headers: auth.headers}
+		saveProfilePicture: {method: 'post', params: {method: 'profile', method2: 'picture'}, headers: auth.headers},
 	});
 });
 
@@ -76,7 +76,7 @@ app.run(($rootScope, $mdDialog) => {
 	$rootScope.$on('$routeChangeError', (e, current, previous, err) => {
 		$mdDialog.show($mdDialog.alert({
 			content: err.message,
-			ok: 'OK'
+			ok: 'OK',
 		}));
 		debug('$routeChangeError', e, current, previous, err);
 	});
@@ -142,12 +142,12 @@ app.controller('LoginCtrl', ($scope, session, $location, User, $mdDialog) => {
 		User.requestLoginLink({email: $scope.username}).$promise.then(resIgnored => {
 			$mdDialog.show($mdDialog.alert({
 				content: 'Message sent. Please check your inbox.',
-				ok: 'OK'
+				ok: 'OK',
 			}));
 		}).catch(err => {
 			$mdDialog.show($mdDialog.alert({
 				content: 'Could not send message: ' + (err.data || 'network error'),
-				ok: 'OK'
+				ok: 'OK',
 			}));
 		}).finally(() => {
 			$scope.sending = false;
@@ -167,7 +167,7 @@ app.controller('RegisterProfileCtrl', ($scope, $location, User, $timeout) => {
 		return ['none', 'beginner', 'intermediate', 'advanced', 'native'].map(level => {
 			return {
 				language: input,
-				level
+				level,
 			};
 		});
 	};
@@ -222,7 +222,7 @@ app.controller('RegisterProfileCtrl', ($scope, $location, User, $timeout) => {
 		return User.saveProfile({
 			name: $scope.name,
 			languages: $scope.languages,
-			topics: $scope.topics
+			topics: $scope.topics,
 		}).$promise.then(() => {
 			$scope.lastSaved = nowSaving;
 			if (savePending) {
@@ -249,7 +249,7 @@ app.controller('RegisterPictureCtrl', ($scope, $location, $mdDialog, User) => {
 		$scope.uploading = true;
 
 		User.saveProfilePicture({
-			data: $scope.imageData
+			data: $scope.imageData,
 		}).$promise.then(() => {
 
 		}).catch(err => {
@@ -257,7 +257,7 @@ app.controller('RegisterPictureCtrl', ($scope, $location, $mdDialog, User) => {
 			debug('', err);
 			$mdDialog.show($mdDialog.alert({
 				content: err.status < 0 ? 'network error' : err.data,
-				ok: 'OK'
+				ok: 'OK',
 			}));
 
 		}).finally(() => {

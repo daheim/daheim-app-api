@@ -34,7 +34,7 @@ UserSchema.pre('save', function(next) {
 		beginner: 1,
 		intermediate: 1,
 		advanced: 1,
-		native: 1
+		native: 1,
 	};
 
 	if (!this.isModified('profile')) {
@@ -91,7 +91,7 @@ UserSchema.methods.incLoginAttempts = function() {
 	if (this.lockUntil && this.lockUntil < Date.now()) {
 		return this.update({
 			$set: {loginAttempts: 1},
-			$unset: {lockUntil: 1}
+			$unset: {lockUntil: 1},
 		});
 	}
 

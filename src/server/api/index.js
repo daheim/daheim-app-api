@@ -29,7 +29,7 @@ export class Api {
 			let user = await User.getAuthenticated(email, password);
 			return {
 				result: 'login',
-				accessToken: tokenHandler.issueForUser(user.id)
+				accessToken: tokenHandler.issueForUser(user.id),
 			};
 		} catch (err) {
 			if (err.name !== 'AuthError') {
@@ -50,7 +50,7 @@ export class Api {
 		await user.save();
 		return {
 			result: 'new',
-			accessToken: tokenHandler.issueForUser(user.id)
+			accessToken: tokenHandler.issueForUser(user.id),
 		};
 	}
 
@@ -59,7 +59,7 @@ export class Api {
 			let user = await User.getAuthenticated(email, password);
 			return {
 				result: 'login',
-				accessToken: tokenHandler.issueForUser(user.id)
+				accessToken: tokenHandler.issueForUser(user.id),
 			};
 		} catch (err) {
 			if (err.name !== 'AuthError') {
@@ -84,7 +84,7 @@ export class Api {
 			from: 'daheim@mesellyounot.com',
 			fromname: 'Daheim',
 			subject: 'Daheim Password Reset',
-			html: `Please click <a href="${process.env.URL}/auth/reset?token=${encodeURIComponent(token)}">here reset your password.</a>.`
+			html: `Please click <a href="${process.env.URL}/auth/reset?token=${encodeURIComponent(token)}">here reset your password.</a>.`,
 		});
 		await sendgrid.sendAsync(sg);
 	}
@@ -96,7 +96,7 @@ export class Api {
 		await user.save();
 
 		return {
-			accessToken: tokenHandler.issueForUser(user.id)
+			accessToken: tokenHandler.issueForUser(user.id),
 		};
 	}
 

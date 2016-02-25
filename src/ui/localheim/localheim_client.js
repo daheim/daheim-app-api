@@ -120,7 +120,7 @@ export default class LocalheimClient extends EventEmitter {
 			localheim: this,
 			participant: this.partner.id,
 			session: this.partner.session,
-			initiator: this.partner.id > this.me.id
+			initiator: this.partner.id > this.me.id,
 		});
 		this[$negotiator].start();
 		this[$setState]('negotiate');
@@ -140,7 +140,7 @@ export default class LocalheimClient extends EventEmitter {
 			localheim: this,
 			participant: this.partner.id,
 			session: this.partner.session,
-			initiator: this.partner.id > this.me.id
+			initiator: this.partner.id > this.me.id,
 		});
 		this[$negotiator].start();
 		this[$setState]('negotiate');
@@ -238,8 +238,8 @@ class Negotiator {
 						type: 'ice',
 						negotiationId: this[$negotiationId],
 						candidates: iceCandidates,
-						complete: iceComplete
-					}
+						complete: iceComplete,
+					},
 				});
 			} catch (err) {
 				this.close({reason: 'error', error: err});
@@ -247,7 +247,7 @@ class Negotiator {
 		});
 
 		this[$pc] = new WebRTC.RTCPeerConnection({
-			iceServers: this[$iceServers]
+			iceServers: this[$iceServers],
 		});
 		this[$pc].onicecandidate = e => this[$iceGatherer].add(e.candidate);
 		this[$pc].onaddstream = e => {
@@ -281,8 +281,8 @@ class Negotiator {
 						message: {
 							type: 'offer',
 							negotiationId: this[$negotiationId],
-							sdp: desc.sdp
-						}
+							sdp: desc.sdp,
+						},
 					});
 					this[$iceGatherer].ready();
 				} catch (err) {
@@ -316,8 +316,8 @@ class Negotiator {
 						message: {
 							type: 'answer',
 							negotiationId: this[$negotiationId],
-							sdp: desc.sdp
-						}
+							sdp: desc.sdp,
+						},
 					});
 				} catch (err) {
 					debug('answer error', err);
@@ -344,7 +344,7 @@ class Negotiator {
 				} catch (err) {
 					return {
 						candidate,
-						error: err
+						error: err,
 					};
 				}
 			});

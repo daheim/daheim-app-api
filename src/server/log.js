@@ -8,7 +8,7 @@ var stream = require('stream');
 
 var streams = [{
 	level: 'debug',
-	stream: process.stdout
+	stream: process.stdout,
 }];
 
 function BunyanStream(opt) {
@@ -16,7 +16,7 @@ function BunyanStream(opt) {
 
 	stream.Writable.call(this, {
 		objectMode: true,
-		highWaterMark: opt.bufferSize || LogentriesDefaults.bufferSize
+		highWaterMark: opt.bufferSize || LogentriesDefaults.bufferSize,
 	});
 
 	this.logger = new LogentriesLogger(opt);
@@ -38,13 +38,13 @@ if (process.env.LOG_LE_TOKEN) {
 	bunyanStream = new BunyanStream({
 		token: process.env.LOG_LE_TOKEN,
 		withLevel: false,
-		secure: true
+		secure: true,
 	});
 
 	streams.push({
 		level: 'info',
 		stream: bunyanStream,
-		type: 'raw'
+		type: 'raw',
 	});
 }
 
@@ -53,8 +53,8 @@ var log = bunyan.createLogger({
 	level: 'debug',
 	streams: streams,
 	serializers: {
-		err: bunyan.stdSerializers.err
-	}
+		err: bunyan.stdSerializers.err,
+	},
 });
 log.bunyanStream = bunyanStream;
 
@@ -63,8 +63,8 @@ var eventLog = bunyan.createLogger({
 	level: 'debug',
 	streams: streams,
 	serializers: {
-		err: bunyan.stdSerializers.err
-	}
+		err: bunyan.stdSerializers.err,
+	},
 });
 log.event = function(name, data) {
 	eventLog.info(data, name);
@@ -87,7 +87,7 @@ log.requestLogger = function() {
 		format: ':remote-address :method :url :status-code :response-time ms',
 		excludes: ['body', 'short-body', 'http-version', 'response-hrtime', 'req-headers', 'res-headers', 'req', 'res', 'referer', 'incoming', 'user-agent'],
 		streams: streams,
-		genReqId: defaultGenerateRequestId
+		genReqId: defaultGenerateRequestId,
 	});
 };
 
@@ -102,7 +102,7 @@ log.errorLogger = function() {
 		excludes: ['short-body', 'incoming', 'response-hrtime'],
 		streams: streams,
 		immediate: true,
-		genReqId: defaultGenerateRequestId
+		genReqId: defaultGenerateRequestId,
 	});
 };
 

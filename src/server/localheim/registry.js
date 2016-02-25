@@ -59,8 +59,8 @@ export default class Registry {
 			log: this[$log],
 			participants: [
 				{member: me},
-				{member: partner}
-			]
+				{member: partner},
+			],
 		});
 		this.userEncounters[me.userId] = encounter;
 		this.userEncounters[partner.userId] = encounter;

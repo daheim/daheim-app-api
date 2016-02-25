@@ -22,7 +22,7 @@ app.config(function($mdThemingProvider) {
 		.theme('video')
 		.dark()
 		.backgroundPalette('grey', {
-			default: '900'
+			default: '900',
 		});
 });
 
@@ -61,7 +61,7 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 		}
 		localheimManager = new LocalheimManager({
 			ozoraProvider,
-			constraints: {audio: true, video: true}
+			constraints: {audio: true, video: true},
 		});
 		localheimManager.on('localStream', () => $timeout(() => $scope.$apply()));
 		localheimManager.on('remoteStream', () => $timeout(() => $scope.$apply()));
@@ -77,13 +77,13 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 
 	$scope.languages = [{
 		language: 'Hungarian',
-		level: 'native'
+		level: 'native',
 	}, {
 		language: 'English',
-		level: 'high'
+		level: 'high',
 	}, {
 		language: 'German',
-		level: 'sucks'
+		level: 'sucks',
 	}];
 
 	//$scope.topics = ['cars', 'food', 'hiking', 'children', 'cars1', 'food1', 'hiking1', 'children1', 'cars2', 'food2', 'hiking2', 'children2', 'cars4', 'food4', 'hiking4', 'children4'];
@@ -105,7 +105,7 @@ app.controller('ThirdCtrl', function($scope, $window, $log, $timeout, $interval,
 			if (localheimManager.state === 'connected' || localheimManager.state === 'negotiating') {
 				return 'You are in a video session.';
 			}
-		}
+		},
 	});
 
 	$scope.klose = () => {

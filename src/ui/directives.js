@@ -16,7 +16,7 @@ app.directive('dhmSizeWatcher', function() {
 			let handler = () => $scope.$apply();
 			$element.on('resize', handler);
 			$scope.$on('$destroy', () => $element.off('resize', handler));
-		}
+		},
 	};
 });
 
@@ -32,7 +32,7 @@ app.directive('dhmCenter', function() {
 					w: $element.outerWidth(),
 					h: $element.outerHeight(),
 					pw: $element.parent().width(),
-					ph: $element.parent().height()
+					ph: $element.parent().height(),
 				};
 			}
 
@@ -50,7 +50,7 @@ app.directive('dhmCenter', function() {
 			$scope.$on('$destroy', () => $element.off('resize', handler));
 			$element.parent().on('resize', handler);
 			$scope.$on('$destroy', () => $element.parent().off('resize', handler));
-		}
+		},
 	};
 });
 
@@ -59,7 +59,7 @@ app.directive('dhmRef', () => {
 		restrict: 'A',
 		link: ($scope, $element, attributes) => {
 			$scope[attributes['dhmRef']] = $element;
-		}
+		},
 	};
 });
 
@@ -101,7 +101,7 @@ app.directive('dhmMaxVideoSize', function() {
 
 			$element.on('resize', setSize);
 			$scope.$on('$destroy', () => $element.off('resize', setSize));
-		}
+		},
 	};
 });
 
@@ -122,7 +122,7 @@ app.directive('dhmSrcObject', function() {
 					WebRTC.attachMediaStream(element[0], value);
 				}
 			});
-		}
+		},
 	};
 });
 
@@ -136,6 +136,6 @@ app.directive('dhmResize', ($parse) => {
 			$scope.$on('$destroy', () => {
 				$element.off('resize', handler);
 			});
-		}
+		},
 	};
 });

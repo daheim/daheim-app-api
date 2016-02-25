@@ -43,7 +43,7 @@ app.use('/api', api.router);
 app.get('/js/config.js', function(req, res) {
 	var cfg = {
 		socketIoUrl: 'http://localhost:3000',
-		storageAccount: azure.blobs.storageAccount
+		storageAccount: azure.blobs.storageAccount,
 	};
 	res.send('angular.module("dhm").constant("config", ' + JSON.stringify(cfg) + ');');
 });
@@ -124,5 +124,5 @@ function start() {
 
 module.exports = {
 	app: app,
-	start: start
+	start: start,
 };

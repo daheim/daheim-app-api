@@ -34,7 +34,7 @@ Azure.prototype.TableBatch = azureStorage.TableBatch;
 
 Azure.createFromEnv = function() {
 	return new Azure({
-		storageConnectionString: process.env.AZURE_STORAGE_CONNECTION_STRING
+		storageConnectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
 	});
 };
 
