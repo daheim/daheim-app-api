@@ -5,6 +5,11 @@ import bcrypt from 'bcryptjs';
 
 SourceMapSupport.install();
 
+Promise.config({
+	longStackTraces: true,
+	warnings: process.env.NODE_ENV === 'development',
+});
+
 process.on('unhandledRejection', function(reason) {
 	console.error('Unhandled rejection:', reason.stack); // eslint-disable-line no-console
 });
