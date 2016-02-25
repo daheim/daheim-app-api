@@ -193,7 +193,7 @@ export default class Encounter {
 		this[$close]({reason});
 	}
 
-	[$close]({reason, me}) {
+	[$close]({reason, meIgnored}) {
 		if (this[$state] === StateClosed) { return; }
 		let success = this[$state] === StateNegotiate;
 		this[$state] = StateClosed;

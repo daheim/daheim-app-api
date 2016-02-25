@@ -21,7 +21,7 @@ export class Api {
 
 		this.router.use('/encounters', encounterApi.router);
 
-		this.router.get('*', (req, res, next) => {res.status(404).send({error: 'not_found'})});
+		this.router.get('*', (req, res) => res.status(404).send({error: 'not_found'}));
 	}
 
 	async register({body: {email, password}}, res) {

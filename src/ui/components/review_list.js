@@ -32,7 +32,6 @@ export class ReviewList extends React.Component {
 		} catch (err) {
 			state.error = err;
 		} finally {
-			console.log(state);
 			this.setState(state);
 		}
 	}

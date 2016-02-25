@@ -1,11 +1,9 @@
 import React from 'react';
-import moment from 'moment';
-import {Link} from 'react-router';
 import {LoadingPanel} from './loading_panel';
 import RaisedButton from 'material-ui/lib/raised-button';
 import FlatButton from 'material-ui/lib/flat-button';
 import TextField from 'material-ui/lib/text-field';
-import StarRating from 'react-star-rating'
+import StarRating from 'react-star-rating';
 import RadioButton from 'material-ui/lib/radio-button';
 import RadioButtonGroup from 'material-ui/lib/radio-button-group';
 
@@ -193,7 +191,6 @@ export class ReviewPage extends React.Component {
 		} catch (err) {
 			state.error = err;
 		} finally {
-			console.log(state);
 			this.setState(state);
 		}
 	}
@@ -225,16 +222,14 @@ export class ReviewPage extends React.Component {
 	handleRatingChange = data => {
 		this.state.data.myRating = data;
 		this.forceUpdate();
-		console.log(data);
 	};
 
 	handleReviewChange = data => {
 		this.state.data.myReview = data;
 		this.forceUpdate();
-		console.log(data);
 	};
 
-	handleSave = async e => {
+	handleSave = async eIgnored => {
 		this.setState({loading: true});
 		try {
 			this.state.data = await $.ajax({
@@ -253,7 +248,7 @@ export class ReviewPage extends React.Component {
 		} finally {
 			this.setState({loading: false});
 		}
-	}
+	};
 
 	render() {
 		return (
@@ -271,7 +266,7 @@ export class ReviewPage extends React.Component {
 								<LessonReview data={this.state.data && this.state.data.myReview} onChange={this.handleReviewChange} />
 
 								<div style={{display: 'flex', justifyContent: 'flex-end', paddingTop: 10}}>
-									<FlatButton style={{flex: '0 1 auto', marginRight: 10}} label="Zurück" onClick={e => history.goBack()} />
+									<FlatButton style={{flex: '0 1 auto', marginRight: 10}} label="Zurück" onClick={eIgnored => history.goBack()} />
 									<RaisedButton style={{flex: '0 1 auto', marginLeft: 10}} label="Speichern" secondary={true} onClick={this.handleSave} />
 								</div>
 							</div>
