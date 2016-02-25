@@ -8,7 +8,8 @@ ENV LOG_LE_TOKEN=**ChangeMe** \
     SECRET=**ChangeMe** \
     SENDGRID_KEY=**ChangeMe** \
     URL=**ChangeMe** \
-    HEAPDUMP=**ChangeMe**
+    HEAPDUMP=**ChangeMe** \
+    NODE_ENV=production
 
 EXPOSE 3000
 CMD node /app
@@ -16,7 +17,7 @@ CMD node /app
 ADD . /app
 RUN cd /app \
   && npm install grunt-cli -g \
-  && npm install \
+  && NODE_ENV=development npm install \
   && grunt \
   && grunt check \
   && npm prune --production \

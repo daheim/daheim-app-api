@@ -21,7 +21,7 @@ module.exports = {
 		filename: 'js/[name].js',
 		chunkFilename: '[chunkhash].js',
 	},
-	devtool: 'eval',
+	devtool: process.env.NODE_ENV === 'production' ? 'source-map' : 'eval',
 	plugins: [
 		new HtmlWebpackPlugin({
 			inject: 'head',
@@ -31,7 +31,9 @@ module.exports = {
 		}),
 		new ExtractTextPlugin('style/[name].css'),
 		new webpack.optimize.DedupePlugin(),
-	],
+	].concat(process.env.NODE_ENV === 'production' ? [
+		new webpack.optimize.UglifyJsPlugin({minimize: true}),
+	] : []),
 	module: {
 		loaders: [
 			{test: /\.jsx?$/, exclude: /(node_modules|bower_components)/, loader: 'ng-annotate!babel?cacheDirectory'},
