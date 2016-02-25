@@ -2,7 +2,7 @@ import './bootstrap';
 import mongoose from 'mongoose';
 
 import {AuthError} from '../../src/server/model/user';
-import tokenHandler from '../../src/server/token_handler';
+//import tokenHandler from '../../src/server/token_handler';
 
 describe('Api', function() {
 
@@ -10,14 +10,22 @@ describe('Api', function() {
 
 	let api;
 	let User;
+	let tokenHandler;
 
 	beforeEach(function() {
 		User = sinon.stub();
 		User.getAuthenticated = sinon.stub();
 		User.prototype.save = sinon.stub();
 
-		api = proxyquire.noCallThru()('../../src/server/api', {
+		tokenHandler = {
+			issueForUser: userId => `token:${userId}`,
+			verifyAccessToken: token => token.substring(6),
+		};
+
+		api = proxyquire('../../src/server/api', {
 			'../model': {User},
+			'../token_handler': tokenHandler,
+			'./encounter': {router: function() {}},
 		}).default;
 	});
 

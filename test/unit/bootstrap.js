@@ -6,13 +6,13 @@ import supertest from 'supertest';
 import express from 'express';
 import bodyParser from 'body-parser';
 
-chai.should();
-
 process.env.SECRET = 'verysecret';
 
-global.proxyquire = proxyquire;
+global.proxyquire = proxyquire.noCallThru();
 global.sinon = sinon;
 global.supertest = supertest;
+global.expect = chai.expect;
+global.should = chai.should();
 
 global.createApp = function(router) {
 	let app = express();

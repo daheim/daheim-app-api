@@ -1,11 +1,5 @@
-require('../../src/server/bootstrap');
-var chai = require('chai');
-var sinon = require('sinon');
-var supertest = require('supertest');
+import './bootstrap';
 var nock = require('nock');
-
-var expect = chai.expect;
-var should = chai.should();
 
 var Promise = require('bluebird');
 var util = require('util');
@@ -14,14 +8,24 @@ var io = require('socket.io-client');
 
 var log = require('../../src/server/log');
 
-import Realtime from '../../src/server/realtime';
+//import Realtime from '../../src/server/realtime';
 import convict from 'convict';
+
+class EncounterRegistry {
+
+}
 
 describe('Realtime', function() {
 	var url;
 	var server;
+	let Realtime;
 
 	beforeEach(function() {
+		Realtime = proxyquire('../../src/server/realtime', {
+			'./localheim': {__esModule: true, default: EncounterRegistry},
+		}).default;
+
+
 		server = require('http').createServer();
 		let config = convict({});
 		config.set('ice', {});
