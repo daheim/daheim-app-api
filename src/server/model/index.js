@@ -8,10 +8,15 @@ export * from './encounter';
 let mongooseUrl = 'mongodb://localhost/first';
 if (process.env.MONGODB_URL) {
 	mongooseUrl = process.env.MONGODB_URL;
-} else if (process.env.MONGODB_PORT_27017_TCP_PORT && process.env.MONGODB_PORT_27017_TCP_ADDR && process.env.MONGODB_DB_NAME) {
+} else if (process.env.MONGODB_PORT_27017_TCP_PORT && process.env.MONGODB_PORT_27017_TCP_ADDR) {
+	if (!process.env.MONGODB_DB_NAME || process.env.MONGODB_DB_NAME === '**ChangeMe**') {
+		log.error('MONGODB_DB_NAME must be defined when mongodb is linked');
+		process.exit(1);
+	}
 	mongooseUrl = 'mongodb://' + process.env.MONGODB_PORT_27017_TCP_ADDR + ':' + process.env.MONGODB_PORT_27017_TCP_PORT + '/' + process.env.MONGODB_DB_NAME;
 }
 
+log.info({mongodbUrl: mongooseUrl}, 'connecting to MongoDB');
 mongoose.connect(mongooseUrl, {
 	server: {
 		reconnectTries: Infinity,
