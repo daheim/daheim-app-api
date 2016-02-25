@@ -12,6 +12,7 @@ export class LoginForm extends React.Component {
 
 	static propTypes = {
 		defaultUsername: React.PropTypes.string,
+		onLogin: React.PropTypes.func,
 	};
 
 	state = {
@@ -126,9 +127,9 @@ export class LoginForm extends React.Component {
 			<LoadingPanel loading={this.state.loading}>
 				<form onSubmit={this.handleLoginClick}>
 					{error}
-					<TextField ref="email" fullWidth={true} floatingLabelText="E-Mail-Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
-					<TextField ref="password" style={{marginTop: -10}} type="password" fullWidth={true} errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
-					<RaisedButton type="submit" style={{marginTop: 20}} fullWidth={true} secondary={true} label="Einloggen" />
+					<TextField ref="email" fullWidth floatingLabelText="E-Mail-Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
+					<TextField ref="password" style={{marginTop: -10}} type="password" fullWidth errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
+					<RaisedButton type="submit" style={{marginTop: 20}} fullWidth secondary label="Einloggen" />
 					<div style={{fontSize: 14, textAlign: 'center', paddingTop: 20}}>
 						<Link to={{pathname: '/auth/forgot', query: {username: this.state.email || undefined}}}>Password vergessen?</Link> oder <Link to={{pathname: '/auth/register', query: {username: this.state.email || undefined}}}>Neu anmelden</Link>
 					</div>

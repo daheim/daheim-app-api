@@ -5,6 +5,14 @@ import {history} from './history';
 
 export class LoginPage extends React.Component {
 
+	static propTypes = {
+		location: React.PropTypes.shape({
+			query: React.PropTypes.shape({
+				username: React.PropTypes.string,
+			}).isRequired,
+		}).isRequired,
+	};
+
 	handleLogin = () => {
 		history.push('/');
 	};

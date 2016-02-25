@@ -9,6 +9,8 @@ export class LoadingPanel extends React.Component {
 
 	static propTypes = {
 		loading: React.PropTypes.bool,
+		children: React.PropTypes.node,
+		style: React.PropTypes.object,
 	};
 
 	render() {

@@ -37,7 +37,7 @@ export class ReadyPage extends React.Component {
 			<div>
 				<div style={{textAlign: 'center'}}>
 					<div style={{display: 'inline-block', margin: '20px auto'}}>
-						<RaisedButton primary={true} label="Start a Lesson" onClick={this.handleReadyClick}/>
+						<RaisedButton primary label="Start a Lesson" onClick={this.handleReadyClick}/>
 					</div>
 				</div>
 				<div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center', maxWidth: 1000, width: '100%', margin: '0 auto'}}>

@@ -10,6 +10,5 @@ require('./core');
 require('./third');
 require('./ready');
 require('./directives');
-require('./settings');
 
 require('./router');

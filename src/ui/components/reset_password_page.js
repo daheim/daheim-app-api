@@ -12,6 +12,7 @@ export class ResetPasswordForm extends React.Component {
 
 	static propTypes = {
 		token: React.PropTypes.string.isRequired,
+		onLogin: React.PropTypes.func,
 	};
 
 	state = {
@@ -134,9 +135,9 @@ export class ResetPasswordForm extends React.Component {
 				<form onSubmit={this.handleLoginClick}>
 					<h1 style={{fontSize: 22}}>Passwort zurückzusetzen</h1>
 					{error}
-					<TextField ref="password" style={{marginTop: -10}} type="password" fullWidth={true} errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
-					<TextField ref="password2" style={{marginTop: -10}} type="password" fullWidth={true} errorText={this.state.errorPassword2} floatingLabelText="Passwort bestätigen" valueLink={this.linkState('password2')} />
-					<RaisedButton type="submit" style={{marginTop: 20}} fullWidth={true} secondary={true} label="Password ändern" />
+					<TextField ref="password" style={{marginTop: -10}} type="password" fullWidth errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
+					<TextField ref="password2" style={{marginTop: -10}} type="password" fullWidth errorText={this.state.errorPassword2} floatingLabelText="Passwort bestätigen" valueLink={this.linkState('password2')} />
+					<RaisedButton type="submit" style={{marginTop: 20}} fullWidth secondary label="Password ändern" />
 				</form>
 			</LoadingPanel>
 		);
@@ -146,6 +147,14 @@ reactMixin(ResetPasswordForm.prototype, LinkedStateMixin);
 
 
 export class ResetPasswordPage extends React.Component {
+
+	static propTypes = {
+		location: React.PropTypes.shape({
+			query: React.PropTypes.shape({
+				token: React.PropTypes.string.isRequired,
+			}).isRequired,
+		}).isRequired,
+	};
 
 	state = {
 		sent: false,

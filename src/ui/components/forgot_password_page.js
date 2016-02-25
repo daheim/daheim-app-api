@@ -10,6 +10,7 @@ export class ForgotPasswordForm extends React.Component {
 
 	static propTypes = {
 		defaultUsername: React.PropTypes.string,
+		onLogin: React.PropTypes.func,
 	};
 
 	state = {
@@ -114,8 +115,8 @@ export class ForgotPasswordForm extends React.Component {
 					<h1 style={{fontSize: 22}}>Passwort vergessen?</h1>
 					<h2 style={{fontSize: 14, fontWeight: 400, lineHeight: '150%'}}>Geben Sie Ihre E-Mail-Adresse ein und wir helfen Ihnen, Ihr Passwort zurückzusetzen.</h2>
 					{error}
-					<TextField ref="email" fullWidth={true} floatingLabelText="E-Mail-Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
-					<RaisedButton type="submit" style={{marginTop: 20}} fullWidth={true} secondary={true} label="Weiter" />
+					<TextField ref="email" fullWidth floatingLabelText="E-Mail-Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
+					<RaisedButton type="submit" style={{marginTop: 20}} fullWidth secondary label="Weiter" />
 				</form>
 			</LoadingPanel>
 		);
@@ -124,6 +125,10 @@ export class ForgotPasswordForm extends React.Component {
 reactMixin(ForgotPasswordForm.prototype, LinkedStateMixin);
 
 export class EmailSent extends React.Component {
+
+	static propTypes = {
+		style: React.PropTypes.object,
+	};
 
 	render() {
 		return (
@@ -134,6 +139,14 @@ export class EmailSent extends React.Component {
 }
 
 export class ForgotPasswordPage extends React.Component {
+
+	static propTypes = {
+		location: React.PropTypes.shape({
+			query: React.PropTypes.shape({
+				username: React.PropTypes.string,
+			}).isRequired,
+		}).isRequired,
+	};
 
 	state = {
 		sent: false,
@@ -147,7 +160,7 @@ export class ForgotPasswordPage extends React.Component {
 		return (
 			<div style={{maxWidth: 400, margin: '0 auto', padding: '16px 10px'}}>
 				<div style={{background: 'rgba(255,255,255,0.9)', borderRadius: 10, padding: 20, paddingTop: 12}}>
-					{ !this.state.sent ? (
+					{!this.state.sent ? (
 						<ForgotPasswordForm onLogin={this.handleLogin} defaultUsername={this.props.location.query.username} />
 					) : (
 						<EmailSent style={{paddingTop: 8}} />

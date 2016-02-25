@@ -7,6 +7,10 @@ import {Logo} from './logo';
 
 export class DefaultLayout extends React.Component {
 
+	static propTypes = {
+		children: React.PropTypes.node,
+	};
+
 	state = {
 
 	};

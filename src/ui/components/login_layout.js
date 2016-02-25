@@ -4,6 +4,10 @@ import {Logo} from './logo';
 
 export class LoginLayout extends React.Component {
 
+	static propTypes = {
+		children: React.PropTypes.node,
+	};
+
 	state = {
 
 	};

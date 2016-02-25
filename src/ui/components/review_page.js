@@ -12,6 +12,15 @@ import {history} from './history';
 
 export class ProficiencyRating extends React.Component {
 
+	static propTypes = {
+		onChange: React.PropTypes.func,
+		readOnly: React.PropTypes.bool,
+		itemStyle: React.PropTypes.object,
+		values: React.PropTypes.object,
+		style: React.PropTypes.object,
+		value: React.PropTypes.string,
+	};
+
 	static defaultProps = {
 		values: {
 			1: 'Einige Wörter',
@@ -42,6 +51,15 @@ export class ProficiencyRating extends React.Component {
 }
 
 export class PersonalRating extends React.Component {
+
+	static propTypes = {
+		onChange: React.PropTypes.func,
+		readOnly: React.PropTypes.bool,
+		data: React.PropTypes.shape({
+			overall: React.PropTypes.number,
+			language: React.PropTypes.number,
+		}),
+	};
 
 	handleOverallChange = (eIgnored, {rating}) => {
 		if (this.props.onChange) {
@@ -83,6 +101,17 @@ export class PersonalRating extends React.Component {
 
 
 export class LessonReview extends React.Component {
+
+	static propTypes = {
+		onChange: React.PropTypes.func,
+		readOnly: React.PropTypes.bool,
+		data: React.PropTypes.shape({
+			overall: React.PropTypes.number,
+			words: React.PropTypes.string,
+			good: React.PropTypes.string,
+			bad: React.PropTypes.string,
+		}),
+	};
 
 	handleOverallChange = (eIgnored, {rating}) => {
 		if (this.props.onChange) {
@@ -127,10 +156,10 @@ export class LessonReview extends React.Component {
 					<TextField
 						hintText="Welche deutschen Wörter habt ihr besonders häufig verwendet?"
 						floatingLabelText="Häufig verwendete Wörter"
-						multiLine={true}
+						multiLine
 						rows={1}
 						rowsMax={4}
-						fullWidth={true}
+						fullWidth
 						value={data.words}
 						onChange={this.handleWordsChange}
 					/>
@@ -139,10 +168,10 @@ export class LessonReview extends React.Component {
 					<TextField
 						hintText="Welche deutschen Wörter habt ihr besonders häufig verwendet?"
 						floatingLabelText="Gut gefallen"
-						multiLine={true}
+						multiLine
 						rows={1}
 						rowsMax={4}
-						fullWidth={true}
+						fullWidth
 						onChange={this.handleGoodChange}
 					/>
 				</div>
@@ -150,10 +179,10 @@ export class LessonReview extends React.Component {
 					<TextField
 						hintText="Was hat dir nicht an dem Gespräch gefallen?"
 						floatingLabelText="Nicht gefallen"
-						multiLine={true}
+						multiLine
 						rows={1}
 						rowsMax={4}
-						fullWidth={true}
+						fullWidth
 						onChange={this.handleBadChange}
 					/>
 				</div>
@@ -167,6 +196,10 @@ export class LessonReview extends React.Component {
 export class ReviewPage extends React.Component {
 
 	static propTypes = {
+		params: React.PropTypes.shape({
+			reviewId: React.PropTypes.string.isRequired,
+		}).isRequired,
+		style: React.PropTypes.object,
 	};
 
 	state = {
@@ -250,6 +283,10 @@ export class ReviewPage extends React.Component {
 		}
 	};
 
+	goBack = eIgnored => {
+		history.goBack();
+	};
+
 	render() {
 		return (
 			<div style={Object.assign({background: 'rgba(255,255,255,0.9)', borderRadius: 10, padding: 20, paddingTop: 12, maxWidth: 1000, margin: '0 auto'}, this.props.style)}>
@@ -266,17 +303,17 @@ export class ReviewPage extends React.Component {
 								<LessonReview data={this.state.data && this.state.data.myReview} onChange={this.handleReviewChange} />
 
 								<div style={{display: 'flex', justifyContent: 'flex-end', paddingTop: 10}}>
-									<FlatButton style={{flex: '0 1 auto', marginRight: 10}} label="Zurück" onClick={eIgnored => history.goBack()} />
-									<RaisedButton style={{flex: '0 1 auto', marginLeft: 10}} label="Speichern" secondary={true} onClick={this.handleSave} />
+									<FlatButton style={{flex: '0 1 auto', marginRight: 10}} label="Zurück" onClick={this.goBack} />
+									<RaisedButton style={{flex: '0 1 auto', marginLeft: 10}} label="Speichern" secondary onClick={this.handleSave} />
 								</div>
 							</div>
 
 							<div style={{flex: '1 1 150px', padding: 10}}>
 								<h2>Partner's Review of You</h2>
-								<PersonalRating readOnly={true} data={this.state.data && this.state.data.partnerRating} />
+								<PersonalRating readOnly data={this.state.data && this.state.data.partnerRating} />
 
 								<h2>Partner's Review of the Lesson</h2>
-								<LessonReview readOnly={true} data={this.state.data && this.state.data.partnerReview} />
+								<LessonReview readOnly data={this.state.data && this.state.data.partnerReview} />
 							</div>
 
 						</div>

@@ -8,6 +8,7 @@ import interop from '../interop';
 export class ReviewList extends React.Component {
 
 	static propTypes = {
+		style: React.PropTypes.object,
 	};
 
 	state = {

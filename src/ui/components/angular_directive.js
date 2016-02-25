@@ -5,6 +5,11 @@ import interop from '../interop';
 
 export class AngularDirective extends React.Component {
 
+	static propTypes = {
+		children: React.PropTypes.element.isRequired,
+		style: React.PropTypes.object,
+	};
+
 	componentDidMount() {
 		this.doAngular();
 	}
