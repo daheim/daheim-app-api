@@ -125,9 +125,9 @@ export class LoginForm extends React.Component {
 
 		return (
 			<LoadingPanel loading={this.state.loading}>
-				<form onSubmit={this.handleLoginClick}>
+				<form noValidate onSubmit={this.handleLoginClick}>
 					{error}
-					<TextField ref="email" fullWidth floatingLabelText="E-Mail-Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
+					<TextField ref="email" type="email" fullWidth floatingLabelText="E-Mail-Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
 					<TextField ref="password" style={{marginTop: -10}} type="password" fullWidth errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
 					<RaisedButton type="submit" style={{marginTop: 20}} fullWidth secondary label="Einloggen" />
 					<div style={{fontSize: 14, textAlign: 'center', paddingTop: 20}}>

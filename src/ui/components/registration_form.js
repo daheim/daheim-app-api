@@ -134,10 +134,10 @@ export class RegistrationForm extends React.Component {
 
 		return (
 			<LoadingPanel loading={this.state.loading}>
-				<form onSubmit={this.handleRegisterClick}>
+				<form noValidate onSubmit={this.handleRegisterClick}>
 					<h1 style={{fontSize: 22}}>Jetzt kostenlos Mitglied werden!</h1>
 					{error}
-					<TextField ref="email" fullWidth floatingLabelText="E-Mail-Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
+					<TextField ref="email" type="email" fullWidth floatingLabelText="E-Mail-Addresse" errorText={this.state.errorEmail} valueLink={this.linkState('email')} />
 					<TextField ref="password" style={{marginTop: -10}} type="password" fullWidth errorText={this.state.errorPassword} floatingLabelText="Passwort" valueLink={this.linkState('password')} />
 					<Checkbox style={{marginTop: 20}} label="Ja, ich möchte zum Newsletter anmelden" checked={this.state.newsletter} onCheck={this.handleNewsletterChange} />
 					<Checkbox style={{marginTop: 10}} label="Ja, ich akzeptiere die AGB" checked={this.state.agree} onCheck={this.handleAgreeChange} />
