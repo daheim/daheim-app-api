@@ -83,6 +83,18 @@ UserSchema.pre('save', async function(next) {
 	}
 });
 
+UserSchema.pre('save', async function(next) {
+	let error;
+	try {
+		if (!this.isModified('username')) { return; }
+		this.username = this.username.toLowerCase();
+	} catch (err) {
+		error = err;
+	} finally {
+		next(error);
+	}
+});
+
 UserSchema.methods.comparePassword = function(candidatePassword) {
 	return bcrypt.compareAsync(candidatePassword, this.password);
 };
@@ -103,6 +115,7 @@ UserSchema.methods.incLoginAttempts = function() {
 };
 
 UserSchema.statics.getAuthenticated = async function(username, password) {
+	username = username.toLowerCase();
 	let user = await this.findOne({username});
 	if (!user) { throw new AuthError('user not found'); }
 
