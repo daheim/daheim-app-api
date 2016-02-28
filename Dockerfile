@@ -14,11 +14,13 @@ ENV LOG_LE_TOKEN=**ChangeMe** \
 EXPOSE 3000
 CMD node /app
 
-ADD . /app
+ADD package.json /app/package.json
 RUN cd /app \
   && npm install grunt-cli -g \
   && NODE_ENV=development npm install \
-  && grunt \
-  && grunt check \
-  && npm prune --production \
   && rm -rf ~/.npm
+
+ADD . /app
+RUN cd /app \
+  && grunt \
+  && grunt check
