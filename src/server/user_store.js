@@ -18,7 +18,7 @@ export default class UserStore {
 	async getProfile(id) {
 		let user = await User.findById(id);
 		if (!user) { throw new Error('user not found'); }
-		return user.profile;
+		return {id, ...user.profile.toObject()};
 	}
 
 	async updateProfile(id, {name, languages, topics}) {
