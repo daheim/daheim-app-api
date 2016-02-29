@@ -32,6 +32,7 @@
     "es6-error": "^2.0.2",
     "express": "^4.13.1",
     "express-bunyan-logger": "^1.1.1",
+    "flux": "^2.1.1",
     "grunt": "^0.4.5",
     "grunt-babel": "^6.0.0",
     "grunt-contrib-clean": "^0.6.0",
