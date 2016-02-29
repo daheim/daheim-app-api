@@ -11,6 +11,10 @@ export class AngularDirective extends React.Component {
 	};
 
 	componentDidMount() {
+		let element = angular.element(this.refs.content);
+		let scope = element.scope() || interop.$rootScope;
+		this.scope = scope.$new();
+
 		this.doAngular();
 	}
 
@@ -18,16 +22,19 @@ export class AngularDirective extends React.Component {
 		this.doAngular();
 	}
 
+	componentWillUnmount() {
+		this.scope.$destroy();
+	}
+
 	doAngular() {
 		if (!this.refs.content) { return; }
 
 		let element = angular.element(this.refs.content);
-		let scope = element.scope() || interop.$rootScope;
 
 		let div = document.createElement('div');
 		ReactDOM.render(React.Children.only(this.props.children), div);
 
-		let compiled = interop.$compile(div.innerHTML)(scope);
+		let compiled = interop.$compile(div.innerHTML)(this.scope);
 		element.empty().append(compiled);
 	}
 
