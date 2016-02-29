@@ -2,7 +2,7 @@
 	"parser": "babel-eslint",
 	"plugins": ["react"],
 	"rules": {
-		"indent": [2, "tab"],
+		"indent": [2, "tab", {"SwitchCase": 1}],
 		"linebreak-style": [2, "unix"],
 		"semi": [2, "always"],
 
