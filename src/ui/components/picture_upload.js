@@ -68,6 +68,10 @@ export class PictureUpload extends React.Component {
 		this.setState({useCamera: false});
 	};
 
+	cancel = e => {
+		e.preventDefault();
+	};
+
 	snap = e => {
 		e.preventDefault();
 		let unregisterWatch = this.refs.asdf.scope.$watch('imageData', value => {
