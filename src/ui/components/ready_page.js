@@ -42,14 +42,13 @@ export class ReadyPage extends React.Component {
 					</div>
 				</div>
 				<div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center', maxWidth: 1000, width: '100%', margin: '0 auto'}}>
-					<ReviewList style={{flex: '0 1 600px'}} />
+					<ReviewList style={{flex: '0 1 600px', margin: '0 8px'}} />
 				</div>
-				<div style={{display: 'flex', flexWrap: 'wrap', maxWidth: 1000, width: '100%', margin: '0 auto'}}>
-					<AngularDirective style={{flex: '1 1 600px'}}><dhm-interop-register-profile /></AngularDirective>
-					<AngularDirective style={{flex: '1 1 auto'}}><dhm-interop-register-picture /></AngularDirective>
-				</div>
-				<div style={{display: 'flex', maxWidth: 1000, width: '100%', margin: '0 auto', justifyContent: 'center'}}>
-					<PicturePanel style={{flex: '0 1 600px'}} />
+				<div style={{display: 'flex', justifyContent: 'center', flexWrap: 'wrap', maxWidth: 1000, width: '100%', margin: '0 auto'}}>
+					<AngularDirective style={{flex: '1 1 400px'}}><dhm-interop-register-profile /></AngularDirective>
+					<div style={{flex: '0 1 300px'}}>
+						<PicturePanel />
+					</div>
 				</div>
 			</div>
 		);

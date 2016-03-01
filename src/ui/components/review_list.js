@@ -2,6 +2,7 @@ import React from 'react';
 import moment from 'moment';
 import {Link} from 'react-router';
 import {LoadingPanel} from './loading_panel';
+import {Panel} from './panel';
 
 import interop from '../interop';
 
@@ -62,7 +63,7 @@ export class ReviewList extends React.Component {
 
 	render() {
 		return (
-			<div style={Object.assign({background: 'rgba(255,255,255,0.9)', borderRadius: 10, padding: 20, paddingTop: 12}, this.props.style)}>
+			<Panel style={this.props.style}>
 				<h1 className="md-headline">Recent Lessons</h1>
 				<LoadingPanel loading={this.state.loading}>
 					{this.state.error ? (
@@ -96,7 +97,7 @@ export class ReviewList extends React.Component {
 						)
 					)}
 				</LoadingPanel>
-			</div>
+			</Panel>
 		);
 	}
 }

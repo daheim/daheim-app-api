@@ -108,10 +108,10 @@ export class PictureUpload extends React.Component {
 						<Dropzone accept="image/*" disableClick style={{textAlign: 'center'}} activeStyle={{opacity: 0.5}} onDrop={this.handleDrop}>
 							<Picture />
 						</Dropzone>
-						<Dropzone accept="image/*" style={{cursor: 'pointer', padding: 5}} activeStyle={{backgroundColor: '#eee'}} onDrop={this.handleDrop}>
+						<Dropzone accept="image/*" style={{cursor: 'pointer', padding: 5, textAlign: 'center', marginTop: 8}} activeStyle={{backgroundColor: '#eee'}} onDrop={this.handleDrop}>
 							<a href="#" onClick={this.cancel}>Upload a new photo</a>
 						</Dropzone>
-						<div style={{textAlign: 'center'}}>
+						<div style={{textAlign: 'center', marginTop: 8}}>
 							<a href="#" onClick={this.useCamera}>Use camera</a>
 						</div>
 					</div>
