@@ -68,6 +68,16 @@ export class TokenHandler {
     let decoded = jwt.verify(accessToken, SECRETS[this], {audience: 'access'})
     return decoded.sub
   }
+
+
+  issueRealtimeToken (userId) {
+    return jwt.sign({}, SECRETS[this], {subject: userId, audience: 'realtime', expiresIn: '5m'})
+  }
+
+  verifyRealtimeToken (accessToken) {
+    let decoded = jwt.verify(accessToken, SECRETS[this], {audience: 'realtime', maxAge: '5m'})
+    return decoded.sub
+  }
 }
 
 export default new TokenHandler({passport, secret: process.env.SECRET})

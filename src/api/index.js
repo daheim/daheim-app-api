@@ -19,9 +19,14 @@ export class Api {
     this.router.post('/forgot', this.handler(this.forgot))
     this.router.post('/reset', passport.authenticate('reset', {session: false}), this.handler(this.reset))
 
+    this.router.post('/realtimeToken', tokenHandler.auth, this.handler(this.realtimeToken))
     this.router.use('/encounters', encounterApi.router)
 
     this.router.get('*', (req, res) => res.status(404).send({error: 'not_found'}))
+  }
+
+  realtimeToken (req, res) {
+    res.send({token: tokenHandler.issueRealtimeToken(req.user.id)})
   }
 
   async register({body: {email, password}}, res) {

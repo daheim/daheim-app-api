@@ -15,6 +15,8 @@ const $userStore = Symbol('userStore')
 
 const $onConnection = Symbol('onConnection')
 
+const AUTH_TIMEOUT = 60 * 1000
+
 class Realtime {
 
   constructor({log, tokenHandler, userStore, config}) {
@@ -23,7 +25,7 @@ class Realtime {
     if (!userStore) { throw new Error('userStore must be defined') }
 
     this[$log] = log
-    this[$tokenHandler] = tokenHandler
+    this[$tokenHandler] = this.tokenHandler = tokenHandler
     this[$userStore] = userStore
 
     let iceServerProvider = new IceServerProvider(config.get('ice'))
@@ -33,7 +35,7 @@ class Realtime {
   listen(server) {
     if (this[$io]) { throw new Error('already started') }
 
-    let io = this[$io] = sio.listen(server)
+    let io = this[$io] = this.io = sio.listen(server)
     io.on('connection', socket => this[$onConnection](socket))
   }
 
@@ -56,6 +58,21 @@ class Realtime {
       this[$log].error({err: err}, 'client error')
     })
 
+    const authTimeout = setTimeout(() => {
+      debug('no auth received in 1 min: %s', socket.id)
+      socket.disconnect()
+    }, AUTH_TIMEOUT)
+    socket.on('auth', async ({token}, cb) => {
+      try {
+        socket.userId = this.tokenHandler.verifyRealtimeToken(token)
+        cb({ok: true})
+        clearTimeout(authTimeout)
+        debug('auth success: %s -> userId: %s', socket.id, this.userId)
+      } catch (err) {
+        cb({ok: false})
+        debug('auth error: %s -> %s', socket.id, err.stack)
+      }
+    })
     socket.on('disconnect', () => {
       debug('SIO disconnected: %s', socket.id)
       this[$io].of('/').clients((err, clients) => {
