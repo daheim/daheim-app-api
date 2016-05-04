@@ -4,12 +4,12 @@
 	"rules": {
 		"indent": [2, "tab", {"SwitchCase": 1}],
 		"linebreak-style": [2, "unix"],
-		"semi": [2, "always"],
+		"semi": [0, "always"],
 
 		"no-unused-vars": [2, {vars:"all", "varsIgnorePattern": "[iI]gnored", "argsIgnorePattern": "[iI]gnored"}],
-		"no-console": 2,
+		"no-console": 0,
 
-		"comma-dangle": [2, "always-multiline"],
+		"comma-dangle": [0, "always-multiline"],
 
 		"react/jsx-boolean-value": 1,
 		"react/jsx-curly-spacing": [2, "never"],

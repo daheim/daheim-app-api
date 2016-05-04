@@ -5,7 +5,7 @@
  * description of configuration variables and their potential values.
  */
 exports.config = {
-	app_name: ['Daheim'],
+	app_name: ['daheim-app-api'],
 	logging: {
 		/**
 		 * Level at which to log. 'trace' is most useful to New Relic when diagnosing

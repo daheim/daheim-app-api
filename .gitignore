@@ -5,7 +5,7 @@ build
 .c9
 .env
 
-
+/lib
 /node_modules
 /*.sqlite
 /coverage

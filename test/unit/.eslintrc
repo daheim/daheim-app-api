@@ -1,8 +1,0 @@
-{
-	"globals": {
-		"sinon": true,
-		"proxyquire": true,
-		"supertest": true,
-		"createApp": true
-	}
-}

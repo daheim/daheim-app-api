@@ -48,25 +48,6 @@ app.get('/js/config.js', function(req, res) {
 	res.send('angular.module("dhm").constant("config", ' + JSON.stringify(cfg) + ');');
 });
 
-
-if (process.env.NODE_ENV === 'development') {
-	let webpackDevMiddleware = require('webpack-dev-middleware');
-	let webpack = require('webpack');
-
-	let compiler = webpack(require('../../../../webpack.config.js'));
-	let webpackmw = webpackDevMiddleware(compiler, {
-		stats: {
-			colors: true,
-		},
-	});
-
-	app.use(webpackmw);
-	app.get('*', function(req, res, next) {
-		req.url = '/';
-		webpackmw(req, res, next);
-	});
-}
-
 app.use(express.static(__dirname + '/../../../../build/public'));
 app.use(express.static(__dirname + '/../../../../public'));
 app.get('*', function(req, res) {
@@ -112,12 +93,16 @@ process.on('uncaughtException', function(err) {
 function start() {
 	var port = process.env.PORT || 3000;
 
-	server.listen(port, function(err) {
+	const listener = server.listen(port, function(err) {
 		if (err) {
 			log.error({err: err}, 'listen error');
 			process.exit(1);
 		}
 		log.info({port: port}, 'listening on %s', port);
+
+	  const address = listener.address().family === 'IPv6' ? `[${listener.address().address}]` : listener.address().address
+	  console.info('----\n==> ✅  %s is running', 'Daheim App API')
+	  console.info('==> 💻  Open http://%s:%s in a browser to view the app.', address, listener.address().port)
 	});
 	server.on('error', function(err) {
 		log.error({err: err}, 'express error');
@@ -129,3 +114,5 @@ module.exports = {
 	app: app,
 	start: start,
 };
+
+start()
