@@ -5,13 +5,13 @@
  * description of configuration variables and their potential values.
  */
 exports.config = {
-	app_name: ['daheim-app-api'],
-	logging: {
-		/**
-		 * Level at which to log. 'trace' is most useful to New Relic when diagnosing
-		 * issues with the agent, 'info' and higher will impose the least overhead on
-		 * production applications.
-		 */
-		level: 'info'
-	}
+  app_name: ['daheim-app-api'],
+  logging: {
+    /**
+     * Level at which to log. 'trace' is most useful to New Relic when diagnosing
+     * issues with the agent, 'info' and higher will impose the least overhead on
+     * production applications.
+     */
+    level: 'info'
+  }
 };
