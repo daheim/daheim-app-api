@@ -19,6 +19,7 @@ let UserSchema = new Schema({
 
   profile: {
     name: String,
+    role: String,
     languages: [{
       language: String,
       level: String,

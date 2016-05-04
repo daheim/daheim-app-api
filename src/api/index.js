@@ -20,13 +20,37 @@ export class Api {
     this.router.post('/reset', passport.authenticate('reset', {session: false}), this.handler(this.reset))
 
     this.router.post('/realtimeToken', tokenHandler.auth, this.handler(this.realtimeToken))
+    this.router.post('/role', tokenHandler.auth, this.handler(this.postRole))
+    this.router.get('/profile', tokenHandler.auth, this.handler(this.getProfile))
+
     this.router.use('/encounters', encounterApi.router)
 
     this.router.get('*', (req, res) => res.status(404).send({error: 'not_found'}))
   }
 
+  async getProfile (req, res) {
+    try {
+      const user = await User.findById(req.user.id)
+      res.send(user)
+    } catch (err) {
+      next(err)
+    }
+  }
+
   realtimeToken (req, res) {
     res.send({token: tokenHandler.issueRealtimeToken(req.user.id)})
+  }
+
+  async postRole (req, res, next) {
+    try {
+      const {role} = req.body
+      const user = await User.findById(req.user.id)
+      user.profile.role = role
+      await user.save()
+      res.send(user)
+    } catch (err) {
+      next(err)
+    }
   }
 
   async register({body: {email, password}}, res) {

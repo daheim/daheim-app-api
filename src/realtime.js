@@ -2,10 +2,14 @@ import sio from 'socket.io'
 import {default as EncounterRegistry, OzoraUserEncounterInterface} from './localheim'
 import IceServerProvider from './ice_server_provider'
 import {default as Ozora, SioChannel, WhitelistReceiver} from './ozora'
+import {User} from './model'
+import Promise from 'bluebird'
+import Namespace from 'socket.io/lib/namespace'
 
 import createDebug from 'debug'
 const debug = createDebug('dhm:realtime')
 
+Promise.promisifyAll(Namespace.prototype)
 
 const $io = Symbol('io')
 const $log = Symbol('log')
@@ -52,7 +56,7 @@ class Realtime {
     })
     ozora.register(zero)
 
-    socket.join('all')
+    //socket.join('all')
 
     socket.on('error', (err) => {
       this[$log].error({err: err}, 'client error')
@@ -65,6 +69,7 @@ class Realtime {
     socket.on('auth', async ({token}, cb) => {
       try {
         socket.userId = this.tokenHandler.verifyRealtimeToken(token)
+        await this.handleUserConnected(socket)
         cb({ok: true})
         clearTimeout(authTimeout)
         debug('auth success: %s -> userId: %s', socket.id, this.userId)
@@ -73,26 +78,55 @@ class Realtime {
         debug('auth error: %s -> %s', socket.id, err.stack)
       }
     })
+
     socket.on('disconnect', () => {
       debug('SIO disconnected: %s', socket.id)
-      this[$io].of('/').clients((err, clients) => {
-        this[$io].sockets.emit('online', {all: clients.length})
-      })
+      this.emitCount()
+      this.emitReady()
     })
 
     socket.on('ready', (data, callback) => {
       if (data.ready) socket.join('ready')
       else socket.leave('ready')
       callback({method: 'ready', data})
-
-      this[$io].of('/').in('ready').clients((err, clients) => {
-        console.log('ready', err, clients)
-      })
+      this.emitCount()
+      this.emitReady()
     })
+  }
 
-    this[$io].of('/').clients((err, clients) => {
-      this[$io].sockets.emit('online', {all: clients.length})
+  async handleUserConnected (socket) {
+    const user = await User.findById(socket.userId)
+    const {role} = user.profile
+    socket.join(`user-${socket.userId}`)
+    socket.join('all')
+    if (role === 'teacher') {
+      socket.join('teachers')
+    } else if (role === 'student') {
+      socket.join('students')
+    }
+    console.log(this.io.of('/').adapter.rooms)
+    this.emitCount()
+    this.emitReady()
+  }
+
+  async emitCount () {
+    const ns = this.io.of('/')
+    const [t, s, a] = await Promise.map(['teachers', 'students', 'all'], (room) => ns.in(room).clientsAsync())
+    ns.emit('online', {
+      teachers: t.length,
+      students: s.length,
+      all: a.length
     })
+  }
+
+  async emitReady () {
+    const ns = this.io.of('/')
+    const r = await ns.in('ready').clientsAsync()
+    const users = {}
+    r.forEach((id) => users[ns.sockets[id].userId] = true)
+    const ready = await User.find({_id: {$in: Object.keys(users)}}).select({profile: 1})
+    //ns.in('teachers').emit('readyUsers', ready)
+    ns.emit('readyUsers', ready)
   }
 }
 
