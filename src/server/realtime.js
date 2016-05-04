@@ -50,13 +50,32 @@ class Realtime {
 		});
 		ozora.register(zero);
 
+		socket.join('all')
+
 		socket.on('error', (err) => {
 			this[$log].error({err: err}, 'client error');
 		});
 
 		socket.on('disconnect', () => {
 			debug('SIO disconnected: %s', socket.id);
+			this[$io].of('/').clients((err, clients) => {
+				this[$io].sockets.emit('online', {all: clients.length})
+			})
 		});
+
+		socket.on('ready', (data, callback) => {
+			if (data.ready) socket.join('ready')
+			else socket.leave('ready')
+			callback({method: 'ready', data})
+
+			this[$io].of('/').in('ready').clients((err, clients) => {
+				console.log('ready', err, clients)
+			})
+		})
+
+		this[$io].of('/').clients((err, clients) => {
+			this[$io].sockets.emit('online', {all: clients.length})
+		})
 	}
 }
 
