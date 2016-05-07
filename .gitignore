@@ -5,6 +5,7 @@ build
 .c9
 .env
 
+/docker-compose-test.yml
 /lib
 /node_modules
 /*.sqlite
