@@ -1,6 +1,9 @@
 import {Schema, default as mongoose} from 'mongoose'
 import bcrypt from 'bcryptjs'
 import BaseError from 'es6-error'
+import gravatar from 'gravatar'
+
+import avatars from '../avatars'
 
 const SALT_WORK_FACTOR = 10
 const MAX_LOGIN_ATTEMPTS = 10
@@ -26,7 +29,35 @@ let UserSchema = new Schema({
       _id: false,
     }],
     topics: [String],
-  },
+    pictureType: String,
+    pictureData: String
+  }
+}, {
+  toJSON: {
+    transform: function(doc, ret, options) {
+      console.log(ret)
+      ret.id = ret._id
+      delete ret._id
+      delete ret.__v
+
+      if (ret.profile.pictureType === 'avatar') {
+        ret.profile.picture = avatars[ret.profile.pictureData] || avatars.default
+      } else if (ret.profile.pictureType === 'gravatar') {
+        ret.profile.picture = gravatar.url(ret.username, {s: '256', r: 'x', d: 'retro', protocol: 'https'})
+      } else if (ret.profile.pictureType === 'data') {
+        ret.profile.picture = ret.profile.pictureData
+      } else {
+        ret.profile.picture = avatars.default
+      }
+      delete ret.profile.pictureType
+      delete ret.profile.pictureData
+
+      delete ret.password
+      delete ret.loginAttempts
+
+      return ret
+    }
+  }
 })
 
 UserSchema.pre('save', function(next) {

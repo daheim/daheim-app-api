@@ -14,7 +14,7 @@ import bodyParser from 'body-parser'
 import log from './log'
 import api from './api'
 //import {User as ModelUser} from './model'
-
+import actions from './actions'
 
 import createDebug from 'debug'
 let debug = createDebug('dhm:app')
@@ -38,6 +38,7 @@ realtime.listen(server)
 
 app.use(passport.initialize())
 app.use('/users', user.router)
+app.use('/api/actions', actions)
 app.use('/api', api.router)
 
 app.get('/js/config.js', function(req, res) {

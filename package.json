@@ -41,6 +41,7 @@
     "es6-error": "^2.0.2",
     "express": "^4.13.1",
     "express-bunyan-logger": "^1.1.1",
+    "gravatar": "^1.5.2",
     "jsonwebtoken": "^5.4.1",
     "le_node": "^1.0.14",
     "lodash": "^3.10.1",
