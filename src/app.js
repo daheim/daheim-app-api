@@ -6,7 +6,6 @@ import passport from 'passport'
 import express from 'express'
 import Azure from './azure'
 import User from './user'
-import UserStore from './user_store'
 import tokenHandler from './token_handler'
 import Realtime from './realtime'
 import config from './config'
@@ -30,14 +29,10 @@ app.enable('trust proxy')
 app.disable('x-powered-by')
 app.use(bodyParser.json({limit: '1mb'}))
 
-let userStore = new UserStore({azure})
-let user = new User({userStore, tokenHandler, passport})
-
-let realtime = new Realtime({log, tokenHandler, userStore, config})
+let realtime = new Realtime({log, tokenHandler, config})
 realtime.listen(server)
 
 app.use(passport.initialize())
-app.use('/users', user.router)
 app.use('/api/actions', actions)
 app.use('/api', api.router)
 

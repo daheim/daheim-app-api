@@ -14,7 +14,6 @@ Promise.promisifyAll(Namespace.prototype)
 const $io = Symbol('io')
 const $log = Symbol('log')
 const $tokenHandler = Symbol('tokenHandler')
-const $userStore = Symbol('userStore')
 
 const $onConnection = Symbol('onConnection')
 
@@ -224,14 +223,12 @@ class Handler {
 
 class Realtime {
 
-  constructor({log, tokenHandler, userStore, config}) {
+  constructor({log, tokenHandler, config}) {
     if (!log) { throw new Error('log must be defined') }
     if (!tokenHandler) { throw new Error('tokenHandler must be defined') }
-    if (!userStore) { throw new Error('userStore must be defined') }
 
     this[$log] = log
     this[$tokenHandler] = this.tokenHandler = tokenHandler
-    this[$userStore] = userStore
     this.lessons = {}
 
     let iceServerProvider = new IceServerProvider(config.get('ice'))
