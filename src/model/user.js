@@ -35,7 +35,6 @@ let UserSchema = new Schema({
 }, {
   toJSON: {
     transform: function(doc, ret, options) {
-      console.log(ret)
       ret.id = ret._id
       delete ret._id
       delete ret.__v
