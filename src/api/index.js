@@ -29,12 +29,7 @@ export class Api {
   }
 
   async getProfile (req, res) {
-    try {
-      const user = await User.findById(req.user.id)
-      res.send(user)
-    } catch (err) {
-      next(err)
-    }
+    return await User.findById(req.user.id)
   }
 
   realtimeToken (req, res) {
