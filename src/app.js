@@ -7,13 +7,13 @@ import express from 'express'
 import Azure from './azure'
 import User from './user'
 import tokenHandler from './token_handler'
-import Realtime from './realtime'
 import config from './config'
 import bodyParser from 'body-parser'
 import log from './log'
 import api from './api'
 //import {User as ModelUser} from './model'
 import actions from './actions'
+import io from './realtime'
 
 import createDebug from 'debug'
 let debug = createDebug('dhm:app')
@@ -29,8 +29,10 @@ app.enable('trust proxy')
 app.disable('x-powered-by')
 app.use(bodyParser.json({limit: '1mb'}))
 
-let realtime = new Realtime({log, tokenHandler, config})
-realtime.listen(server)
+//let realtime = new Realtime({log, tokenHandler, config})
+//realtime.listen(server)
+
+io.listen(server)
 
 app.use(passport.initialize())
 app.use('/api/actions', actions)
