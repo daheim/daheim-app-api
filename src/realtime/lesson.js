@@ -7,7 +7,7 @@ const debug = require('debug')('dhm:realtime:Lesson')
 const INACTIVITY_TIMEOUT = 2 * 60 * 1000
 
 export default class Lesson {
-  constructor({teacherHandler, studentId, onClose}) {
+  constructor ({teacherHandler, studentId, onClose}) {
     this.id = uuid.v4()
 
     this.teacherId = teacherHandler.userId
@@ -51,7 +51,7 @@ export default class Lesson {
     }
 
     this.handlers[userId] = {
-      handler: handler,
+      handler,
       unsubscribe: this.subscribeToDisconnect(handler)
     }
 

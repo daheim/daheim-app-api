@@ -1,10 +1,9 @@
 import {Router} from 'express'
 
 import tokenHandler from '../token_handler'
-import {User} from '../model'
 import avatars from '../avatars'
 
-const app = Router()
+const app = new Router()
 
 function def (action, cb, opt) {
   app.use((req, res, next) => {
@@ -24,7 +23,7 @@ function def (action, cb, opt) {
 def('/profile/save', async (req) => {
   const {user, body} = req
   const {name, pictureType, pictureData} = body
-  const {pictureType: oldPictureType, avatarData: oldPictureData} = user
+  // const {pictureType: oldPictureType, avatarData: oldPictureData} = user
 
   const rollback = []
   const commit = []
@@ -63,9 +62,7 @@ def('/profile/save', async (req) => {
   }
 
   commit.map((hook) => hook())
-  return {
-    user: user
-  }
+  return {user}
 })
 
 const deleteFileHook = (path) => async () => {

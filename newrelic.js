@@ -14,4 +14,4 @@ exports.config = {
      */
     level: 'info'
   }
-};
+}

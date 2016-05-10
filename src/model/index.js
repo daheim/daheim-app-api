@@ -19,20 +19,20 @@ if (process.env.MONGODB_URL) {
 log.info({mongodbUrl: mongooseUrl}, 'connecting to MongoDB')
 mongoose.connect(mongooseUrl, {
   server: {
-    reconnectTries: Infinity,
+    reconnectTries: Infinity
   },
   db: {
-    bufferMaxEntries: 0,
-  },
-}, function(err, connIgnored) {
+    bufferMaxEntries: 0
+  }
+}, function (err, connIgnored) {
   if (err) {
     log.error({err}, 'mongoose connect error: ', err.message)
     process.exit(1)
   }
-  mongoose.connection.on('disconnected', err => {
+  mongoose.connection.on('disconnected', (err) => {
     log.warn({err}, 'mongoose disconnected')
   })
 })
-mongoose.connection.on('connected', errIgnored => {
+mongoose.connection.on('connected', (errIgnored) => {
   log.info('mongoose connected')
 })

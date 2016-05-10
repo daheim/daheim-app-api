@@ -17,8 +17,8 @@ class LessonRegistry {
     }
 
     const lesson = new Lesson({
-      teacherHandler: teacherHandler,
-      studentId: studentId,
+      teacherHandler,
+      studentId,
       onClose: () => this.onLessonClose(lesson)
     })
 

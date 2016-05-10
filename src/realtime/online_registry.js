@@ -71,7 +71,7 @@ class OnlineRegistry {
   emitOnline (socket) {
     const online = {
       teachers: Object.keys(this.teachers).length,
-      students: Object.keys(this.students).length,
+      students: Object.keys(this.students).length
     }
     io.of('/').in('authenticated').emit('online', online)
   }

@@ -5,18 +5,17 @@ import authHandler from './auth_handler'
 import lessonHandler from './lesson_handler'
 import log from '../log'
 
-function attachHandlers(socket, ...handlers) {
-  const onevent = socket.onevent
+function attachHandlers (socket, ...handlers) {
+  // const onevent = socket.onevent
   socket.onevent = async (packet) => {
     const {id, data} = packet
     const [channel] = data
-    const cb = id == null ? nop : socket.ack(id)
 
     let handlerFn
     for (let x = 0; x < handlers.length && !handlerFn; x++) handlerFn = handlers[x]['$' + channel]
 
     if (!handlerFn) {
-      console.warn(`unhandled message`, packet)
+      console.warn('unhandled message', packet)
       if (id) socket.ack(id)({error: 'unhandled'})
       return
     }

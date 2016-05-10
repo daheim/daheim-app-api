@@ -2,7 +2,7 @@ const $servers = Symbol()
 
 export default class IceServerProvider {
 
-  constructor({useDefaultServers = true, servers = []} = {}) {
+  constructor ({useDefaultServers = true, servers = []} = {}) {
     this[$servers] = []
     if (useDefaultServers) {
       this[$servers].push({url: 'stun:stun.l.google.com:19302'})
@@ -13,7 +13,7 @@ export default class IceServerProvider {
     }
   }
 
-  async get() {
+  async get () {
     return this[$servers]
   }
 
