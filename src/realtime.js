@@ -1,7 +1,5 @@
 import sio from 'socket.io'
-import {default as EncounterRegistry, OzoraUserEncounterInterface} from './localheim'
 import IceServerProvider from './ice_server_provider'
-import {default as Ozora, SioChannel, WhitelistReceiver} from './ozora'
 import {User} from './model'
 import Promise from 'bluebird'
 import Namespace from 'socket.io/lib/namespace'
@@ -15,7 +13,6 @@ Promise.promisifyAll(Namespace.prototype)
 
 const $io = Symbol('io')
 const $log = Symbol('log')
-const $registry = Symbol('registry')
 const $tokenHandler = Symbol('tokenHandler')
 const $userStore = Symbol('userStore')
 
@@ -238,7 +235,6 @@ class Realtime {
     this.lessons = {}
 
     let iceServerProvider = new IceServerProvider(config.get('ice'))
-    this[$registry] = new EncounterRegistry({iceServerProvider, log})
   }
 
   listen(server) {
@@ -250,56 +246,12 @@ class Realtime {
 
   [$onConnection](socket) {
     debug('new SIO connection: %s', socket.id)
-
-    let channel = new SioChannel({socket})
-    let ozora = new Ozora({channel})
-    let zero = new Zero({
-      registry: this[$registry],
-      tokenHandler: this[$tokenHandler],
-      userStore: this[$userStore],
-      log: this[$log],
-    })
-    ozora.register(zero)
-
     Handler.use(socket)
-
-    //socket.join('all')
 
     socket.on('error', (err) => {
       this[$log].error({err: err}, 'client error')
     })
   }
-}
-
-class Zero extends WhitelistReceiver {
-
-  constructor({registry, tokenHandler, userStore, log}) {
-    super(['auth', 'getUserId', 'ready', 'createEncounter'])
-    this[$registry] = registry
-    this[$tokenHandler] = tokenHandler
-    this[$userStore] = userStore
-    this[$log] = log
-  }
-
-  async auth({accessToken}) {
-    try {
-      let id = this[$tokenHandler].verifyAccessToken(accessToken)
-      let profile = await this[$userStore].getProfile(id)
-      this[$log].event('ozora_auth_success', {userId: id})
-      this.ozora.user = {id, profile}
-      this.ozora.userId = id
-    } catch (err) {
-      this[$log].event('ozora_auth_error', {err})
-      throw err
-    }
-  }
-
-  createEncounter({callbackId}) {
-    let callback = this.ozora.getObject(callbackId)
-    let iface = new OzoraUserEncounterInterface({callback, registry: this[$registry]})
-    return iface.objectId
-  }
-
 }
 
 class Lesson {
