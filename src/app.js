@@ -2,7 +2,10 @@ import './optional_newrelic'
 import './bootstrap'
 
 import path from 'path'
+import fs from 'fs'
 import passport from 'passport'
+import http from 'http'
+import spdy from 'spdy'
 import express from 'express'
 import Azure from './azure'
 import User from './user'
@@ -20,7 +23,20 @@ let debug = createDebug('dhm:app')
 debug('starting server')
 
 var app = express()
-var server = require('http').Server(app)
+
+function createServer () {
+  if (process.env.USE_HTTPS === '1') {
+    const options = {
+      cert: fs.readFileSync(process.env.SSL_CERT),
+      key: fs.readFileSync(process.env.SSL_KEY)
+    }
+    return new spdy.Server(options, app)
+  } else {
+    return new http.Server(app)
+  }
+}
+const server = createServer()
+
 
 let azure = Azure.createFromEnv()
 
@@ -98,9 +114,10 @@ function start() {
     }
     log.info({port: port}, 'listening on %s', port)
 
+    const protocol = process.env.USE_HTTPS === '1' ? 'https' : 'http'
     const address = listener.address().family === 'IPv6' ? `[${listener.address().address}]` : listener.address().address
     console.info('----\n==> ✅  %s is running', 'Daheim App API')
-    console.info('==> 💻  Open http://%s:%s in a browser to view the app.', address, listener.address().port)
+    console.info('==> 💻  Open %s://%s:%s in a browser to view the app.', protocol, address, listener.address().port)
   })
   server.on('error', function(err) {
     log.error({err: err}, 'express error')
