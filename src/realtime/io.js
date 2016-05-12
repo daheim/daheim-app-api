@@ -33,7 +33,7 @@ function attachHandlers (socket, ...handlers) {
         result = {error: err.sio}
       } else {
         result = {error: 'internalServerError'}
-        log.error('io error', {err})
+        log.error({err}, 'io error')
       }
     }
 
