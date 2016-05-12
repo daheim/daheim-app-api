@@ -78,7 +78,9 @@ class OnlineRegistry {
 
   emitReady (socket) {
     const users = Object.keys(this.ready).map((userId) => {
-      const {user: {id, profile}} = Object.values(this.ready[userId])[0]
+      const {user} = Object.values(this.ready[userId])[0]
+      const userJson = user.toJSON()
+      const {id, profile} = userJson
       return {id, profile}
     })
     io.of('/').in('teachers').emit('readyUsers', users)
