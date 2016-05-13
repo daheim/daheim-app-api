@@ -1,4 +1,4 @@
-import {Strategy as JwtStrategy} from 'passport-jwt'
+import {Strategy as JwtStrategy, ExtractJwt} from 'passport-jwt'
 import jwt from 'jsonwebtoken'
 import passport from 'passport'
 
@@ -20,7 +20,7 @@ export class TokenHandler {
       this[$passport] = passport
       passport.use('jwt', new JwtStrategy({
         secretOrKey: SECRETS[this],
-        authScheme: 'Bearer'
+        jwtFromRequest: (req) => req.cookies.sid
       }, async function (jwt, done) {
         try {
           let user = await User.findById(jwt.sub)
@@ -32,7 +32,7 @@ export class TokenHandler {
 
       passport.use('reset', new JwtStrategy({
         secretOrKey: SECRETS[this],
-        authScheme: 'Bearer',
+        jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('Bearer'),
         audience: 'reset',
       }, async function (jwt, done) {
         try {

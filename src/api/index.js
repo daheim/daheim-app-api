@@ -2,6 +2,8 @@ import {Router} from 'express'
 import Promise from 'bluebird'
 import createSendgrid from 'sendgrid'
 import passport from 'passport'
+import LocalStrategy from 'passport-local'
+import uuid from 'node-uuid'
 
 import {User} from '../model'
 import tokenHandler from '../token_handler'
@@ -10,12 +12,22 @@ import encounterApi from './encounter'
 let sendgrid = createSendgrid(process.env.SENDGRID_KEY)
 Promise.promisifyAll(sendgrid)
 
+passport.use(new LocalStrategy(async (username, password, done) => {
+  try {
+    let user = await User.getAuthenticated(username, password)
+    done(null, user)
+  } catch (err) {
+    if (err.name === 'AuthError') return done(null, null)
+    return done(err)
+  }
+}))
+
 export class Api {
 
   constructor() {
     this.router = Router()
     this.router.post('/register', this.handler(this.register))
-    this.router.post('/login', this.handler(this.login))
+    this.router.post('/login', passport.authenticate('local', {session: false}), this.handler(this.login))
     this.router.post('/forgot', this.handler(this.forgot))
     this.router.post('/reset', passport.authenticate('reset', {session: false}), this.handler(this.reset))
 
@@ -78,20 +90,12 @@ export class Api {
     }
   }
 
-  async login({body: {email, password}}, res) {
-    try {
-      let user = await User.getAuthenticated(email, password)
-      return {
-        result: 'login',
-        accessToken: tokenHandler.issueForUser(user.id),
-      }
-    } catch (err) {
-      if (err.name !== 'AuthError') {
-        throw err
-      }
-
-      res.status(401).send('Unauthorized')
-    }
+  async login(req, res) {
+    const accessToken = tokenHandler.issueForUser(req.user.id)
+    const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
+    res.cookie('sid', accessToken, {httpOnly: true, secure: process.env.SECURE_COOKIES === '1', expires})
+    res.cookie('_csrf', uuid.v4(), {secure: process.env.SECURE_COOKIES === '1', expires})
+    return {profile: req.user}
   }
 
   async forgot({body: {email}}, res) {
