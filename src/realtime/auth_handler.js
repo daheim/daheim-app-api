@@ -8,34 +8,36 @@ const debug = require('debug')('dhm:realtime:AuthHandler')
 
 class AuthHandler {
 
-  async '$auth' (socket, {token}) {
-    if (socket.authRunning) throw sioError('busy')
-    socket.authRunning = true
-
+  async auth (socket, accessToken) {
+    let userId
     try {
-      let userId
-      try {
-        userId = tokenHandler.verifyRealtimeToken(token)
-      } catch (err) {
-        throw sioError('authError')
-      }
-
-      const user = await User.findById(userId)
-      if (!user) throw sioError('authError')
-
-      socket.userId = user.id
-      socket.user = user
-
-      onlineRegistry.onUserOnline(socket)
-      lessonRegistry.sendState(socket.userId)
-      debug('auth success: %s -> userId: %s', socket.id, socket.userId)
-      return {}
+      userId = tokenHandler.verifyRealtimeToken(accessToken)
     } catch (err) {
-      debug('auth error: %s -> %s', socket.id, err.stack)
-      throw err
-    } finally {
-      delete socket.authRunning
+      throw sioError('unauthorized')
     }
+
+    const user = await User.findById(userId)
+    if (!user) throw sioError('unauthorized')
+
+    socket.userId = user.id
+    socket.user = user
+  }
+
+  middleware = async (socket, next) => {
+    const accessToken = socket.request._query.access_token
+    try {
+      await this.auth(socket, accessToken)
+      next()
+    } catch (err) {
+      if (err.sio) return next(err)
+      log.error({err}, 'sio auth error')
+      next(new Error('internalServerError'))
+    }
+  }
+
+  onConnect (socket) {
+    onlineRegistry.onUserOnline(socket)
+    lessonRegistry.sendState(socket.userId)
   }
 
   async '$ready' (socket, {ready}) {

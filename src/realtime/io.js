@@ -65,6 +65,7 @@ function attachHandlers (socket, ...handlers) {
 }
 
 const io = new Server()
+io.use(authHandler.middleware)
 io.on('connection', (socket) => attachHandlers(socket,
   authHandler,
   lessonHandler
