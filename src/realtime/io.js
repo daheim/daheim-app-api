@@ -54,6 +54,14 @@ function attachHandlers (socket, ...handlers) {
       }
     }
   })
+
+  for (let handler of handlers) {
+    try {
+      if (handler.onConnect) handler.onConnect(socket)
+    } catch (err) {
+      log.error({err}, 'onConnect handler error')
+    }
+  }
 }
 
 const io = new Server()
