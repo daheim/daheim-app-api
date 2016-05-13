@@ -37,7 +37,7 @@ function attachHandlers (socket, ...handlers) {
       }
     }
 
-    if (id) {
+    if (id != null) {
       if (result === undefined) log.warn({packet}, 'message needs response but none given')
       socket.ack(id)(result)
     } else {
