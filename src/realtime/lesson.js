@@ -7,12 +7,11 @@ const debug = require('debug')('dhm:realtime:Lesson')
 const INACTIVITY_TIMEOUT = 2 * 60 * 1000
 
 export default class Lesson {
-  constructor ({teacherId, studentId, onClose}) {
+  constructor ({teacherId, studentId}) {
     this.id = uuid.v4()
 
     this.teacherId = teacherId
     this.studentId = studentId
-    this.onClose = onClose
     this.active = false
     this.handlers = {}
   }
@@ -98,7 +97,7 @@ export default class Lesson {
 
     if (!this.active && num === 0) {
       debug('%s inviter disconnected before accept', this.id)
-      this.onClose('disconnectBeforeAccept')
+      this.close('disconnectBeforeAccept')
       return
     }
 
