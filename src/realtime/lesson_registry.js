@@ -16,11 +16,8 @@ class LessonRegistry {
       })
     }
 
-    const lesson = new Lesson({
-      teacherHandler,
-      studentId,
-      onClose: () => this.onLessonClose(lesson)
-    })
+    const lesson = new Lesson({teacherId, studentId})
+    lesson.onUpdate = () => this.handleLessonUpdate(lesson)
 
     this.lessons[lesson.id] = lesson
     this.users[teacherId] = this.users[teacherId] || []
@@ -28,13 +25,21 @@ class LessonRegistry {
     this.users[studentId] = this.users[studentId] || []
     this.users[studentId].push(lesson)
 
-    this.sendState(teacherId)
-    this.sendState(studentId)
+    lesson.join(teacherHandler)
 
     return lesson
   }
 
-  onLessonClose (lesson) {
+  handleLessonUpdate (lesson) {
+    const {teacherId, studentId, closed} = lesson
+
+    this.sendState(teacherId)
+    this.sendState(studentId)
+
+    if (closed) this.handleLessonClose(lesson)
+  }
+
+  handleLessonClose (lesson) {
     const {id, teacherId, studentId} = lesson
     delete this.lessons[id]
 
@@ -48,16 +53,23 @@ class LessonRegistry {
       if (index >= 0) this.users[studentId].splice(index, 1)
       if (this.users[studentId].length === 0) delete this.users[studentId]
     }
-
-    this.sendState(teacherId)
-    this.sendState(studentId)
   }
 
   sendState (userId) {
-    const state = {}
+    const state = {
+      lessons: {},
+      closedLessons: {}
+    }
+
     const lessons = this.users[userId] || []
-    lessons.forEach(({id, active, studentId, teacherId}) => {
-      state[id] = {id, active, studentId, teacherId}
+    lessons.forEach((lesson) => {
+      const {id, closed} = lesson
+      if (closed) {
+        state.lessons[id] = null
+        state.closedLessons[id] = lesson.toJSON()
+      } else {
+        state.lessons[id] = lesson.toJSON()
+      }
     })
 
     io.of('/').in(`user-${userId}`).emit('Lesson.onUpdated', state)

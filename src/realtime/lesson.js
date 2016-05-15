@@ -7,16 +7,14 @@ const debug = require('debug')('dhm:realtime:Lesson')
 const INACTIVITY_TIMEOUT = 2 * 60 * 1000
 
 export default class Lesson {
-  constructor ({teacherHandler, studentId, onClose}) {
+  constructor ({teacherId, studentId, onClose}) {
     this.id = uuid.v4()
 
-    this.teacherId = teacherHandler.userId
+    this.teacherId = teacherId
     this.studentId = studentId
     this.onClose = onClose
     this.active = false
     this.handlers = {}
-
-    this.join(teacherHandler)
   }
 
   subscribeToDisconnect (handler) {
@@ -74,50 +72,73 @@ export default class Lesson {
   }
 
   close (reason) {
+    if (this.closed) return
+    this.closed = true
+    this.closeReason = reason
+
     debug('%s closing lesson because', this.id, reason)
 
+    if (this.inactiveTimeout) {
+      clearTimeout(this.inactiveTimeout)
+      delete this.inactiveTimeout
+    }
+
     for (let userId of Object.keys(this.handlers)) {
-      const {handler, unsubscribe} = this.handlers[userId]
-      handler.emit('lesson.onClose', {id: this.id})
+      const {unsubscribe} = this.handlers[userId]
       unsubscribe()
     }
     this.handlers = {}
 
-    this.onClose('inactiveTimeout')
+    this.onUpdate()
   }
 
   checkState () {
     const num = Object.keys(this.handlers).length
-
-    if (!this.active && num === 2) {
-      this.startTime = new Date()
-      this.active = true
-      debug('%s became active', this.id)
-    }
+    const connected = this.connected = num === 2
 
     if (!this.active && num === 0) {
-      this.onClose('disconnectBeforeAccept')
       debug('%s inviter disconnected before accept', this.id)
+      this.onClose('disconnectBeforeAccept')
+      return
     }
 
-    if (this.active && num < 2 && !this.inactiveTimeout) {
-      this.inactiveTimeout = setTimeout(() => this.handleInactiveTimeout(), INACTIVITY_TIMEOUT)
+    if (!this.active && connected) {
+      debug('%s became active', this.id)
+      this.startTime = Date.now()
+      this.active = true
+    }
+
+    if (this.active && !connected && !this.inactiveTimeout) {
       debug('%s starting inactive timeout', this.id)
+      this.inactiveTimeout = setTimeout(() => this.handleInactiveTimeout(), INACTIVITY_TIMEOUT)
     }
 
-    if (num === 2 && this.inactiveTimeout) {
+    if (connected && this.inactiveTimeout) {
+      debug('%s stopping inactive timeout', this.id)
       clearTimeout(this.inactiveTimeout)
       delete this.inactiveTimeout
-      debug('%s stopping inactive timeout', this.id)
     }
 
     if (this.active) {
-      const connected = num === 2
       debug('%s sending connection state; connected: %s', this.id, connected)
       for (let userId of Object.keys(this.handlers)) {
         const {handler} = this.handlers[userId]
         handler.emit('lesson.onConnectionChanged', {id: this.id, connected})
       }
+    }
+
+    this.onUpdate()
+  }
+
+  toJSON () {
+    return {
+      id: this.id,
+      studentId: this.studentId,
+      teacherId: this.teacherId,
+      connected: this.connected,
+      active: this.active,
+      startTime: this.startTime,
+      closeReason: this.closeReason
     }
   }
 
