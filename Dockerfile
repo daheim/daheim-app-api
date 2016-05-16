@@ -1,26 +1,13 @@
-FROM node:5
-
-ENV LOG_LE_TOKEN=**ChangeMe** \
-    NEW_RELIC_APP_NAME=daheim \
-    NEW_RELIC_LICENSE_KEY=**ChangeMe** \
-    NEW_RELIC_LOG=stdout \
-    AZURE_STORAGE_CONNECTION_STRING=**ChangeMe** \
-    SECRET=**ChangeMe** \
-    SENDGRID_KEY=**ChangeMe** \
-    URL=**ChangeMe** \
-    HEAPDUMP=**ChangeMe** \
-    NODE_ENV=production
-
-EXPOSE 3000
-CMD node /app
+FROM mhart/alpine-node:6
 
 ADD package.json /app/package.json
-RUN cd /app \
-  && npm install grunt-cli -g \
-  && NODE_ENV=development npm install \
-  && rm -rf ~/.npm
+RUN cd /app && npm install
 
 ADD . /app
-RUN cd /app \
-  && grunt \
-  && grunt check
+WORKDIR /app
+
+RUN npm run build
+RUN npm prune --production
+RUN mv Dockerfile.run Dockerfile
+
+CMD tar -cf - .

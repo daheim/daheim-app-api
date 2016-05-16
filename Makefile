@@ -1,11 +1,29 @@
-IMAGE ?= egergo/daheim:latest
+NAME ?= egergo/daheim-app-api
+VERSION ?= 0.1
 
-all: push
+.PHONY: all build tag_latest release builder_image builder run
 
-image:
-	docker build -t $(IMAGE) .
+all: build
 
-push: image
-	docker push $(IMAGE)
+builder_image:
+	docker build -t $(NAME)-builder .
 
-.PHONY: all image
+build/builder/Dockerfile: builder_image
+	rm -rf build/builder
+	mkdir -p build/builder
+	docker run $(NAME)-builder | tar -C build/builder -x -
+
+builder: build/builder/Dockerfile
+
+build: builder
+	docker build -t $(NAME):$(VERSION) build/builder
+
+run: build
+	docker run --rm -p 80:80 -p 443:443 $(NAME):$(VERSION)
+
+tag_latest:
+	docker tag -f $(NAME):$(VERSION) $(NAME):latest
+
+release: tag_latest
+	@if ! docker images $(NAME) | awk '{ print $$2 }' | grep -q -F $(VERSION); then echo "$(NAME) version $(VERSION) is not yet built. Please run 'make build'"; false; fi
+	docker push $(NAME)

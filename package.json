@@ -50,7 +50,7 @@
     "newrelic": "^1.22.0",
     "node-uuid": "^1.4.3",
     "passport": "^0.3.0",
-    "passport-jwt": "^1.2.1",
+    "passport-jwt": "^2.0.0",
     "passport-local": "^1.0.0",
     "request-promise": "^0.4.2",
     "sendgrid": "^1.9.2",
