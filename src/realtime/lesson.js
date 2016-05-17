@@ -1,6 +1,7 @@
 import uuid from 'node-uuid'
 
 import sioError from './sio_error'
+import iceServers from './ice_servers'
 
 const debug = require('debug')('dhm:realtime:Lesson')
 
@@ -63,6 +64,15 @@ export default class Lesson {
 
     debug('%s user leaving %s', this.id, userId)
     this.close('userLeft')
+
+    return {}
+  }
+
+  async getIceServers (socket) {
+    const {userId} = socket
+    if (userId !== this.teacherId && userId !== this.studentId) throw sioError('notParticipating')
+
+    return iceServers.get()
   }
 
   handleInactiveTimeout () {

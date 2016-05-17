@@ -36,6 +36,13 @@ class LessonHandler {
     return lesson.leave(socket)
   }
 
+  async '$lesson.getIceServers' (socket, {id}) {
+    const lesson = lessonRegistry.lessons[id]
+    if (!lesson) throw sioError('lessonNotFound')
+
+    return lesson.getIceServers(socket)
+  }
+
 }
 
 export default new LessonHandler()
