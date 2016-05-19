@@ -3,6 +3,8 @@ import {Router} from 'express'
 import tokenHandler from '../token_handler'
 import avatars from '../avatars'
 
+import {User} from '../model'
+
 const app = new Router()
 
 function def (action, cb, opt) {
@@ -63,6 +65,20 @@ def('/profile/save', async (req) => {
 
   commit.map((hook) => hook())
   return {user}
+})
+
+def('/users.loadUser', async (req) => {
+  const {id} = req.body
+
+  const user = await User.findById(id)
+  if (!user) throw new Error('user not found')
+
+  const raw = {...user.toJSON().profile, id: user.id}
+  return {
+    users: {
+      [raw.id]: raw
+    }
+  }
 })
 
 const deleteFileHook = (path) => async () => {
