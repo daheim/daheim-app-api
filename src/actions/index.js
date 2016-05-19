@@ -1,9 +1,10 @@
 import {Router} from 'express'
+import Promise from 'bluebird'
 
 import tokenHandler from '../token_handler'
 import avatars from '../avatars'
 
-import {User} from '../model'
+import {User, Review} from '../model'
 
 const app = new Router()
 
@@ -67,18 +68,33 @@ def('/profile/save', async (req) => {
   return {user}
 })
 
-def('/users.loadUser', async (req) => {
-  const {id} = req.body
-
+async function loadUser(id, asUserId) {
   const user = await User.findById(id)
   if (!user) throw new Error('user not found')
 
-  const raw = {...user.toJSON().profile, id: user.id}
+  const [receivedReviews, myReview] = await Promise.all([
+    Review.find({to: id}),
+    Review.findOne({to: id, from: asUserId})
+  ])
+
+  const raw = {
+    ...user.toJSON().profile,
+    id: user.id,
+    myReview,
+    receivedReviews
+  }
+
   return {
     users: {
       [raw.id]: raw
     }
   }
+}
+
+def('/users.loadUser', async (req) => {
+  const {id} = req.body
+
+  return loadUser(id, req.user.id)
 })
 
 const deleteFileHook = (path) => async () => {
