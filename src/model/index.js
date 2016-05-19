@@ -4,6 +4,7 @@ import log from '../log'
 
 export {User} from './user'
 export * from './encounter'
+export Review from './review'
 
 let mongooseUrl = 'mongodb://localhost/first'
 if (process.env.MONGODB_URL) {
