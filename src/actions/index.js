@@ -97,6 +97,21 @@ def('/users.loadUser', async (req) => {
   return loadUser(id, req.user.id)
 })
 
+
+def('/review.sendReview', async (req) => {
+  const {user, body} = req
+
+  const {to, rating, text} = body
+  const date = new Date()
+  // TODO: compare from and to case insensitive
+  // TODO: load user
+  // TODO: check if had lesson
+
+  const myReview = await Review.update({from: user.id, to}, {$set: {date, rating, text}}, {runValidators: true, upsert: true})
+
+  return loadUser(to, req.user.id)
+})
+
 const deleteFileHook = (path) => async () => {
   // TODO: delete azure file
 }
