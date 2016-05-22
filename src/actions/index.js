@@ -10,7 +10,6 @@ const app = new Router()
 
 function def (action, cb, opt) {
   app.use((req, res, next) => {
-    console.log('yeah')
     next()
   })
   app.post(action, tokenHandler.auth, async (req, res, next) => {
