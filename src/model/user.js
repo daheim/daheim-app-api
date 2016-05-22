@@ -13,6 +13,14 @@ export class AuthError extends BaseError {
   constructor(m) { super(m) }
 }
 
+function aToO(a) {
+  const o = {}
+  for (let value of a || []) {
+    o[value] = 1
+  }
+  return o
+}
+
 let UserSchema = new Schema({
   username: {type: String, required: true, index: {unique: true}},
   password: {type: String, required: true},
@@ -23,12 +31,11 @@ let UserSchema = new Schema({
   profile: {
     name: String,
     role: String,
-    languages: [{
-      language: String,
-      level: String,
-      _id: false,
-    }],
-    topics: [String],
+    languages2: [String],
+    topics2: [String],
+    inGermanySince: String,
+    germanLevel: Number,
+    introduction: String,
     pictureType: String,
     pictureData: String
   }
@@ -38,6 +45,11 @@ let UserSchema = new Schema({
       ret.id = ret._id
       delete ret._id
       delete ret.__v
+
+      ret.profile.languages = aToO(ret.profile.languages2)
+      delete ret.profile.languages2
+      ret.profile.topics = aToO(ret.profile.topics2)
+      delete ret.profile.topics2
 
       if (ret.profile.pictureType === 'avatar') {
         ret.profile.picture = avatars[ret.profile.pictureData] || avatars.default

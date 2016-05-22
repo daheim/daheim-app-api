@@ -22,17 +22,46 @@ function def (action, cb, opt) {
   })
 }
 
-def('/profile/save', async (req) => {
+def('/profile.saveProfile', async (req) => {
   const {user, body} = req
-  const {name, pictureType, pictureData} = body
-  // const {pictureType: oldPictureType, avatarData: oldPictureData} = user
+  const {name, topics, languages, inGermanySince, germanLevel, introduction, pictureType, pictureData} = body
 
   const rollback = []
   const commit = []
 
-  if (name) {
-    user.profile.name = name
+  if (name) user.profile.name = name
+  if (inGermanySince) user.profile.inGermanySince = inGermanySince
+  if (germanLevel) user.profile.germanLevel = germanLevel
+  if (introduction) user.profile.introduction = introduction
+
+  if (languages) {
+    for (let x = 0; x < user.profile.languages2.length; x++) {
+      const language = user.profile.languages2[x]
+      if (languages[language] !== undefined && !languages[language]) {
+        user.profile.languages2.splice(x, 1)
+        x--
+      }
+    }
+
+    for (let x in languages) {
+      if (languages[x]) user.profile.languages2.push(x)
+    }
   }
+
+  if (topics) {
+    for (let x = 0; x < user.profile.topics2.length; x++) {
+      const topic = user.profile.topics2[x]
+      if (topics[topic] !== undefined && !topics[topic]) {
+        user.profile.topics2.splice(x, 1)
+        x--
+      }
+    }
+
+    for (let x in topics) {
+      if (topics[x]) user.profile.topics2.push(x)
+    }
+  }
+
   if (pictureType) {
     // delete old file in commit hook
     if (user.pictureType === 'file') {
