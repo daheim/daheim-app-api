@@ -46,6 +46,8 @@ let UserSchema = new Schema({
       delete ret._id
       delete ret.__v
 
+      ret.profile.userSince = doc._id.getTimestamp()
+
       ret.profile.languages = aToO(ret.profile.languages2)
       delete ret.profile.languages2
       ret.profile.topics = aToO(ret.profile.topics2)
