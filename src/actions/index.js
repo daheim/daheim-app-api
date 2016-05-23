@@ -29,10 +29,10 @@ def('/profile.saveProfile', async (req) => {
   const rollback = []
   const commit = []
 
-  if (name) user.profile.name = name
-  if (inGermanySince) user.profile.inGermanySince = inGermanySince
-  if (germanLevel) user.profile.germanLevel = germanLevel
-  if (introduction) user.profile.introduction = introduction
+  if (name != null) user.profile.name = name
+  if (inGermanySince != null) user.profile.inGermanySince = inGermanySince
+  if (germanLevel != null) user.profile.germanLevel = germanLevel
+  if (introduction != null) user.profile.introduction = introduction
 
   if (languages) {
     for (let x = 0; x < user.profile.languages2.length; x++) {
