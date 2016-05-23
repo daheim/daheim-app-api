@@ -9,9 +9,6 @@ import {User, Review} from '../model'
 const app = new Router()
 
 function def (action, cb, opt) {
-  app.use((req, res, next) => {
-    next()
-  })
   app.post(action, tokenHandler.auth, async (req, res, next) => {
     try {
       const result = await cb(req, res)
