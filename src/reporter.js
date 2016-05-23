@@ -28,7 +28,7 @@ class Reporter {
   }
 
   requestHandler = (req, res, next) => next()
-  errorHandler = (req, res, next, err) => next()
+  errorHandler = (err, req, res, next) => next(err)
 }
 
 export default new Reporter().start()
