@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 import tokenHandler from '../token_handler'
 import avatars from '../avatars'
 
-import {User, Review} from '../model'
+import {User, Review, Lesson} from '../model'
 
 const app = new Router()
 
@@ -118,10 +118,22 @@ async function loadUser(id, asUserId) {
 
 def('/users.loadUser', async (req) => {
   const {id} = req.body
-
   return loadUser(id, req.user.id)
 })
 
+def('/lessons.loadLessons', async (req) => {
+  const raw = await Lesson.find({participants: req.user.id})
+    .limit(20).sort({createdTime: -1}).exec()
+
+  const lessonList = []
+  const lessons = {}
+  for (let lesson of raw) {
+    lessonList.push(lesson.id)
+    lessons[lesson.id] = lesson
+  }
+
+  return {lessonList, lessons}
+})
 
 def('/review.sendReview', async (req) => {
   const {user, body} = req
