@@ -53,12 +53,10 @@ let UserSchema = new Schema({
 
       if (ret.profile.pictureType === 'avatar') {
         ret.profile.picture = avatars[ret.profile.pictureData] || avatars.default
-      } else if (ret.profile.pictureType === 'gravatar') {
-        ret.profile.picture = gravatar.url(ret.username, {s: '256', r: 'x', d: 'monsterid', protocol: 'https'})
       } else if (ret.profile.pictureType === 'data') {
         ret.profile.picture = ret.profile.pictureData
       } else {
-        ret.profile.picture = avatars.default
+        ret.profile.picture = gravatar.url(ret.username, {s: '256', r: 'x', d: 'monsterid', protocol: 'https'})
       }
       delete ret.profile.pictureType
       delete ret.profile.pictureData
