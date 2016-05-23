@@ -14,7 +14,3 @@ Bluebird.config({
 })
 Bluebird.promisifyAll(bcrypt)
 
-process.on('unhandledRejection', function (reason) {
-  console.error('Unhandled rejection:', reason.stack) // eslint-disable-line no-console
-})
-
