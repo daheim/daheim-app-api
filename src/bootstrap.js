@@ -1,5 +1,6 @@
 import 'babel-polyfill'
 import SourceMapSupport from 'source-map-support'
+import './reporter'
 import Promise from 'bluebird'
 import bcrypt from 'bcryptjs'
 

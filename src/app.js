@@ -18,12 +18,14 @@ import api from './api'
 //import {User as ModelUser} from './model'
 import actions from './actions'
 import io from './realtime'
+import reporter from './reporter'
 
 import createDebug from 'debug'
 let debug = createDebug('dhm:app')
 debug('starting server')
 
 var app = express()
+app.use(reporter.requestHandler)
 
 function createServer () {
   if (process.env.USE_HTTPS === '1') {
@@ -66,10 +68,12 @@ app.get('/js/config.js', function(req, res) {
 
 app.use(express.static(__dirname + '/../../../../build/public'))
 app.use(express.static(__dirname + '/../../../../public'))
-app.get('*', function(req, res) {
+app.get('*', function(req, res, next) {
   req.url = '/'
   res.sendFile(path.resolve(__dirname + '/../../../../build/public/index.html'))
 })
+
+app.use(reporter.errorHandler)
 
 // log errors
 app.use(log.errorLogger())
@@ -98,22 +102,12 @@ app.use(function(err, req, res, next) {
   next()
 })
 
-
-process.on('uncaughtException', function(err) {
-  log.error({err: err}, 'uncaught exception')
-  setTimeout(function() {
-    process.exit(1)
-  }, 1000)
-})
-
 function start() {
   var port = process.env.PORT || 3000
 
   const listener = server.listen(port, function(err) {
-    if (err) {
-      log.error({err: err}, 'listen error')
-      process.exit(1)
-    }
+    if (err) return reporter.error(err, {fatal: true})
+
     log.info({port: port}, 'listening on %s', port)
 
     const protocol = process.env.USE_HTTPS === '1' ? 'https' : 'http'
@@ -122,7 +116,7 @@ function start() {
     console.info('==> 💻  Open %s://%s:%s in a browser to view the app.', protocol, address, listener.address().port)
   })
   server.on('error', function(err) {
-    log.error({err: err}, 'express error')
+    reporter.error(err)
   })
   return server
 }

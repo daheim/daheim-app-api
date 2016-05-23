@@ -4,6 +4,7 @@ import './promisify'
 import authHandler from './auth_handler'
 import lessonHandler from './lesson_handler'
 import log from '../log'
+import reporter from '../reporter'
 
 function attachHandlers (socket, ...handlers) {
   // const onevent = socket.onevent
@@ -15,7 +16,7 @@ function attachHandlers (socket, ...handlers) {
     for (let x = 0; x < handlers.length && !handlerFn; x++) handlerFn = handlers[x]['$' + channel]
 
     if (!handlerFn) {
-      console.warn('unhandled message', packet)
+      log.warn({packet}, 'unhandled message')
       if (id) socket.ack(id)({error: 'unhandled'})
       return
     }
@@ -26,14 +27,12 @@ function attachHandlers (socket, ...handlers) {
     let result
     try {
       result = await handlerFn.apply(this, args)
-      // console.log('io', data, result)
     } catch (err) {
-      // console.log('io', data, err)
       if (err.sio) {
         result = {error: err.sio}
       } else {
         result = {error: 'internalServerError'}
-        log.error({err}, 'io error')
+        reporter.error(err)
       }
     }
 
@@ -50,7 +49,7 @@ function attachHandlers (socket, ...handlers) {
       try {
         if (handlers[x].onDisconnect) handlers[x].onDisconnect(socket)
       } catch (err) {
-        log.error({err}, 'onDisconnect handler error')
+        reporter.error(err)
       }
     }
   })
@@ -59,7 +58,7 @@ function attachHandlers (socket, ...handlers) {
     try {
       if (handler.onConnect) handler.onConnect(socket)
     } catch (err) {
-      log.error({err}, 'onConnect handler error')
+      reporter.error(err)
     }
   }
 }

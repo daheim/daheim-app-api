@@ -30,7 +30,6 @@ class AuthHandler {
       next()
     } catch (err) {
       if (err.sio) return next(err)
-      log.error({err}, 'sio auth error')
       next(new Error('internalServerError'))
     }
   }

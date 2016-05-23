@@ -5,14 +5,14 @@ import log from '../log'
 export {User} from './user'
 export * from './encounter'
 export Review from './review'
+import reporter from '../reporter'
 
 let mongooseUrl = 'mongodb://localhost/first'
 if (process.env.MONGODB_URL) {
   mongooseUrl = process.env.MONGODB_URL
 } else if (process.env.MONGODB_PORT_27017_TCP_PORT && process.env.MONGODB_PORT_27017_TCP_ADDR) {
   if (!process.env.MONGODB_DB_NAME || process.env.MONGODB_DB_NAME === '**ChangeMe**') {
-    log.error('MONGODB_DB_NAME must be defined when mongodb is linked')
-    process.exit(1)
+    reporter.error(new Error('MONGODB_DB_NAME must be defined when mongodb is linked'), {fatal: true})
   }
   mongooseUrl = 'mongodb://' + process.env.MONGODB_PORT_27017_TCP_ADDR + ':' + process.env.MONGODB_PORT_27017_TCP_PORT + '/' + process.env.MONGODB_DB_NAME
 }
@@ -27,8 +27,7 @@ mongoose.connect(mongooseUrl, {
   }
 }, function (err, connIgnored) {
   if (err) {
-    log.error({err}, 'mongoose connect error: ', err.message)
-    process.exit(1)
+    reporter.error(err, {fatal: true})
   }
   mongoose.connection.on('disconnected', (err) => {
     log.warn({err}, 'mongoose disconnected')
