@@ -5,6 +5,7 @@ import log from '../log'
 export {User} from './user'
 export * from './encounter'
 export Review from './review'
+export Lesson from './lesson'
 import reporter from '../reporter'
 
 let mongooseUrl = 'mongodb://localhost/first'
