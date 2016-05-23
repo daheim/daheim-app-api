@@ -1,7 +1,8 @@
-import uuid from 'node-uuid'
+import {Types} from 'mongoose'
 
 import sioError from './sio_error'
 import iceServers from './ice_servers'
+import {Lesson as LessonModel} from '../model'
 
 const debug = require('debug')('dhm:realtime:Lesson')
 
@@ -9,7 +10,7 @@ const INACTIVITY_TIMEOUT = 2 * 60 * 1000
 
 export default class Lesson {
   constructor ({teacherId, studentId}) {
-    this.id = uuid.v4()
+    this.id = new Types.ObjectId()
 
     this.teacherId = teacherId
     this.studentId = studentId
@@ -92,6 +93,16 @@ export default class Lesson {
       delete this.inactiveTimeout
     }
 
+    if (this.persistInterval) {
+      clearInterval(this.persistInterval)
+      delete this.persistInterval
+    }
+
+    if (this.active) {
+      debug('%s persisting close', this.id, reason)
+      LessonModel.update({_id: this.id}, {$set: {closeTime: new Date()}}).exec()
+    }
+
     for (let userId of Object.keys(this.handlers)) {
       const {unsubscribe} = this.handlers[userId]
       unsubscribe()
@@ -115,6 +126,20 @@ export default class Lesson {
       debug('%s became active', this.id)
       this.startTime = Date.now()
       this.active = true
+
+      const now = new Date()
+      const lesson = new LessonModel({
+        _id: this.id,
+        createdTime: now,
+        pingTime: now,
+        participants: [this.teacherId, this.studentId]
+      })
+      lesson.save()
+
+      this.persistInterval = setInterval(() => {
+        debug('%s persist ping', this.id)
+        LessonModel.update({_id: this.id}, {$set: {pingTime: new Date()}}).exec()
+      }, 30000)
     }
 
     if (this.active && !connected && !this.inactiveTimeout) {
