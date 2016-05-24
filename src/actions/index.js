@@ -135,7 +135,7 @@ def('/lessons.loadLessons', async (req) => {
   return {lessonList, lessons}
 })
 
-def('/review.sendReview', async (req) => {
+def('/users.sendReview', async (req) => {
   const {user, body} = req
 
   const {to, rating, text} = body
