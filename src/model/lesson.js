@@ -16,7 +16,7 @@ const lessonSchema = new Schema({
 
       const now = new Date()
       const closed = doc.closeTime || (now - doc.pingTime > 2 * 60 * 1000)
-      const closeTime = doc.closeTime || now
+      const closeTime = closed ? doc.closeTime || doc.pingTime : now
       ret.active = !closed
       ret.duration = closeTime - doc.createdTime
 
