@@ -39,8 +39,8 @@ class AuthHandler {
     lessonRegistry.sendState(socket.userId)
   }
 
-  async '$ready' (socket, {ready}) {
-    if (ready) onlineRegistry.onUserReady(socket)
+  async '$ready' (socket, {ready, topic}) {
+    if (ready) onlineRegistry.onUserReady(socket, {topic})
     else onlineRegistry.onUserNotReady(socket)
     return {}
   }

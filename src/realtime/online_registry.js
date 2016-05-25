@@ -1,6 +1,10 @@
 import io from './io'
 import sioError from './sio_error'
 
+const debug = require('debug')('dhm:realtime:OnlineRegistry')
+
+const OFFLINE_TIMEOUT = 30 * 1000
+
 class OnlineRegistry {
 
   students = {}
@@ -22,6 +26,16 @@ class OnlineRegistry {
     }
     if (list) list[socket.id] = socket
 
+    const readyEntry = this.ready[socket.userId]
+    if (readyEntry) {
+      if (readyEntry.timeout) {
+        clearTimeout(readyEntry.timeout)
+        delete readyEntry.timeout
+      }
+      const {topic} = readyEntry
+      socket.emit('userIsReady', {topic})
+    }
+
     this.emitOnline()
     this.emitReady()
   }
@@ -37,34 +51,46 @@ class OnlineRegistry {
       delete teachers[socket.userId][socket.id]
       if (Object.keys(teachers[socket.userId]).length === 0) delete teachers[socket.userId]
     }
-    if (ready[socket.userId]) {
-      delete ready[socket.userId][socket.id]
-      if (Object.keys(ready[socket.userId]).length === 0) delete ready[socket.userId]
+
+    const readyEntry = this.ready[socket.userId]
+    if (readyEntry) {
+      if (!readyEntry.timeout) {
+        if (!io.of('/').adapter.rooms[`user-${socket.userId}`]) { // room is deleted when the last leaves
+          readyEntry.timeout = setTimeout(() => {
+            delete this.ready[socket.userId]
+            this.emitReady()
+          }, OFFLINE_TIMEOUT)
+        }
+      }
     }
 
     this.emitOnline()
-    this.emitReady()
   }
 
-  onUserReady (socket) {
+  onUserReady (socket, {topic} = {}) {
     if (!socket.user) throw sioError('unauthorized')
+    if (!topic) throw sioError('noTopic')
+
+    if (this.ready[socket.userId]) return // already ready
 
     const {role} = socket.user.profile
     if (role !== 'student') throw sioError('onlyStudents')
-    const list = this.ready[socket.userId] = this.ready[socket.userId] || {}
-    list[socket.id] = socket
 
+    this.ready[socket.userId] = {topic, date: new Date()}
+    io.of('/').in(`user-${socket.userId}`).emit('userIsReady', {topic})
     this.emitReady()
   }
 
   onUserNotReady (socket) {
     if (!socket.user) throw sioError('unauthorized')
 
-    const {ready} = this
-    if (ready[socket.userId]) {
-      delete ready[socket.userId][socket.id]
-      if (Object.keys(ready[socket.userId]).length === 0) delete ready[socket.userId]
-    }
+    const entry = this.ready[socket.userId]
+    if (!entry) return
+
+    if (entry.timeout) clearTimeout(entry.timeout)
+    delete this.ready[socket.userId]
+
+    io.of('/').in(`user-${socket.userId}`).emit('userIsNotReady')
     this.emitReady()
   }
 
@@ -77,11 +103,9 @@ class OnlineRegistry {
   }
 
   emitReady (socket) {
-    const users = Object.keys(this.ready).map((userId) => {
-      const {user} = Object.values(this.ready[userId])[0]
-      const userJson = user.toJSON()
-      const {id, profile} = userJson
-      return {id, profile}
+    const users = Object.keys(this.ready).map((id) => {
+      const {topic} = this.ready[id]
+      return {id, topic}
     })
     io.of('/').in('teachers').emit('readyUsers', users)
   }
