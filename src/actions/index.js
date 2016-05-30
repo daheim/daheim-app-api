@@ -3,6 +3,7 @@ import Promise from 'bluebird'
 import passport from 'passport'
 import uuid from 'node-uuid'
 
+import restError from '../restError'
 import tokenHandler from '../token_handler'
 import avatars from '../avatars'
 
@@ -38,6 +39,28 @@ def('/auth.login', async (req, res) => {
 }, {
   auth: false,
   middlewares: [passport.authenticate('local', {session: false})],
+  checkCsrf: false
+})
+
+def('/auth.requestNewPassword', async (req, res) => {
+  const {username} = req.body
+
+  const user = await User.findOne({username})
+  if (!user) throw restError({code: 'user_not_found', error: 'Invalid username'})
+
+  let token = tokenHandler.issuePasswordResetToken(user.id)
+  let address = user.username
+  let sg = new sendgrid.Email({
+    to: address,
+    from: 'daheim@mesellyounot.com',
+    fromname: 'Daheim',
+    subject: 'Daheim Password Reset',
+    html: `Please click <a href="${process.env.URL}/auth/reset?token=${encodeURIComponent(token)}">here to reset your password.</a>.`,
+  })
+  await sendgrid.sendAsync(sg)
+  return {}
+}, {
+  auth: false,
   checkCsrf: false
 })
 
