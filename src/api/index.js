@@ -1,16 +1,12 @@
 import {Router} from 'express'
-import Promise from 'bluebird'
-import createSendgrid from 'sendgrid'
 import passport from 'passport'
 import LocalStrategy from 'passport-local'
 import uuid from 'node-uuid'
 
+import sendgrid from '../sendgrid'
 import {User} from '../model'
 import tokenHandler from '../token_handler'
 import encounterApi from './encounter'
-
-let sendgrid = createSendgrid(process.env.SENDGRID_KEY)
-Promise.promisifyAll(sendgrid)
 
 passport.use(new LocalStrategy(async (username, password, done) => {
   try {
