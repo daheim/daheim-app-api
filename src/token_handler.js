@@ -32,7 +32,7 @@ export class TokenHandler {
 
       passport.use('reset', new JwtStrategy({
         secretOrKey: SECRETS[this],
-        jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('Bearer'),
+        jwtFromRequest: (req) => req.body.token,
         audience: 'reset',
       }, async function (jwt, done) {
         try {

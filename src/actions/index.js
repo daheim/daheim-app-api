@@ -4,6 +4,7 @@ import passport from 'passport'
 import uuid from 'node-uuid'
 
 import restError from '../restError'
+import sendgrid from '../sendgrid'
 import tokenHandler from '../token_handler'
 import avatars from '../avatars'
 
@@ -61,6 +62,26 @@ def('/auth.requestNewPassword', async (req, res) => {
   return {}
 }, {
   auth: false,
+  checkCsrf: false
+})
+
+def('/auth.resetPassword', async (req, res) => {
+  const {user} = req
+  const {password} = req.body
+
+  user.password = password
+  user.loginAttempts = 0
+  user.lockUntil = null
+  await user.save()
+
+  const accessToken = tokenHandler.issueForUser(req.user.id)
+  const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
+  res.cookie('sid', accessToken, {httpOnly: true, secure: process.env.SECURE_COOKIES === '1', expires})
+  res.cookie('_csrf', uuid.v4(), {secure: process.env.SECURE_COOKIES === '1', expires})
+  return {profile: req.user}
+}, {
+  auth: false,
+  middlewares: [passport.authenticate('reset', {session: false})],
   checkCsrf: false
 })
 
