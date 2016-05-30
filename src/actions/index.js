@@ -1,5 +1,7 @@
 import {Router} from 'express'
 import Promise from 'bluebird'
+import passport from 'passport'
+import uuid from 'node-uuid'
 
 import tokenHandler from '../token_handler'
 import avatars from '../avatars'
@@ -26,6 +28,18 @@ function def (action, cb, {auth = true, middlewares = []} = {}) {
 
   app.post(action, handlers)
 }
+
+def('/auth.login', async (req, res) => {
+  const accessToken = tokenHandler.issueForUser(req.user.id)
+  const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
+  res.cookie('sid', accessToken, {httpOnly: true, secure: process.env.SECURE_COOKIES === '1', expires})
+  res.cookie('_csrf', uuid.v4(), {secure: process.env.SECURE_COOKIES === '1', expires})
+  return {profile: req.user}
+}, {
+  auth: false,
+  middlewares: [passport.authenticate('local', {session: false})],
+  checkCsrf: false
+})
 
 def('/profile.saveProfile', async (req) => {
   const {user, body} = req
