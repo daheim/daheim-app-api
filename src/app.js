@@ -94,24 +94,24 @@ app.use(log.errorLogger())
 app.use(function(err, req, res, next) {
   // don't do anything if the response was already sent
   if (res.headersSent) {
-    return
+    return next(err)
   }
 
   res.status(500)
 
   if (req.accepts('html')) {
     res.send('Internal Server Error. Request identifier: ' + req.id)
-    return
+    return next(err)
   }
 
   if (req.accepts('json')) {
     res.json({ error: 'Internal Server Error', requestId: req.id })
-    return
+    return next(err)
   }
 
   res.type('txt').send('Internal Server Error. Request identifier: ' + req.id)
 
-  next()
+  next(err)
 })
 
 function start() {
