@@ -8,15 +8,23 @@ import {User, Review, Lesson} from '../model'
 
 const app = new Router()
 
-function def (action, cb, opt) {
-  app.post(action, tokenHandler.auth, async (req, res, next) => {
+function def (action, cb, {auth = true, middlewares = []} = {}) {
+  const handler = async (req, res, next) => {
     try {
       const result = await cb(req, res)
       res.send(result)
     } catch (err) {
       next(err)
     }
-  })
+  }
+
+  const handlers = [
+    ...(auth ? [tokenHandler.auth] : []),
+    ...middlewares,
+    handler
+  ]
+
+  app.post(action, handlers)
 }
 
 def('/profile.saveProfile', async (req) => {
