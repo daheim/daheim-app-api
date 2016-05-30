@@ -73,6 +73,18 @@ app.get('*', function(req, res, next) {
   res.sendFile(path.resolve(__dirname + '/../../../../build/public/index.html'))
 })
 
+app.use(function(err, req, res, next) {
+  if (res.headersSent) {
+    return next(err)
+  }
+
+  if (err.rest) {
+    res.status(400).send(err.rest)
+  }
+
+  next(err)
+})
+
 app.use(reporter.errorHandler)
 
 // log errors
