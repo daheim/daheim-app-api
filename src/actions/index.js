@@ -43,6 +43,41 @@ def('/auth.login', async (req, res) => {
   checkCsrf: false
 })
 
+def('/auth.register', async (req, res) => {
+  const {username, password} = req.body
+
+  try {
+    let user = await User.getAuthenticated(username, password)
+    const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
+    const accessToken = tokenHandler.issueForUser(user.id)
+    res.cookie('sid', accessToken, {httpOnly: true, secure: process.env.SECURE_COOKIES === '1', expires})
+    return {result: 'login'}
+  } catch (err) {
+    if (err.name !== 'AuthError') {
+      throw err
+    }
+
+    if (err.message !== 'user not found') {
+      res.status(400).send({error: 'user_already_exists'})
+      return
+    }
+  }
+
+  // TODO: save newsletter information
+  let user = new User({
+    username,
+    password,
+  })
+  await user.save()
+  const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
+  const accessToken = tokenHandler.issueForUser(user.id)
+  res.cookie('sid', accessToken, {httpOnly: true, secure: process.env.SECURE_COOKIES === '1', expires})
+  return {result: 'new'}
+}, {
+  auth: false,
+  checkCsrf: false
+})
+
 def('/auth.logout', async (req, res) => {
   res.clearCookie('sid')
   return {}
