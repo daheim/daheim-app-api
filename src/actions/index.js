@@ -43,6 +43,14 @@ def('/auth.login', async (req, res) => {
   checkCsrf: false
 })
 
+def('/auth.logout', async (req, res) => {
+  res.clearCookie('sid')
+  return {}
+}, {
+  auth: false,
+  checkCsrf: true
+})
+
 def('/auth.requestNewPassword', async (req, res) => {
   const {username} = req.body
 
