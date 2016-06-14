@@ -1,5 +1,6 @@
 import io from './io'
 import sioError from './sio_error'
+import lessonRegistry from './lesson_registry'
 
 const debug = require('debug')('dhm:realtime:OnlineRegistry')
 
@@ -94,6 +95,10 @@ class OnlineRegistry {
     this.emitReady()
   }
 
+  onLessonsChanged () {
+    this.emitReady()
+  }
+
   emitOnline (socket) {
     const online = {
       teachers: Object.keys(this.teachers).length,
@@ -103,7 +108,7 @@ class OnlineRegistry {
   }
 
   emitReady (socket) {
-    const users = Object.keys(this.ready).map((id) => {
+    const users = Object.keys(this.ready).filter((id) => !lessonRegistry.users[id]).map((id) => {
       const {topic} = this.ready[id]
       return {id, topic}
     })

@@ -1,6 +1,7 @@
 import io from './io'
 import Lesson from './lesson'
 import sioError from './sio_error'
+import onlineRegistry from './online_registry'
 
 class LessonRegistry {
 
@@ -26,6 +27,8 @@ class LessonRegistry {
     this.users[studentId].push(lesson)
 
     lesson.join(teacherHandler)
+
+    onlineRegistry.onLessonsChanged()
 
     return lesson
   }
@@ -53,6 +56,8 @@ class LessonRegistry {
       if (index >= 0) this.users[studentId].splice(index, 1)
       if (this.users[studentId].length === 0) delete this.users[studentId]
     }
+
+    onlineRegistry.onLessonsChanged()
   }
 
   sendState (userId) {
