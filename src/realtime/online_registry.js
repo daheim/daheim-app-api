@@ -70,7 +70,6 @@ class OnlineRegistry {
 
   onUserReady (socket, {topic} = {}) {
     if (!socket.user) throw sioError('unauthorized')
-    if (!topic) throw sioError('noTopic')
 
     if (this.ready[socket.userId]) return // already ready
 
