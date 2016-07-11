@@ -22,6 +22,8 @@ export class Api {
 
   constructor() {
     this.router = Router()
+    this.router.get('/healthz', (req, res) => res.send('ok'))
+
     this.router.post('/register', this.handler(this.register))
     this.router.post('/login', passport.authenticate('local', {session: false}), this.handler(this.login))
     this.router.post('/forgot', this.handler(this.forgot))
