@@ -1,5 +1,5 @@
 import {Router} from 'express'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import passport from 'passport'
 import uuid from 'node-uuid'
 
@@ -206,7 +206,7 @@ async function loadUser(id, asUserId) {
   const user = await User.findById(id)
   if (!user) throw new Error('user not found')
 
-  const [receivedReviews, myReview] = await Promise.all([
+  const [receivedReviews, myReview] = await Bluebird.all([
     Review.find({to: id}),
     Review.findOne({to: id, from: asUserId})
   ])
