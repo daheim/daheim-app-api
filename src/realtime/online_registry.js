@@ -1,6 +1,7 @@
 import io from './io'
 import sioError from './sio_error'
 import lessonRegistry from './lesson_registry'
+import slack from '../slack'
 
 const debug = require('debug')('dhm:realtime:OnlineRegistry')
 
@@ -72,6 +73,8 @@ class OnlineRegistry {
     if (!socket.user) throw sioError('unauthorized')
 
     if (this.ready[socket.userId]) return // already ready
+
+    slack.sendText(`${socket.user.username} is ready for a Gespräch`)
 
     const {role} = socket.user.profile
     if (role !== 'student') throw sioError('onlyStudents')

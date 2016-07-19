@@ -2,6 +2,8 @@ import io from './io'
 import Lesson from './lesson'
 import sioError from './sio_error'
 import onlineRegistry from './online_registry'
+import {User} from '../model'
+import slack from '../slack'
 
 class LessonRegistry {
 
@@ -30,6 +32,13 @@ class LessonRegistry {
 
     onlineRegistry.onLessonsChanged()
 
+    ;(async () => {
+      const teacherUsername = teacherHandler.user.username
+      const studentUser = await User.findById(studentId)
+      const studentUsername = studentUser && studentUser.username
+      slack.sendText(`Gespräch started between ${teacherUsername} and ${studentUsername} (id: ${lesson.id})`)
+    })()
+
     return lesson
   }
 
@@ -45,6 +54,8 @@ class LessonRegistry {
   handleLessonClose (lesson) {
     const {id, teacherId, studentId} = lesson
     delete this.lessons[id]
+
+    slack.sendText(`Gespräch ended (id: ${id})`)
 
     if (this.users[teacherId]) {
       const index = this.users[teacherId].indexOf(lesson)

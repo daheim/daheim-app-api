@@ -8,6 +8,7 @@ import sendgrid from '../sendgrid'
 import tokenHandler from '../token_handler'
 import avatars from '../avatars'
 import mailchimp from '../mailchimp'
+import slack from '../slack'
 
 import {User, Review, Lesson} from '../model'
 
@@ -33,6 +34,8 @@ function def (action, cb, {auth = true, middlewares = []} = {}) {
 }
 
 def('/auth.login', async (req, res) => {
+  slack.sendText(`${req.user.username} logged in`)
+
   const accessToken = tokenHandler.issueForUser(req.user.id)
   const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
   res.cookie('sid', accessToken, {httpOnly: true, secure: process.env.SECURE_COOKIES === '1', expires})
@@ -51,6 +54,7 @@ def('/auth.register', async (req, res) => {
     let user = await User.getAuthenticated(username, password)
 
     if (newsletter) mailchimp.addMemberIfNew({email: username, firstName})
+    slack.sendText(`${user.username} logged in`)
 
     const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
     const accessToken = tokenHandler.issueForUser(user.id)
@@ -78,6 +82,7 @@ def('/auth.register', async (req, res) => {
   await user.save()
 
   if (newsletter) mailchimp.addMemberIfNew({email: username, firstName})
+  slack.sendText(`${user.username} registered`)
 
   const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
   const accessToken = tokenHandler.issueForUser(user.id)
