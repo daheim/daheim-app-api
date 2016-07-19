@@ -45,12 +45,12 @@ def('/auth.login', async (req, res) => {
 })
 
 def('/auth.register', async (req, res) => {
-  const {username, password, newsletter} = req.body
+  const {username, password, newsletter, firstName} = req.body
 
   try {
     let user = await User.getAuthenticated(username, password)
 
-    if (newsletter) mailchimp.addMemberIfNew({email: username})
+    if (newsletter) mailchimp.addMemberIfNew({email: username, firstName})
 
     const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
     const accessToken = tokenHandler.issueForUser(user.id)
@@ -71,10 +71,13 @@ def('/auth.register', async (req, res) => {
   let user = new User({
     username,
     password,
+    profile: {
+      name: firstName
+    }
   })
   await user.save()
 
-  if (newsletter) mailchimp.addMemberIfNew({email: username})
+  if (newsletter) mailchimp.addMemberIfNew({email: username, firstName})
 
   const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
   const accessToken = tokenHandler.issueForUser(user.id)

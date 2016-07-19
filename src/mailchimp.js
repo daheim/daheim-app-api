@@ -24,7 +24,7 @@ class Mailchimp {
       const result = await this.axe.post(`/lists/${listId}/members`, {
         email_address: email,
         status: 'pending',
-        merge_fields: {FNAME: name},
+        merge_fields: {FNAME: firstName},
         language: 'de',
         location: {
           latitude: 53.637954,
