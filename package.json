@@ -28,6 +28,7 @@
     "npm": "3.8.8"
   },
   "dependencies": {
+    "axios": "^0.13.1",
     "azure-common": "^0.9.16",
     "azure-storage": "^0.6.0",
     "babel-core": "^6.5.2",

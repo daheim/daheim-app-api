@@ -7,6 +7,7 @@ import restError from '../restError'
 import sendgrid from '../sendgrid'
 import tokenHandler from '../token_handler'
 import avatars from '../avatars'
+import mailchimp from '../mailchimp'
 
 import {User, Review, Lesson} from '../model'
 
@@ -44,10 +45,13 @@ def('/auth.login', async (req, res) => {
 })
 
 def('/auth.register', async (req, res) => {
-  const {username, password} = req.body
+  const {username, password, newsletter} = req.body
 
   try {
     let user = await User.getAuthenticated(username, password)
+
+    if (newsletter) mailchimp.addMemberIfNew({email: username})
+
     const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
     const accessToken = tokenHandler.issueForUser(user.id)
     res.cookie('sid', accessToken, {httpOnly: true, secure: process.env.SECURE_COOKIES === '1', expires})
@@ -69,6 +73,9 @@ def('/auth.register', async (req, res) => {
     password,
   })
   await user.save()
+
+  if (newsletter) mailchimp.addMemberIfNew({email: username})
+
   const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365)
   const accessToken = tokenHandler.issueForUser(user.id)
   res.cookie('sid', accessToken, {httpOnly: true, secure: process.env.SECURE_COOKIES === '1', expires})
