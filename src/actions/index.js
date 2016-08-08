@@ -143,6 +143,19 @@ def('/auth.resetPassword', async (req, res) => {
   checkCsrf: false
 })
 
+def('/auth.changePassword', async (req, res) => {
+  const {newPassword} = req.body
+  req.user.password = newPassword
+  req.user.save()
+  return {}
+}, {
+  auth: false,
+  middlewares: [
+    // always reauthenticate
+    passport.authenticate('local', {session: false})
+  ]
+})
+
 def('/profile.saveProfile', async (req) => {
   const {user, body} = req
   const {name, topics, languages, inGermanySince, germanLevel, introduction, pictureType, pictureData} = body
