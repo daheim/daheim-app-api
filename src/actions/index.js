@@ -9,6 +9,7 @@ import tokenHandler from '../token_handler'
 import avatars from '../avatars'
 import mailchimp from '../mailchimp'
 import slack from '../slack'
+import intl from '../intl'
 
 import {User, Review, Lesson} from '../model'
 
@@ -111,8 +112,11 @@ def('/auth.requestNewPassword', async (req, res) => {
   let address = user.username
   await sendgrid.send({
     to: address,
-    subject: 'Daheim Password Reset',
-    html: `Please click <a href="${process.env.URL}/auth/reset?token=${encodeURIComponent(token)}">here to reset your password.</a>.`
+    subject: intl.formatMessage('forgotPassword.email.subject'),
+    html: intl.formatMessage('forgotPassword.email.text', {
+      linkStart: `<a href="${process.env.URL}/auth/reset?token=${encodeURIComponent(token)}">`,
+      linkEnd: '</a>'
+    })
   })
   return {}
 }, {
