@@ -109,14 +109,11 @@ def('/auth.requestNewPassword', async (req, res) => {
 
   let token = tokenHandler.issuePasswordResetToken(user.id)
   let address = user.username
-  let sg = new sendgrid.Email({
+  await sendgrid.send({
     to: address,
-    from: 'daheim@mesellyounot.com',
-    fromname: 'Daheim',
     subject: 'Daheim Password Reset',
-    html: `Please click <a href="${process.env.URL}/auth/reset?token=${encodeURIComponent(token)}">here to reset your password.</a>.`,
+    html: `Please click <a href="${process.env.URL}/auth/reset?token=${encodeURIComponent(token)}">here to reset your password.</a>.`
   })
-  await sendgrid.sendAsync(sg)
   return {}
 }, {
   auth: false,
